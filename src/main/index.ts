@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { dialog } from 'electron'
 
 function createWindow(): void {
   // Create the browser window.
@@ -13,9 +14,9 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
+      sandbox: false
     },
-    title: 'Smart Tax - Bill Tracker',
+    title: 'Smart Tax - Bill Tracker'
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -73,3 +74,11 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+ipcMain.handle('select-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+
+  return result.canceled ? null : result.filePaths[0]
+})
