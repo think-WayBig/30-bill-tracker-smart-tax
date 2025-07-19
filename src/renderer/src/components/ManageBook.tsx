@@ -3,6 +3,8 @@ import Layout from './Layout'
 
 const ManageBook = () => {
   useEffect(() => {
+    const panToFilePath = new Map<string, string>()
+
     const renderTable = (
       data: {
         name: string
@@ -34,24 +36,38 @@ const ManageBook = () => {
         const tr = document.createElement('tr')
         tr.className = 'hoverable-row'
 
-        const ackNo = entry.ackno || 'N/A'
-        const billingStatus = entry.billingStatus || 'Due'
-        const group = entry.group || 'None'
+        const ackNoCell =
+          entry.ackno && panToFilePath.has(entry.pan)
+            ? `<a href="#" data-pan="${entry.pan}" style="color: #2563eb; text-decoration: underline;">${entry.ackno}</a>`
+            : entry.ackno || 'N/A'
 
         tr.innerHTML = `
           <td style="padding: 10px 16px;">${entry.name}</td>
           <td style="padding: 10px 16px;">${entry.pan}</td>
-          <td style="padding: 10px 16px;">${ackNo}</td>
-          <td style="padding: 10px 16px;">${billingStatus}</td>
-          <td style="padding: 10px 16px;">${group}</td>
+          <td style="padding: 10px 16px;">${ackNoCell}</td>
+          <td style="padding: 10px 16px;">${entry.billingStatus || 'Due'}</td>
+          <td style="padding: 10px 16px;">${entry.group || 'None'}</td>
         `
         tbody.appendChild(tr)
       }
+
+      // Bind click listeners for ackno links
+      tbody.querySelectorAll('a[data-pan]')?.forEach((a) => {
+        const pan = a.getAttribute('data-pan')!
+        a.addEventListener('click', (e) => {
+          e.preventDefault()
+          const filePath = panToFilePath.get(pan)
+          if (filePath) {
+            window.electronAPI.openContainingFolder(filePath)
+          }
+        })
+      })
     }
 
     const loadAndRender = async () => {
       const folderPath = localStorage.getItem('selectedFolder')
       const entries = await window.electronAPI.loadEntries()
+      panToFilePath.clear()
 
       if (folderPath) {
         for (const entry of entries) {
@@ -60,8 +76,7 @@ const ManageBook = () => {
               const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
               if (result.success && result.ackno) {
                 entry.ackno = result.ackno
-
-                // Save updated ackNo back to system (entry storage)
+                panToFilePath.set(entry.pan, result.filePath!)
                 await window.electronAPI.updateEntryAckno(entry.pan, result.ackno)
               }
             } catch (err) {
@@ -72,22 +87,6 @@ const ManageBook = () => {
       }
 
       renderTable(entries)
-
-      const searchInput = document.getElementById('searchInput') as HTMLInputElement
-      if (!searchInput) return
-
-      searchInput.addEventListener('input', () => {
-        const query = searchInput.value.toLowerCase()
-        const filtered = entries.filter(
-          (entry) =>
-            entry.name.toLowerCase().includes(query) ||
-            entry.pan.toLowerCase().includes(query) ||
-            (entry.ackno || '').toLowerCase().includes(query) ||
-            (entry.billingStatus || '').toLowerCase().includes(query) ||
-            (entry.group || '').toLowerCase().includes(query)
-        )
-        renderTable(filtered)
-      })
     }
 
     loadAndRender()

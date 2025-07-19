@@ -8,6 +8,7 @@ declare global {
         pan: string
         ackno?: string
         billingStatus?: 'Due' | 'Paid'
+        filePath?: string
         group?: string
       }) => Promise<{ success: boolean; error?: string }>
 
@@ -17,6 +18,7 @@ declare global {
           pan: string
           ackno?: string
           billingStatus?: 'Due' | 'Paid'
+          filePath?: string
           group?: string
         }[]
       >
@@ -27,6 +29,7 @@ declare global {
           pan: string
           ackno?: string
           billingStatus?: 'Due' | 'Paid'
+          filePath?: string
           group?: string
         }[]
       ) => Promise<{ success: boolean; error?: string }>
@@ -50,12 +53,14 @@ declare global {
       getAcknoFromFile: (
         pan: string,
         directory: string
-      ) => Promise<{ success: boolean; ackno?: string; error?: string }>
+      ) => Promise<{ success: boolean; ackno?: string; error?: string; filePath?: string }>
 
       updateEntryAckno: (
         pan: string,
         ackno: string
       ) => Promise<{ success: boolean; error?: string }>
+
+      openContainingFolder: (filePath: string) => Promise<void>
     }
 
     api: {

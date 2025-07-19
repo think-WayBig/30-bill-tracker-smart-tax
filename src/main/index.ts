@@ -273,7 +273,7 @@ ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: str
       return +curr.assmentYear > +prev.assmentYear ? curr : prev
     })
 
-    return { success: true, ackno: latest.ackNum }
+    return { success: true, ackno: latest.ackNum, filePath }
   } catch (error: any) {
     return { success: false, error: error.message }
   }
@@ -292,4 +292,8 @@ ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string) => {
     console.error('Failed to update ackno:', err)
     return { success: false, error: err.message }
   }
+})
+
+ipcMain.handle('open-containing-folder', async (_event, filePath) => {
+  shell.showItemInFolder(filePath)
 })
