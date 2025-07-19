@@ -252,13 +252,31 @@ ipcMain.handle('delete-entry', async (_event, pan) => {
   }
 })
 
+function findFileRecursive(dir: string, targetFile: string): string | null {
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+
+    if (entry.isFile() && entry.name === targetFile) {
+      return fullPath
+    } else if (entry.isDirectory()) {
+      const result = findFileRecursive(fullPath, targetFile)
+      if (result) return result
+    }
+  }
+
+  return null
+}
+
 ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: string) => {
   try {
     const fileName = `${pan}_ITRV.txt`
-    const filePath = path.join(directory, fileName)
 
-    if (!fs.existsSync(filePath)) {
-      return { success: false, error: 'File not found' }
+    const filePath = findFileRecursive(directory, fileName)
+
+    if (!filePath) {
+      return { success: false, error: 'File not found in any subfolder' }
     }
 
     const content = fs.readFileSync(filePath, 'utf-8')
@@ -268,7 +286,6 @@ ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: str
       return { success: false, error: 'Invalid file format' }
     }
 
-    // Get the object with the latest assmentYear (numeric compare)
     const latest = jsonData.reduce((prev, curr) => {
       return +curr.assmentYear > +prev.assmentYear ? curr : prev
     })

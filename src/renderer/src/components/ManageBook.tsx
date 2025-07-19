@@ -76,10 +76,8 @@ const ManageBook = () => {
       if (folderPath) {
         for (const entry of entries) {
           if (entry.ackno) {
-            console.log(entry)
             // Use existing filePath if available
             if (entry.filePath) {
-              console.log(`Using existing filePath for ${entry.pan}: ${entry.filePath}`)
               panToFilePath.set(entry.pan, entry.filePath)
             }
             continue
