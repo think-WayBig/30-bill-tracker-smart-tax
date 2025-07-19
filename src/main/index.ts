@@ -204,3 +204,21 @@ ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
     return { success: false, error: error.message }
   }
 })
+
+ipcMain.handle('update-billing-status', async (_event, pan, billingStatus) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+    if (!fs.existsSync(filePath)) throw new Error('Entries file does not exist')
+
+    const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const updated = existing.map((entry) =>
+      entry.pan === pan ? { ...entry, billingStatus } : entry
+    )
+
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})

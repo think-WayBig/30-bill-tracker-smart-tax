@@ -6,15 +6,41 @@ declare global {
       saveEntry: (entry: {
         name: string
         pan: string
+        ackno?: string
+        billingStatus?: 'Due' | 'Paid'
+        group?: string
       }) => Promise<{ success: boolean; error?: string }>
-      loadEntries: () => Promise<{ name: string; pan: string }[]>
+
+      loadEntries: () => Promise<
+        {
+          name: string
+          pan: string
+          ackno?: string
+          billingStatus?: 'Due' | 'Paid'
+          group?: string
+        }[]
+      >
+
       saveEntries: (
-        entries: { name: string; pan: string; group?: string }[]
+        entries: {
+          name: string
+          pan: string
+          ackno?: string
+          billingStatus?: 'Due' | 'Paid'
+          group?: string
+        }[]
+      ) => Promise<{ success: boolean; error?: string }>
+
+      updateBillingStatus: (
+        pan: string,
+        billingStatus: 'Due' | 'Paid'
       ) => Promise<{ success: boolean; error?: string }>
     }
+
     api: {
       selectFolder: () => Promise<string | null>
     }
+
     electron: (typeof import('@electron-toolkit/preload'))['electronAPI']
   }
 }

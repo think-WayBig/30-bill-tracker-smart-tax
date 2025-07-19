@@ -60,6 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       {renderButton('add', 'Add Entry', '➕')}
       {renderButton('manage', 'Manage Book', '📖')}
       {renderButton('group', 'Manage Groups', '📂')}
+      {renderButton('billing', 'Manage Billing', '🧾')}
     </div>
   )
 }
