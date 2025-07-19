@@ -55,7 +55,7 @@ const ManageGroup = () => {
   })
 
   return (
-    <Layout title="👥 Manage Groups">
+    <Layout title="📂 Manage Groups">
       <style>
         {`
           .group-row:hover {

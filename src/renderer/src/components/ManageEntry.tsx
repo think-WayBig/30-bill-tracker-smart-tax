@@ -36,7 +36,7 @@ const AddEntry: React.FC = () => {
   }
 
   return (
-    <Layout title="Add or Remove Entry">
+    <Layout title="👤 Add or Remove Entry">
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
         {/* Add Entry Form */}
         <form onSubmit={handleAddSubmit} style={formStyle}>

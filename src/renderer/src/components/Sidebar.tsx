@@ -57,10 +57,10 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         📚 Bill Tracker
       </div>
 
-      {renderButton('add', 'Manage Entry', '➕')}
-      {renderButton('manage', 'Manage Book', '📖')}
+      {renderButton('add', 'Manage Entry', '👤')}
+      {renderButton('manage', 'Manage Book', '📚')}
       {renderButton('group', 'Manage Groups', '📂')}
-      {renderButton('billing', 'Manage Billing', '🧾')}
+      {renderButton('billing', 'Manage Billing', '💳')}
     </div>
   )
 }
