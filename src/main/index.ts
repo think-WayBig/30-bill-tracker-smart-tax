@@ -251,3 +251,45 @@ ipcMain.handle('delete-entry', async (_event, pan) => {
     return { success: false, error: error.message }
   }
 })
+
+ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: string) => {
+  try {
+    const fileName = `${pan}_ITRV.txt`
+    const filePath = path.join(directory, fileName)
+
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'File not found' }
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const jsonData = JSON.parse(content)
+
+    if (!Array.isArray(jsonData)) {
+      return { success: false, error: 'Invalid file format' }
+    }
+
+    // Get the object with the latest assmentYear (numeric compare)
+    const latest = jsonData.reduce((prev, curr) => {
+      return +curr.assmentYear > +prev.assmentYear ? curr : prev
+    })
+
+    return { success: true, ackno: latest.ackNum }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string) => {
+  try {
+    const entriesPath = path.join(app.getPath('userData'), 'entries.json')
+    const content = JSON.parse(fs.readFileSync(entriesPath, 'utf-8'))
+
+    const updated = content.map((entry) => (entry.pan === pan ? { ...entry, ackNo: ackno } : entry))
+
+    fs.writeFileSync(entriesPath, JSON.stringify(updated, null, 2))
+    return { success: true }
+  } catch (err: any) {
+    console.error('Failed to update ackno:', err)
+    return { success: false, error: err.message }
+  }
+})

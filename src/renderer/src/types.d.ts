@@ -46,6 +46,16 @@ declare global {
       }) => Promise<{ success: boolean; error?: string }>
 
       deleteEntry: (pan: string) => Promise<{ success: boolean; error?: string }>
+
+      getAcknoFromFile: (
+        pan: string,
+        directory: string
+      ) => Promise<{ success: boolean; ackno?: string; error?: string }>
+
+      updateEntryAckno: (
+        pan: string,
+        ackno: string
+      ) => Promise<{ success: boolean; error?: string }>
     }
 
     api: {

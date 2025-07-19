@@ -7,7 +7,7 @@ const ManageBook = () => {
       data: {
         name: string
         pan: string
-        ackNo?: string
+        ackno?: string
         billingStatus?: 'Due' | 'Paid'
         group?: string
       }[]
@@ -34,7 +34,7 @@ const ManageBook = () => {
         const tr = document.createElement('tr')
         tr.className = 'hoverable-row'
 
-        const ackNo = entry.ackNo || 'N/A'
+        const ackNo = entry.ackno || 'N/A'
         const billingStatus = entry.billingStatus || 'Due'
         const group = entry.group || 'None'
 
@@ -49,7 +49,28 @@ const ManageBook = () => {
       }
     }
 
-    window.electronAPI.loadEntries().then((entries) => {
+    const loadAndRender = async () => {
+      const folderPath = localStorage.getItem('selectedFolder')
+      const entries = await window.electronAPI.loadEntries()
+
+      if (folderPath) {
+        for (const entry of entries) {
+          if (!entry.ackno) {
+            try {
+              const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
+              if (result.success && result.ackno) {
+                entry.ackno = result.ackno
+
+                // Save updated ackNo back to system (entry storage)
+                await window.electronAPI.updateEntryAckno(entry.pan, result.ackno)
+              }
+            } catch (err) {
+              console.error(`Error fetching ackNo for ${entry.pan}`, err)
+            }
+          }
+        }
+      }
+
       renderTable(entries)
 
       const searchInput = document.getElementById('searchInput') as HTMLInputElement
@@ -67,7 +88,9 @@ const ManageBook = () => {
         )
         renderTable(filtered)
       })
-    })
+    }
+
+    loadAndRender()
   }, [])
 
   return (
@@ -83,7 +106,7 @@ const ManageBook = () => {
       <input
         type="text"
         id="searchInput"
-        placeholder="Search by Name or PAN"
+        placeholder="Search by Name, PAN, Ack No., Billing Status or Group"
         style={{
           width: '100%',
           padding: '10px 15px',
