@@ -121,3 +121,80 @@ ipcMain.handle('load-entries', async () => {
     return []
   }
 })
+
+// Save or create a group
+ipcMain.handle('save-group', async (_event, group) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'groups.json')
+
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
+
+    const updated = [...existing, group]
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Load all groups
+ipcMain.handle('load-groups', async () => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'groups.json')
+
+    if (!fs.existsSync(filePath)) return []
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(content)
+  } catch (error) {
+    console.error('Error loading groups:', error)
+    return []
+  }
+})
+
+// Update user's group assignment
+ipcMain.handle('assign-user-to-group', async (_event, { pan, group }) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
+
+    const users = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const index = users.findIndex((user: any) => user.pan === pan)
+    if (index === -1) return { success: false, error: 'User not found' }
+
+    users[index].group = group // only modify the group field
+    fs.writeFileSync(filePath, JSON.stringify(users, null, 2))
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
+
+    const updated = existing.map((entry: any) => {
+      const updatedEntry = newEntries.find((e: any) => e.pan === entry.pan)
+      return updatedEntry ? { ...entry, ...updatedEntry } : entry
+    })
+
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})

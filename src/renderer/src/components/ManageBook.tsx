@@ -8,6 +8,20 @@ const ManageBook = () => {
       if (!tbody) return
 
       tbody.innerHTML = ''
+
+      if (data.length === 0) {
+        const tr = document.createElement('tr')
+        const td = document.createElement('td')
+        td.colSpan = 2
+        td.style.textAlign = 'center'
+        td.style.padding = '20px'
+        td.style.color = '#666'
+        td.textContent = 'No data available'
+        tr.appendChild(td)
+        tbody.appendChild(tr)
+        return
+      }
+
       for (const entry of data) {
         const tr = document.createElement('tr')
         tr.innerHTML = `<td style="padding: 10px 16px;">${entry.name}</td><td style="padding: 10px 16px;">${entry.pan}</td>`

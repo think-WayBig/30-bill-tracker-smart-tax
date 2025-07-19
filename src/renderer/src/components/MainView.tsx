@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Sidebar from './Sidebar'
 import AddEntry from './AddEntry'
 import ManageBook from './ManageBook'
+import ManageGroup from './ManageGroup'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState('add')
@@ -18,6 +19,7 @@ const MainView = () => {
       >
         {activeScreen === 'add' && <AddEntry />}
         {activeScreen === 'manage' && <ManageBook />}
+        {activeScreen === 'group' && <ManageGroup />}
       </div>
     </div>
   )

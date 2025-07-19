@@ -8,6 +8,9 @@ declare global {
         pan: string
       }) => Promise<{ success: boolean; error?: string }>
       loadEntries: () => Promise<{ name: string; pan: string }[]>
+      saveEntries: (
+        entries: { name: string; pan: string; group?: string }[]
+      ) => Promise<{ success: boolean; error?: string }>
     }
     api: {
       selectFolder: () => Promise<string | null>
