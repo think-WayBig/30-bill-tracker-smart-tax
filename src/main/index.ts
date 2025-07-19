@@ -96,6 +96,16 @@ ipcMain.handle('save-entry', async (_event, entry) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
     const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
 
+    // Check if PAN already exists (case-insensitive match)
+    const panExists = existing.some((e: any) => e.pan?.toLowerCase() === entry.pan?.toLowerCase())
+
+    if (panExists) {
+      return {
+        success: false,
+        error: 'Entry with this PAN already exists.'
+      }
+    }
+
     existing.push(entry)
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
 
