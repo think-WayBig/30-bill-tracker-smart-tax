@@ -12,9 +12,8 @@ const MainView = () => {
       <div
         style={{
           flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          overflowY: 'auto',
+          backgroundColor: '#f3f4f6'
         }}
       >
         {activeScreen === 'add' && <AddEntry />}

@@ -106,3 +106,18 @@ ipcMain.handle('save-entry', async (_event, entry) => {
     return { success: false, error: error.message }
   }
 })
+
+ipcMain.handle('load-entries', async () => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(filePath)) return []
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(content)
+  } catch (error) {
+    console.error('Error loading entries:', error)
+    return []
+  }
+})

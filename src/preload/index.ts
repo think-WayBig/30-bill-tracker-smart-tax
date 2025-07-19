@@ -6,7 +6,8 @@ const api = {
 }
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  saveEntry: (entry: { name: string; pan: string }) => ipcRenderer.invoke('save-entry', entry)
+  saveEntry: (entry: { name: string; pan: string }) => ipcRenderer.invoke('save-entry', entry),
+  loadEntries: () => ipcRenderer.invoke('load-entries')
 })
 
 // Use `contextBridge` APIs to expose Electron APIs to
