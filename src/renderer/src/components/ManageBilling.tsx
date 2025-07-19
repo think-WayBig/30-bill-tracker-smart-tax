@@ -79,7 +79,7 @@ export default function ManageBilling() {
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>PAN</th>
-            <th style={thStyle}>Paid?</th>
+            <th style={thStyle}>Billing Status</th>
           </tr>
         </thead>
         <tbody>

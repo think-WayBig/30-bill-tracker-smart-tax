@@ -24,13 +24,19 @@ const ManageGroup = () => {
     }
   }, [])
 
-  const handleCreateGroup = () => {
-    if (!newGroup.trim()) return
+  const handleCreateGroup = async () => {
+    const trimmed = newGroup.trim()
+    if (!trimmed) return
 
-    const updatedGroups = [...groups, newGroup.trim()]
-    setGroups(updatedGroups)
-    setNewGroup('')
-    localStorage.setItem('groups', JSON.stringify(updatedGroups))
+    const res = await window.electronAPI.saveGroup(trimmed)
+    if (res.success) {
+      const updatedGroups = [...groups, trimmed]
+      setGroups(updatedGroups)
+      setNewGroup('')
+      localStorage.setItem('groups', JSON.stringify(updatedGroups))
+    } else {
+      alert(res.error || 'Failed to create group') // or show inline error
+    }
   }
 
   const handleGroupChange = (pan: string, group: string) => {

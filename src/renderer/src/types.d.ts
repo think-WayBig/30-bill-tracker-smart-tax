@@ -35,6 +35,17 @@ declare global {
         pan: string,
         billingStatus: 'Due' | 'Paid'
       ) => Promise<{ success: boolean; error?: string }>
+
+      saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>
+
+      loadGroups: () => Promise<string[]>
+
+      assignUserToGroup: (payload: {
+        pan: string
+        group: string
+      }) => Promise<{ success: boolean; error?: string }>
+
+      deleteEntry: (pan: string) => Promise<{ success: boolean; error?: string }>
     }
 
     api: {

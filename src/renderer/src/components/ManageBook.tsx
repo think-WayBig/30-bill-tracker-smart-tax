@@ -59,7 +59,11 @@ const ManageBook = () => {
         const query = searchInput.value.toLowerCase()
         const filtered = entries.filter(
           (entry) =>
-            entry.name.toLowerCase().includes(query) || entry.pan.toLowerCase().includes(query)
+            entry.name.toLowerCase().includes(query) ||
+            entry.pan.toLowerCase().includes(query) ||
+            (entry.ackno || '').toLowerCase().includes(query) ||
+            (entry.billingStatus || '').toLowerCase().includes(query) ||
+            (entry.group || '').toLowerCase().includes(query)
         )
         renderTable(filtered)
       })

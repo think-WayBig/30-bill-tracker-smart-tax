@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Sidebar from './Sidebar'
-import AddEntry from './AddEntry'
+import AddEntry from './ManageEntry'
 import ManageBook from './ManageBook'
 import ManageGroup from './ManageGroup'
 import ManageBilling from './ManageBilling'

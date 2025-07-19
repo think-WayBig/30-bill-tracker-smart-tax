@@ -137,6 +137,12 @@ ipcMain.handle('save-group', async (_event, group) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
     const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
 
+    // Check if group already exists (case-insensitive)
+    const alreadyExists = existing.some((g: string) => g.toLowerCase() === group.toLowerCase())
+    if (alreadyExists) {
+      return { success: false, error: 'Group already exists.' }
+    }
+
     const updated = [...existing, group]
     fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
 
@@ -217,6 +223,29 @@ ipcMain.handle('update-billing-status', async (_event, pan, billingStatus) => {
     )
 
     fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('delete-entry', async (_event, pan) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
+
+    const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const match = existing.find((entry: any) => entry.pan?.toLowerCase() === pan.toLowerCase())
+    if (!match) {
+      return { success: false, error: 'Entry does not exist' }
+    }
+
+    const updated = existing.filter((entry: any) => entry.pan?.toLowerCase() !== pan.toLowerCase())
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
