@@ -3,7 +3,15 @@ import Layout from './Layout'
 
 const ManageBook = () => {
   useEffect(() => {
-    const renderTable = (data: { name: string; pan: string }[]) => {
+    const renderTable = (
+      data: {
+        name: string
+        pan: string
+        ackNo?: string
+        billingStatus?: 'Due' | 'Paid'
+        group?: string
+      }[]
+    ) => {
       const tbody = document.getElementById('entryBody')
       if (!tbody) return
 
@@ -12,7 +20,7 @@ const ManageBook = () => {
       if (data.length === 0) {
         const tr = document.createElement('tr')
         const td = document.createElement('td')
-        td.colSpan = 2
+        td.colSpan = 5
         td.style.textAlign = 'center'
         td.style.padding = '20px'
         td.style.color = '#666'
@@ -24,8 +32,19 @@ const ManageBook = () => {
 
       for (const entry of data) {
         const tr = document.createElement('tr')
-        tr.innerHTML = `<td style="padding: 10px 16px;">${entry.name}</td><td style="padding: 10px 16px;">${entry.pan}</td>`
         tr.className = 'hoverable-row'
+
+        const ackNo = entry.ackNo || 'N/A'
+        const billingStatus = entry.billingStatus || 'Due'
+        const group = entry.group || 'None'
+
+        tr.innerHTML = `
+          <td style="padding: 10px 16px;">${entry.name}</td>
+          <td style="padding: 10px 16px;">${entry.pan}</td>
+          <td style="padding: 10px 16px;">${ackNo}</td>
+          <td style="padding: 10px 16px;">${billingStatus}</td>
+          <td style="padding: 10px 16px;">${group}</td>
+        `
         tbody.appendChild(tr)
       }
     }
@@ -52,10 +71,11 @@ const ManageBook = () => {
       <style>
         {`
         .hoverable-row:hover {
-          background-color: #eef2ff; /* light indigo */
+          background-color: #eef2ff;
         }
       `}
       </style>
+
       <input
         type="text"
         id="searchInput"
@@ -84,6 +104,9 @@ const ManageBook = () => {
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>PAN</th>
+            <th style={thStyle}>Acknowledgement No.</th>
+            <th style={thStyle}>Billing Status</th>
+            <th style={thStyle}>Group</th>
           </tr>
         </thead>
         <tbody id="entryBody" />

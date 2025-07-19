@@ -1,10 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Layout from './Layout'
 
 const AddEntry: React.FC = () => {
   const [name, setName] = useState('')
   const [pan, setPan] = useState('')
   const [message, setMessage] = useState('')
+
+  // Clear message after 5 seconds
+  useEffect(() => {
+    if (message) {
+      const timeout = setTimeout(() => setMessage(''), 5000)
+      return () => clearTimeout(timeout) // Cleanup on unmount or next message
+    }
+    return undefined
+  }, [message])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

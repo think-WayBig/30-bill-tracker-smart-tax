@@ -88,8 +88,6 @@ ipcMain.handle('select-folder', async () => {
 
 ipcMain.handle('save-entry', async (_event, entry) => {
   try {
-    console.log('Received entry:', entry)
-
     const dir = path.join(app.getPath('userData'), 'data')
     const filePath = path.join(dir, 'entries.json')
 
@@ -108,8 +106,6 @@ ipcMain.handle('save-entry', async (_event, entry) => {
 
     existing.push(entry)
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
-
-    console.log('Saving to:', filePath)
 
     return { success: true }
   } catch (error: any) {
