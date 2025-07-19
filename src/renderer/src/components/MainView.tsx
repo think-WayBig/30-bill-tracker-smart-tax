@@ -9,7 +9,14 @@ const MainView = () => {
   return (
     <div style={{ display: 'flex', height: '95vh' }}>
       <Sidebar setActiveScreen={setActiveScreen} />
-      <div style={{ flex: 1 }}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         {activeScreen === 'add' && <AddEntry />}
         {activeScreen === 'manage' && <ManageBook />}
       </div>

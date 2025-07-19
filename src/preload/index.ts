@@ -5,6 +5,10 @@ const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
 
+contextBridge.exposeInMainWorld('electronAPI', {
+  saveEntry: (entry: { name: string; pan: string }) => ipcRenderer.invoke('save-entry', entry)
+})
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.

@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        padding: '24px',
+        padding: '10px',
         borderRight: '1px solid #ddd',
         width: '240px',
         boxSizing: 'border-box',
@@ -49,10 +49,9 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       <div
         style={{
           fontSize: '22px',
-          marginBottom: '48px',
+          marginBottom: '38px',
           display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
+          alignItems: 'center'
         }}
       >
         📚 Bill Tracker

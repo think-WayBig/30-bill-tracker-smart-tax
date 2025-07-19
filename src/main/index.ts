@@ -4,6 +4,9 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { dialog } from 'electron'
 
+import fs from 'fs'
+import path from 'path'
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -81,4 +84,25 @@ ipcMain.handle('select-folder', async () => {
   })
 
   return result.canceled ? null : result.filePaths[0]
+})
+
+ipcMain.handle('save-entry', async (_event, entry) => {
+  try {
+    console.log('Received entry:', entry)
+
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
+
+    existing.push(entry)
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    console.log('Saving to:', filePath)
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 })

@@ -5,6 +5,7 @@ declare global {
     }
   }
 }
+
 import { useEffect, useState } from 'react'
 import FolderSelector from './components/FolderSelector'
 import MainView from './components/MainView'
