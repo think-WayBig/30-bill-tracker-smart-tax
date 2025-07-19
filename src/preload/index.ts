@@ -14,7 +14,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveGroup: (group) => ipcRenderer.invoke('save-group', group),
   getAcknoFromFile: (pan: string, directory: string) =>
     ipcRenderer.invoke('get-ackno-from-file', pan, directory),
-  updateEntryAckno: (pan, ackno) => ipcRenderer.invoke('update-entry-ackno', pan, ackno),
+  updateEntryAckno: (pan, ackno, filePath) =>
+    ipcRenderer.invoke('update-entry-ackno', pan, ackno, filePath),
   deleteEntry: (pan) => ipcRenderer.invoke('delete-entry', pan),
   openContainingFolder: (filePath: string) => ipcRenderer.invoke('open-containing-folder', filePath)
 })

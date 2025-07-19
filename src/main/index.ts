@@ -279,21 +279,42 @@ ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: str
   }
 })
 
-ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string) => {
+ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string, filePath: string) => {
   try {
-    const entriesPath = path.join(app.getPath('userData'), 'entries.json')
+    const entriesPath = path.join(app.getPath('userData'), 'data', 'entries.json')
+
+    if (!fs.existsSync(entriesPath)) {
+      return { success: false, error: 'Entries file not found.' }
+    }
+
     const content = JSON.parse(fs.readFileSync(entriesPath, 'utf-8'))
 
-    const updated = content.map((entry) => (entry.pan === pan ? { ...entry, ackNo: ackno } : entry))
+    let found = false
+    const updated = content.map((entry) => {
+      if (entry.pan === pan) {
+        found = true
+        return { ...entry, ackno, filePath }
+      }
+      return entry
+    })
+
+    if (!found) {
+      return { success: false, error: 'PAN not found in entries.' }
+    }
 
     fs.writeFileSync(entriesPath, JSON.stringify(updated, null, 2))
     return { success: true }
   } catch (err: any) {
-    console.error('Failed to update ackno:', err)
     return { success: false, error: err.message }
   }
 })
 
-ipcMain.handle('open-containing-folder', async (_event, filePath) => {
-  shell.showItemInFolder(filePath)
+ipcMain.handle('open-containing-folder', async (_event, filePath: string) => {
+  try {
+    await shell.showItemInFolder(filePath)
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error opening folder:', error)
+    return { success: false, error: error.message }
+  }
 })

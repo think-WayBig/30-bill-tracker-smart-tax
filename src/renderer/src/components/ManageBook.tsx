@@ -12,6 +12,7 @@ const ManageBook = () => {
         ackno?: string
         billingStatus?: 'Due' | 'Paid'
         group?: string
+        filePath?: string
       }[]
     ) => {
       const tbody = document.getElementById('entryBody')
@@ -36,6 +37,10 @@ const ManageBook = () => {
         const tr = document.createElement('tr')
         tr.className = 'hoverable-row'
 
+        if (entry.filePath) {
+          panToFilePath.set(entry.pan, entry.filePath)
+        }
+
         const ackNoCell =
           entry.ackno && panToFilePath.has(entry.pan)
             ? `<a href="#" data-pan="${entry.pan}" style="color: #2563eb; text-decoration: underline;">${entry.ackno}</a>`
@@ -51,7 +56,6 @@ const ManageBook = () => {
         tbody.appendChild(tr)
       }
 
-      // Bind click listeners for ackno links
       tbody.querySelectorAll('a[data-pan]')?.forEach((a) => {
         const pan = a.getAttribute('data-pan')!
         a.addEventListener('click', (e) => {
@@ -71,17 +75,26 @@ const ManageBook = () => {
 
       if (folderPath) {
         for (const entry of entries) {
-          if (!entry.ackno) {
-            try {
-              const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
-              if (result.success && result.ackno) {
-                entry.ackno = result.ackno
-                panToFilePath.set(entry.pan, result.filePath!)
-                await window.electronAPI.updateEntryAckno(entry.pan, result.ackno)
-              }
-            } catch (err) {
-              console.error(`Error fetching ackNo for ${entry.pan}`, err)
+          if (entry.ackno) {
+            console.log(entry)
+            // Use existing filePath if available
+            if (entry.filePath) {
+              console.log(`Using existing filePath for ${entry.pan}: ${entry.filePath}`)
+              panToFilePath.set(entry.pan, entry.filePath)
             }
+            continue
+          }
+
+          try {
+            const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
+            if (result.success && result.ackno && result.filePath) {
+              entry.ackno = result.ackno
+              entry.filePath = result.filePath
+              panToFilePath.set(entry.pan, result.filePath)
+              await window.electronAPI.updateEntryAckno(entry.pan, result.ackno, result.filePath)
+            }
+          } catch (err) {
+            console.error(`Error fetching ackNo for ${entry.pan}`, err)
           }
         }
       }

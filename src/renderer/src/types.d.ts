@@ -57,7 +57,8 @@ declare global {
 
       updateEntryAckno: (
         pan: string,
-        ackno: string
+        ackno: string,
+        filePath: string
       ) => Promise<{ success: boolean; error?: string }>
 
       openContainingFolder: (filePath: string) => Promise<void>
