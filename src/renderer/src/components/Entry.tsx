@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Layout from './Layout'
 
-const AddEntry: React.FC = () => {
+const Entry: React.FC = () => {
   const [name, setName] = useState('')
   const [fileCode, setFileCode] = useState('')
   const [pan, setPan] = useState('')
@@ -103,7 +103,7 @@ const AddEntry: React.FC = () => {
   )
 }
 
-export default AddEntry
+export default Entry
 
 const formStyle: React.CSSProperties = {
   display: 'flex',

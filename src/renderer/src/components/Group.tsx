@@ -8,7 +8,7 @@ interface User {
   group?: string
 }
 
-const ManageGroup = () => {
+const Group = () => {
   const [groups, setGroups] = useState<string[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [newGroup, setNewGroup] = useState('')
@@ -186,4 +186,4 @@ const tdStyle: React.CSSProperties = {
   padding: '10px 16px'
 }
 
-export default ManageGroup
+export default Group

@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         flexDirection: 'column',
         padding: '10px',
         borderRight: '1px solid #ddd',
-        width: '240px',
+        width: '200px',
         boxSizing: 'border-box',
         backgroundColor: '#f9fafb',
         boxShadow: '2px 0 6px rgba(0,0,0,0.05)'
@@ -56,10 +56,11 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         📚 Bill Tracker
       </div>
 
-      {renderButton('add', 'Manage Entry', '👤')}
-      {renderButton('manage', 'Manage Book', '📚')}
-      {renderButton('group', 'Manage Groups', '📂')}
-      {renderButton('billing', 'Manage Billing', '💳')}
+      {renderButton('add', 'Entry', '👤')}
+      {renderButton('manage', 'Book', '📚')}
+      {renderButton('group', 'Groups', '📂')}
+      {renderButton('billing', 'Billing', '💳')}
+      {renderButton('settings', 'Settings', '⚙️')}
     </div>
   )
 }

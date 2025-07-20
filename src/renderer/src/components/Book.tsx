@@ -11,7 +11,7 @@ type Entry = {
   filePath?: string
 }
 
-const ManageBook = () => {
+const Book = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [search, setSearch] = useState('')
 
@@ -150,4 +150,4 @@ const tdStyle: React.CSSProperties = {
   padding: '10px 16px'
 }
 
-export default ManageBook
+export default Book

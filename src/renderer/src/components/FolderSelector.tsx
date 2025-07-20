@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 
-type FolderSelectorProps = {
-  onFolderSelected: (path: string) => void
-}
-
-const FolderSelector = ({ onFolderSelected }: FolderSelectorProps) => {
+const FolderSelector = () => {
   const [showButton, setShowButton] = useState(false)
 
   const chooseFolder = async () => {
@@ -12,7 +8,6 @@ const FolderSelector = ({ onFolderSelected }: FolderSelectorProps) => {
 
     if (selected) {
       localStorage.setItem('selectedFolder', selected)
-      onFolderSelected(selected)
       setShowButton(false)
     } else {
       setShowButton(true)
@@ -21,9 +16,7 @@ const FolderSelector = ({ onFolderSelected }: FolderSelectorProps) => {
 
   useEffect(() => {
     const savedFolder = localStorage.getItem('selectedFolder')
-    if (savedFolder) {
-      onFolderSelected(savedFolder)
-    } else {
+    if (!savedFolder) {
       chooseFolder()
     }
   }, [])

@@ -10,7 +10,7 @@ type BillingEntry = {
   fileCode: string
 }
 
-export default function ManageBilling() {
+export default function Billing() {
   const [entries, setEntries] = useState<BillingEntry[]>([])
   const [search, setSearch] = useState('')
 
