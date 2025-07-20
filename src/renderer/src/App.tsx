@@ -28,8 +28,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MainView />
 
       {/* Right Panel */}
@@ -37,14 +36,12 @@ function App() {
         {/* FolderSelector */}
         <FolderSelector onFolderSelected={setFolderPath} />
 
-        {/* Main Content Placeholder */}
-        <div style={{ flex: 1, backgroundColor: '#f9f9f9' }}></div>
-
         {/* Bottom Bar */}
         {folderPath && (
           <div
             style={{
-              padding: '12px 20px',
+              height: '5vh',
+              padding: '0 20px',
               fontSize: '14px',
               background: '#f0f0f0',
               color: '#333',
@@ -54,13 +51,18 @@ function App() {
               alignItems: 'center'
             }}
           >
-            <span>📁 Current Directory: {folderPath}</span>
+            <span>
+              📁 Current Directory:{' '}
+              <a href="#" onClick={() => window.electronAPI.openContainingFolder(folderPath)}>
+                {folderPath}
+              </a>
+            </span>
             <button
               onClick={handleChangeFolder}
               style={{
                 padding: '6px 16px',
                 fontSize: '13px',
-                backgroundColor: '#007bff',
+                backgroundColor: '#4f46e5',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '6px',
@@ -69,10 +71,10 @@ function App() {
                 transition: 'background-color 0.3s ease'
               }}
               onMouseEnter={(e) =>
-                ((e.target as HTMLButtonElement).style.backgroundColor = '#0056b3')
+                ((e.target as HTMLButtonElement).style.backgroundColor = '#4f46b1')
               }
               onMouseLeave={(e) =>
-                ((e.target as HTMLButtonElement).style.backgroundColor = '#007bff')
+                ((e.target as HTMLButtonElement).style.backgroundColor = '#4f46e5')
               }
             >
               Change

@@ -328,7 +328,7 @@ ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string, fileP
 
 ipcMain.handle('open-containing-folder', async (_event, filePath: string) => {
   try {
-    await shell.showItemInFolder(filePath)
+    await shell.openPath(filePath)
     return { success: true }
   } catch (error: any) {
     console.error('Error opening folder:', error)

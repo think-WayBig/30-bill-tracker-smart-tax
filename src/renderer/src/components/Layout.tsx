@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div style={{ backgroundColor: '#f5f7ff', minHeight: '100vh' }}>
+  <div>
     <header
       style={{
         padding: '1rem 2rem',

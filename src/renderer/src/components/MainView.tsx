@@ -15,7 +15,7 @@ const MainView = () => {
         style={{
           flex: 1,
           overflowY: 'auto',
-          backgroundColor: '#f3f4f6'
+          backgroundColor: '#f5f7ff'
         }}
       >
         {activeScreen === 'add' && <AddEntry />}

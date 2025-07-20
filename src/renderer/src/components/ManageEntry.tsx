@@ -3,12 +3,13 @@ import Layout from './Layout'
 
 const AddEntry: React.FC = () => {
   const [name, setName] = useState('')
+  const [fileCode, setFileCode] = useState('')
   const [pan, setPan] = useState('')
   const [deletePan, setDeletePan] = useState('')
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await window.electronAPI.saveEntry({ name, pan })
+    const result = await window.electronAPI.saveEntry({ name, pan, fileCode })
 
     if (result.success) {
       alert('✅ Entry saved successfully!')
@@ -46,6 +47,16 @@ const AddEntry: React.FC = () => {
             placeholder="Enter Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <label style={labelStyle}>File Code</label>
+          <input
+            type="text"
+            placeholder="Enter File Code"
+            value={fileCode}
+            onChange={(e) => setFileCode(e.target.value)}
             required
             style={inputStyle}
           />

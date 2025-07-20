@@ -35,7 +35,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   return (
     <div
       style={{
-        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         padding: '10px',

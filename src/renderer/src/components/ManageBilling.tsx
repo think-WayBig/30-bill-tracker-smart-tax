@@ -5,6 +5,7 @@ type BillingEntry = {
   name: string
   pan: string
   billingStatus?: 'Due' | 'Paid'
+  fileCode: string
 }
 
 export default function ManageBilling() {
@@ -30,9 +31,10 @@ export default function ManageBilling() {
   }
 
   const filteredEntries = entries.filter(
-    (entry) =>
-      entry.name.toLowerCase().includes(search.toLowerCase()) ||
-      entry.pan.toLowerCase().includes(search.toLowerCase())
+    (e) =>
+      e.fileCode.toLowerCase().includes(search.toLowerCase()) ||
+      e.name.toLowerCase().includes(search.toLowerCase()) ||
+      e.pan.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -77,6 +79,7 @@ export default function ManageBilling() {
       >
         <thead>
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+            <th style={thStyle}>File Code</th>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>PAN</th>
             <th style={thStyle}>Billing Status</th>
@@ -85,13 +88,14 @@ export default function ManageBilling() {
         <tbody>
           {filteredEntries.length === 0 ? (
             <tr>
-              <td colSpan={3} style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+              <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
                 No data available
               </td>
             </tr>
           ) : (
             filteredEntries.map((entry) => (
               <tr key={entry.pan} className="hoverable-row">
+                <td style={tdStyle}>{entry.fileCode || '—'}</td>
                 <td style={tdStyle}>{entry.name}</td>
                 <td style={tdStyle}>{entry.pan}</td>
                 <td style={tdStyle}>

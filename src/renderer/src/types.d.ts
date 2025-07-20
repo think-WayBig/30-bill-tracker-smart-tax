@@ -5,6 +5,7 @@ declare global {
     electronAPI: {
       saveEntry: (entry: {
         name: string
+        fileCode: string
         pan: string
         ackno?: string
         billingStatus?: 'Due' | 'Paid'
@@ -15,6 +16,7 @@ declare global {
       loadEntries: () => Promise<
         {
           name: string
+          fileCode: string
           pan: string
           ackno?: string
           billingStatus?: 'Due' | 'Paid'
@@ -26,6 +28,7 @@ declare global {
       saveEntries: (
         entries: {
           name: string
+          fileCode: string
           pan: string
           ackno?: string
           billingStatus?: 'Due' | 'Paid'

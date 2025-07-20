@@ -4,6 +4,7 @@ import Layout from './Layout'
 interface User {
   name: string
   pan: string
+  fileCode: string
   group?: string
 }
 
@@ -14,14 +15,16 @@ const ManageGroup = () => {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    window.electronAPI.loadEntries().then((entries) => {
-      setUsers(entries)
-    })
+    // Load users and groups from files
+    const fetchData = async () => {
+      const loadedUsers = await window.electronAPI.loadEntries()
+      setUsers(loadedUsers)
 
-    const storedGroups = localStorage.getItem('groups')
-    if (storedGroups) {
-      setGroups(JSON.parse(storedGroups))
+      const loadedGroups = await window.electronAPI.loadGroups()
+      setGroups(loadedGroups)
     }
+
+    fetchData()
   }, [])
 
   const handleCreateGroup = async () => {
@@ -30,12 +33,12 @@ const ManageGroup = () => {
 
     const res = await window.electronAPI.saveGroup(trimmed)
     if (res.success) {
-      const updatedGroups = [...groups, trimmed]
+      const updatedGroups = await window.electronAPI.loadGroups()
       setGroups(updatedGroups)
       setNewGroup('')
-      localStorage.setItem('groups', JSON.stringify(updatedGroups))
+      alert('Group created successfully!')
     } else {
-      alert(res.error || 'Failed to create group') // or show inline error
+      alert(res.error || 'Failed to create group')
     }
   }
 
@@ -48,6 +51,7 @@ const ManageGroup = () => {
   const filteredUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase()
     return (
+      user.fileCode.toLowerCase().includes(search) ||
       user.name.toLowerCase().includes(search) ||
       user.pan.toLowerCase().includes(search) ||
       (user.group?.toLowerCase() || '').includes(search)
@@ -81,34 +85,38 @@ const ManageGroup = () => {
           }}
         />
 
-        <input
-          type="text"
-          placeholder="Enter new group name"
-          value={newGroup}
-          onChange={(e) => setNewGroup(e.target.value)}
-          style={{
-            padding: '10px',
-            fontSize: '16px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            outline: 'none',
-            flex: '1 1 200px'
-          }}
-        />
-        <button
-          onClick={handleCreateGroup}
-          style={{
-            padding: '10px 15px',
-            backgroundColor: '#4f46e5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            flex: '0 0 auto'
-          }}
-        >
-          Create Group
-        </button>
+        <form style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            placeholder="Enter new group name"
+            value={newGroup}
+            onChange={(e) => setNewGroup(e.target.value)}
+            style={{
+              padding: '10px',
+              fontSize: '16px',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+              outline: 'none',
+              flex: '1 1 200px'
+            }}
+            required
+          />
+          <button
+            type="submit"
+            onClick={handleCreateGroup}
+            style={{
+              padding: '10px 15px',
+              backgroundColor: '#4f46e5',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              flex: '0 0 auto'
+            }}
+          >
+            Create Group
+          </button>
+        </form>
       </div>
 
       {/* Users Table */}
@@ -122,6 +130,7 @@ const ManageGroup = () => {
       >
         <thead>
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+            <th style={thStyle}>File Code</th>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>PAN</th>
             <th style={thStyle}>Group</th>
@@ -137,6 +146,7 @@ const ManageGroup = () => {
           ) : (
             filteredUsers.map((user) => (
               <tr key={user.pan} className="group-row">
+                <td style={tdStyle}>{user.fileCode}</td>
                 <td style={tdStyle}>{user.name}</td>
                 <td style={tdStyle}>{user.pan}</td>
                 <td style={tdStyle}>

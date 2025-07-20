@@ -1,107 +1,59 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Layout from './Layout'
 
+type Entry = {
+  name: string
+  fileCode: string
+  pan: string
+  ackno?: string
+  billingStatus?: 'Due' | 'Paid'
+  group?: string
+  filePath?: string
+}
+
 const ManageBook = () => {
+  const [entries, setEntries] = useState<Entry[]>([])
+  const [search, setSearch] = useState('')
+
   useEffect(() => {
-    const panToFilePath = new Map<string, string>()
-
-    const renderTable = (
-      data: {
-        name: string
-        pan: string
-        ackno?: string
-        billingStatus?: 'Due' | 'Paid'
-        group?: string
-        filePath?: string
-      }[]
-    ) => {
-      const tbody = document.getElementById('entryBody')
-      if (!tbody) return
-
-      tbody.innerHTML = ''
-
-      if (data.length === 0) {
-        const tr = document.createElement('tr')
-        const td = document.createElement('td')
-        td.colSpan = 5
-        td.style.textAlign = 'center'
-        td.style.padding = '20px'
-        td.style.color = '#666'
-        td.textContent = 'No data available'
-        tr.appendChild(td)
-        tbody.appendChild(tr)
-        return
-      }
-
-      for (const entry of data) {
-        const tr = document.createElement('tr')
-        tr.className = 'hoverable-row'
-
-        if (entry.filePath) {
-          panToFilePath.set(entry.pan, entry.filePath)
-        }
-
-        const ackNoCell =
-          entry.ackno && panToFilePath.has(entry.pan)
-            ? `<a href="#" data-pan="${entry.pan}" style="color: #2563eb; text-decoration: underline;">${entry.ackno}</a>`
-            : entry.ackno || 'N/A'
-
-        tr.innerHTML = `
-          <td style="padding: 10px 16px;">${entry.name}</td>
-          <td style="padding: 10px 16px;">${entry.pan}</td>
-          <td style="padding: 10px 16px;">${ackNoCell}</td>
-          <td style="padding: 10px 16px;">${entry.billingStatus || 'Due'}</td>
-          <td style="padding: 10px 16px;">${entry.group || 'None'}</td>
-        `
-        tbody.appendChild(tr)
-      }
-
-      tbody.querySelectorAll('a[data-pan]')?.forEach((a) => {
-        const pan = a.getAttribute('data-pan')!
-        a.addEventListener('click', (e) => {
-          e.preventDefault()
-          const filePath = panToFilePath.get(pan)
-          if (filePath) {
-            window.electronAPI.openContainingFolder(filePath)
-          }
-        })
-      })
-    }
-
     const loadAndRender = async () => {
       const folderPath = localStorage.getItem('selectedFolder')
-      const entries = await window.electronAPI.loadEntries()
-      panToFilePath.clear()
+      const loaded = await window.electronAPI.loadEntries()
 
       if (folderPath) {
-        for (const entry of entries) {
-          if (entry.ackno) {
-            // Use existing filePath if available
-            if (entry.filePath) {
-              panToFilePath.set(entry.pan, entry.filePath)
+        for (const entry of loaded) {
+          if (!entry.ackno) {
+            try {
+              const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
+              if (result.success && result.ackno && result.filePath) {
+                entry.ackno = result.ackno
+                entry.filePath = result.filePath
+                await window.electronAPI.updateEntryAckno(entry.pan, result.ackno, result.filePath)
+              }
+            } catch (err) {
+              console.error(`Error fetching ackNo for ${entry.pan}`, err)
             }
-            continue
-          }
-
-          try {
-            const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
-            if (result.success && result.ackno && result.filePath) {
-              entry.ackno = result.ackno
-              entry.filePath = result.filePath
-              panToFilePath.set(entry.pan, result.filePath)
-              await window.electronAPI.updateEntryAckno(entry.pan, result.ackno, result.filePath)
-            }
-          } catch (err) {
-            console.error(`Error fetching ackNo for ${entry.pan}`, err)
           }
         }
       }
 
-      renderTable(entries)
+      setEntries(loaded)
     }
 
     loadAndRender()
   }, [])
+
+  const filtered = entries.filter((e) => {
+    const q = search.toLowerCase()
+    return (
+      e.fileCode.toLowerCase().includes(q) ||
+      e.name.toLowerCase().includes(q) ||
+      e.pan.toLowerCase().includes(q) ||
+      (e.ackno || '').toLowerCase().includes(q) ||
+      (e.billingStatus || '').toLowerCase().includes(q) ||
+      (e.group || '').toLowerCase().includes(q)
+    )
+  })
 
   return (
     <Layout title="📚 Manage Book">
@@ -110,13 +62,19 @@ const ManageBook = () => {
         .hoverable-row:hover {
           background-color: #eef2ff;
         }
+        a.ack-link {
+          color: #2563eb;
+          text-decoration: underline;
+          cursor: pointer;
+        }
       `}
       </style>
 
       <input
         type="text"
-        id="searchInput"
         placeholder="Search by Name, PAN, Ack No., Billing Status or Group"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         style={{
           width: '100%',
           padding: '10px 15px',
@@ -129,7 +87,6 @@ const ManageBook = () => {
       />
 
       <table
-        id="entryTable"
         style={{
           width: '100%',
           borderCollapse: 'collapse',
@@ -139,6 +96,7 @@ const ManageBook = () => {
       >
         <thead>
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+            <th style={thStyle}>File Code</th>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>PAN</th>
             <th style={thStyle}>Acknowledgement No.</th>
@@ -146,7 +104,37 @@ const ManageBook = () => {
             <th style={thStyle}>Group</th>
           </tr>
         </thead>
-        <tbody id="entryBody" />
+        <tbody>
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={6} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                No data available
+              </td>
+            </tr>
+          ) : (
+            filtered.map((entry) => (
+              <tr key={entry.pan} className="hoverable-row">
+                <td style={tdStyle}>{entry.fileCode}</td>
+                <td style={tdStyle}>{entry.name}</td>
+                <td style={tdStyle}>{entry.pan}</td>
+                <td style={tdStyle}>
+                  {entry.ackno && entry.filePath ? (
+                    <a
+                      className="ack-link"
+                      onClick={() => window.electronAPI.openContainingFolder(entry.filePath!)}
+                    >
+                      {entry.ackno}
+                    </a>
+                  ) : (
+                    entry.ackno || 'N/A'
+                  )}
+                </td>
+                <td style={tdStyle}>{entry.billingStatus || 'Due'}</td>
+                <td style={tdStyle}>{entry.group || 'None'}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
       </table>
     </Layout>
   )
@@ -156,6 +144,10 @@ const thStyle: React.CSSProperties = {
   padding: '12px 16px',
   textAlign: 'left',
   fontWeight: 'bold'
+}
+
+const tdStyle: React.CSSProperties = {
+  padding: '10px 16px'
 }
 
 export default ManageBook
