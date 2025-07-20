@@ -57,7 +57,7 @@ export default function Billing() {
 
       <input
         type="text"
-        placeholder="Search by Name or PAN"
+        placeholder="Search Entry"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{

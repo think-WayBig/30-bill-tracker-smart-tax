@@ -3,10 +3,14 @@ import Layout from './Layout'
 
 export default function Settings() {
   const [folderPath, setFolderPath] = useState<string | null>(null)
+  const [year, setYear] = useState<string>('')
 
   useEffect(() => {
-    const saved = localStorage.getItem('selectedFolder')
-    if (saved) setFolderPath(saved)
+    const savedFolder = localStorage.getItem('selectedFolder')
+    const savedYear = localStorage.getItem('selectedYear')
+
+    if (savedFolder) setFolderPath(savedFolder)
+    if (savedYear) setYear(savedYear)
   }, [])
 
   const handleSelectFolder = async () => {
@@ -16,6 +20,17 @@ export default function Settings() {
       setFolderPath(selected)
     }
   }
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedYear = e.target.value
+    setYear(selectedYear)
+    localStorage.setItem('selectedYear', selectedYear)
+  }
+
+  const yearOptions = Array.from({ length: 5 }, (_, i) => {
+    const y = new Date().getFullYear() + i - 1 // e.g. 2024 to 2028
+    return y.toString()
+  })
 
   return (
     <Layout title="⚙️ Manage Settings">
@@ -53,10 +68,12 @@ export default function Settings() {
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border-radius: 6px;
             padding: 20px;
+            margin-bottom: 20px;
           }
         `}
       </style>
 
+      {/* Folder Selection */}
       <div className="settings-box">
         <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>
           📁 Selected Folder
@@ -75,6 +92,29 @@ export default function Settings() {
             Select Folder
           </button>
         </div>
+      </div>
+
+      {/* Year Selection */}
+      <div className="settings-box">
+        <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>
+          📅 Select Financial Year
+        </label>
+
+        <select
+          className="input-style"
+          value={year}
+          onChange={handleYearChange}
+          style={{ maxWidth: '200px' }}
+        >
+          <option value="" disabled>
+            -- Choose Year --
+          </option>
+          {yearOptions.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
       </div>
     </Layout>
   )

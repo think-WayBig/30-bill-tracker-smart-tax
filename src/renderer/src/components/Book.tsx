@@ -72,7 +72,7 @@ const Book = () => {
 
       <input
         type="text"
-        placeholder="Search by Name, PAN, Ack No., Billing Status or Group"
+        placeholder="Search Entry"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{

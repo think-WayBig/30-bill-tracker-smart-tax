@@ -72,7 +72,7 @@ const Group = () => {
       <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <input
           type="text"
-          placeholder="Search name, PAN, or group"
+          placeholder="Search Entry"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
