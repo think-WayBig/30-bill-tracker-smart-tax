@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 type SidebarProps = {
   setActiveScreen: (screen: string) => void
@@ -6,14 +6,24 @@ type SidebarProps = {
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [hovered, setHovered] = useState<string | null>(null)
-  const [active, setActive] = useState<string>('add') // default active screen
+  const [active, setActive] = useState<string>(() => {
+    return localStorage.getItem('activeScreen') || 'add'
+  })
+
+  useEffect(() => {
+    // Ensure screen is set on mount
+    setActiveScreen(active)
+  }, [active, setActiveScreen])
+
+  const handleClick = (key: string) => {
+    setActiveScreen(key)
+    setActive(key)
+    localStorage.setItem('activeScreen', key)
+  }
 
   const renderButton = (key: string, label: string, icon: string) => (
     <button
-      onClick={() => {
-        setActiveScreen(key)
-        setActive(key)
-      }}
+      onClick={() => handleClick(key)}
       onMouseEnter={() => setHovered(key)}
       onMouseLeave={() => setHovered(null)}
       style={{

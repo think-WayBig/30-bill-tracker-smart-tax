@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './Sidebar'
 import Entry from './Entry'
 import Book from './Book'
@@ -7,7 +7,20 @@ import Billing from './Billing'
 import Settings from './Settings'
 
 const MainView = () => {
-  const [activeScreen, setActiveScreen] = useState('add')
+  const [activeScreen, setActiveScreen] = useState(() => {
+    return localStorage.getItem('activeScreen') || 'add'
+  })
+
+  // Load saved screen on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('activeScreen')
+    if (saved) setActiveScreen(saved)
+  }, [])
+
+  // Save screen on change
+  useEffect(() => {
+    localStorage.setItem('activeScreen', activeScreen)
+  }, [activeScreen])
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
