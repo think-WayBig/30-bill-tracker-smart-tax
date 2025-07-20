@@ -31,6 +31,8 @@ const Book = () => {
         for (const entry of loaded) {
           const alreadyHas = entry.ackno?.some((a) => a.year === currentYear)
 
+          console.log('Already has ackno for current year:', alreadyHas, entry.pan)
+
           if (!alreadyHas) {
             try {
               const result = await window.electronAPI.getAcknoFromFile(
@@ -38,6 +40,8 @@ const Book = () => {
                 folderPath,
                 currentYear
               )
+
+              console.log('Ackno result:', result)
 
               if (result.success && result.ackno) {
                 const currentAck = result.ackno

@@ -269,38 +269,43 @@ function findFileRecursive(dir: string, targetFile: string): string | null {
   return null
 }
 
-ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: string) => {
-  try {
-    const fileName = `${pan}_ITRV.txt`
-    const filePath = findFileRecursive(directory, fileName)
+ipcMain.handle(
+  'get-ackno-from-file',
+  async (_event, pan: string, directory: string, year: string) => {
+    try {
+      const fileName = `${pan}_ITRV.txt`
+      const filePath = findFileRecursive(directory, fileName)
 
-    if (!filePath) {
-      return { success: false, error: 'File not found in any subfolder' }
-    }
-
-    const content = fs.readFileSync(filePath, 'utf-8')
-    const jsonData = JSON.parse(content)
-
-    if (!Array.isArray(jsonData)) {
-      return { success: false, error: 'Invalid file format' }
-    }
-
-    const latest = jsonData.reduce((prev, curr) => {
-      return +curr.assmentYear > +prev.assmentYear ? curr : prev
-    })
-
-    return {
-      success: true,
-      ackno: {
-        num: latest.ackNum,
-        year: latest.assmentYear,
-        filePath
+      if (!filePath) {
+        return { success: false, error: 'File not found in any subfolder' }
       }
+
+      const content = fs.readFileSync(filePath, 'utf-8')
+      const jsonData = JSON.parse(content)
+
+      if (!Array.isArray(jsonData)) {
+        return { success: false, error: 'Invalid file format' }
+      }
+
+      const match = jsonData.find((entry) => `${entry.assmentYear}` === year)
+
+      if (!match) {
+        return { success: false, error: `No entry found for year ${year}` }
+      }
+
+      return {
+        success: true,
+        ackno: {
+          num: match.ackNum,
+          year,
+          filePath
+        }
+      }
+    } catch (error: any) {
+      return { success: false, error: error.message }
     }
-  } catch (error: any) {
-    return { success: false, error: error.message }
   }
-})
+)
 
 ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string, filePath: string) => {
   try {
