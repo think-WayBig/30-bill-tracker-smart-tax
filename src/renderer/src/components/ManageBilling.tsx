@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import Layout from './Layout'
 
+type BillingStatus = 'Not started' | 'Pending' | 'Paid'
+
 type BillingEntry = {
   name: string
   pan: string
-  billingStatus?: 'Due' | 'Paid'
+  billingStatus?: BillingStatus
   fileCode: string
 }
 
@@ -20,9 +22,7 @@ export default function ManageBilling() {
     fetchEntries()
   }, [])
 
-  const handleCheckboxChange = async (pan: string, checked: boolean) => {
-    const newStatus = checked ? 'Paid' : 'Due'
-
+  const handleBillingStatusChange = async (pan: string, newStatus: BillingStatus) => {
     setEntries((prev) =>
       prev.map((entry) => (entry.pan === pan ? { ...entry, billingStatus: newStatus } : entry))
     )
@@ -45,9 +45,11 @@ export default function ManageBilling() {
           background-color: #eef2ff;
         }
 
-        .large-checkbox {
-          width: 24px;
-          height: 24px;
+        select.billing-dropdown {
+          padding: 6px 10px;
+          font-size: 15px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
           cursor: pointer;
         }
       `}
@@ -99,12 +101,17 @@ export default function ManageBilling() {
                 <td style={tdStyle}>{entry.name}</td>
                 <td style={tdStyle}>{entry.pan}</td>
                 <td style={tdStyle}>
-                  <input
-                    type="checkbox"
-                    className="large-checkbox"
-                    checked={entry.billingStatus === 'Paid'}
-                    onChange={(e) => handleCheckboxChange(entry.pan, e.target.checked)}
-                  />
+                  <select
+                    className="billing-dropdown"
+                    value={entry.billingStatus || 'Not started'}
+                    onChange={(e) =>
+                      handleBillingStatusChange(entry.pan, e.target.value as BillingStatus)
+                    }
+                  >
+                    <option value="Not started">Not started</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
                 </td>
               </tr>
             ))

@@ -9,11 +9,17 @@ const AddEntry: React.FC = () => {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await window.electronAPI.saveEntry({ name, pan, fileCode })
+    const result = await window.electronAPI.saveEntry({
+      name,
+      pan,
+      fileCode,
+      billingStatus: 'Not started'
+    })
 
     if (result.success) {
       alert('✅ Entry saved successfully!')
       setName('')
+      setFileCode('')
       setPan('')
     } else {
       alert(`❌ Error: ${result.error}`)

@@ -6,7 +6,7 @@ type Entry = {
   fileCode: string
   pan: string
   ackno?: string
-  billingStatus?: 'Due' | 'Paid'
+  billingStatus?: 'Not started' | 'Pending' | 'Paid'
   group?: string
   filePath?: string
 }
@@ -129,7 +129,7 @@ const ManageBook = () => {
                     entry.ackno || 'N/A'
                   )}
                 </td>
-                <td style={tdStyle}>{entry.billingStatus || 'Due'}</td>
+                <td style={tdStyle}>{entry.billingStatus}</td>
                 <td style={tdStyle}>{entry.group || 'None'}</td>
               </tr>
             ))
