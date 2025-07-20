@@ -8,7 +8,7 @@ declare global {
         fileCode: string
         pan: string
         ackno?: { num: string; year: string; filePath: string }[]
-        billingStatus?: 'Not started' | 'Pending' | 'Paid'
+        billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
         group?: string
       }) => Promise<{ success: boolean; error?: string }>
 
@@ -18,7 +18,7 @@ declare global {
           fileCode: string
           pan: string
           ackno?: { num: string; year: string; filePath: string }[]
-          billingStatus?: 'Not started' | 'Pending' | 'Paid'
+          billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
           group?: string
         }[]
       >
@@ -29,14 +29,15 @@ declare global {
           fileCode: string
           pan: string
           ackno?: { num: string; year: string; filePath: string }[]
-          billingStatus?: 'Not started' | 'Pending' | 'Paid'
+          billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
           group?: string
         }[]
       ) => Promise<{ success: boolean; error?: string }>
 
       updateBillingStatus: (
         pan: string,
-        billingStatus: 'Not started' | 'Pending' | 'Paid'
+        billingStatus: { status: 'Not started' | 'Pending' | 'Paid'; year: string },
+        year
       ) => Promise<{ success: boolean; error?: string }>
 
       saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>

@@ -12,7 +12,7 @@ type Entry = {
   fileCode: string
   pan: string
   ackno?: AcknoEntry[]
-  billingStatus?: 'Not started' | 'Pending' | 'Paid'
+  billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
 }
 
@@ -31,8 +31,6 @@ const Book = () => {
         for (const entry of loaded) {
           const alreadyHas = entry.ackno?.some((a) => a.year === currentYear)
 
-          console.log('Already has ackno for current year:', alreadyHas, entry.pan)
-
           if (!alreadyHas) {
             try {
               const result = await window.electronAPI.getAcknoFromFile(
@@ -40,8 +38,6 @@ const Book = () => {
                 folderPath,
                 currentYear
               )
-
-              console.log('Ackno result:', result)
 
               if (result.success && result.ackno) {
                 const currentAck = result.ackno
@@ -69,12 +65,14 @@ const Book = () => {
   const filtered = entries.filter((e) => {
     const q = search.toLowerCase()
     const ack = e.ackno?.find((a) => a.year === currentYear)?.num || ''
+    const billingStatus = e.billingStatus?.find((b) => b.year === currentYear)?.status || ''
+
     return (
       e.fileCode.toLowerCase().includes(q) ||
       e.name.toLowerCase().includes(q) ||
       e.pan.toLowerCase().includes(q) ||
       ack.toLowerCase().includes(q) ||
-      (e.billingStatus || '').toLowerCase().includes(q) ||
+      billingStatus.toLowerCase().includes(q) ||
       (e.group || '').toLowerCase().includes(q)
     )
   })
@@ -138,8 +136,7 @@ const Book = () => {
           ) : (
             filtered.map((entry) => {
               const ackEntry = entry.ackno?.find((a) => a.year === currentYear)
-
-              console.log('Ack Entry:', ackEntry)
+              const billingStatus = entry.billingStatus?.find((b) => b.year === currentYear)?.status
 
               return (
                 <tr key={entry.pan} className="hoverable-row">
@@ -158,7 +155,7 @@ const Book = () => {
                       'N/A'
                     )}
                   </td>
-                  <td style={tdStyle}>{entry.billingStatus}</td>
+                  <td style={tdStyle}>{billingStatus || 'Not started'}</td>
                   <td style={tdStyle}>{entry.group || 'None'}</td>
                 </tr>
               )

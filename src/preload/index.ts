@@ -9,8 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveEntry: (entry: { name: string; pan: string }) => ipcRenderer.invoke('save-entry', entry),
   loadEntries: () => ipcRenderer.invoke('load-entries'),
   saveEntries: (entries: Array<any>) => ipcRenderer.invoke('save-multiple-entries', entries),
-  updateBillingStatus: (pan, billingStatus) =>
-    ipcRenderer.invoke('update-billing-status', pan, billingStatus),
+  updateBillingStatus: (pan, billingStatus, year) =>
+    ipcRenderer.invoke('update-billing-status', pan, billingStatus, year),
   saveGroup: (group) => ipcRenderer.invoke('save-group', group),
   loadGroups: () => ipcRenderer.invoke('load-groups'),
   getAcknoFromFile: (pan: string, directory: string, year: string) =>

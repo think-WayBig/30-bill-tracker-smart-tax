@@ -211,16 +211,34 @@ ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
   }
 })
 
-ipcMain.handle('update-billing-status', async (_event, pan, billingStatus) => {
+ipcMain.handle('update-billing-status', async (_event, pan, newStatus, year: string) => {
   try {
     const dir = path.join(app.getPath('userData'), 'data')
     const filePath = path.join(dir, 'entries.json')
     if (!fs.existsSync(filePath)) throw new Error('Entries file does not exist')
 
     const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-    const updated = existing.map((entry) =>
-      entry.pan === pan ? { ...entry, billingStatus } : entry
-    )
+
+    const updated = existing.map((entry) => {
+      if (entry.pan !== pan) return entry
+
+      const billing: { year: string; status: string }[] = Array.isArray(entry.billingStatus)
+        ? entry.billingStatus
+        : []
+
+      // Ensure year comparison is done as string
+      const index = billing.findIndex((b) => String(b.year) === String(year))
+
+      if (index !== -1) {
+        // If the year already exists, update the status
+        billing[index].status = newStatus.status
+      } else {
+        // Otherwise, add the new status object
+        billing.push({ year: newStatus.year, status: newStatus.status })
+      }
+
+      return { ...entry, billingStatus: billing }
+    })
 
     fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
     return { success: true }
