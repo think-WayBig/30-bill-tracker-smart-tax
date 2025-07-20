@@ -272,7 +272,6 @@ function findFileRecursive(dir: string, targetFile: string): string | null {
 ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: string) => {
   try {
     const fileName = `${pan}_ITRV.txt`
-
     const filePath = findFileRecursive(directory, fileName)
 
     if (!filePath) {
@@ -290,7 +289,14 @@ ipcMain.handle('get-ackno-from-file', async (_event, pan: string, directory: str
       return +curr.assmentYear > +prev.assmentYear ? curr : prev
     })
 
-    return { success: true, ackno: latest.ackNum, filePath }
+    return {
+      success: true,
+      ackno: {
+        num: latest.ackNum,
+        year: latest.assmentYear,
+        filePath
+      }
+    }
   } catch (error: any) {
     return { success: false, error: error.message }
   }

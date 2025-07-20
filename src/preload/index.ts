@@ -13,17 +13,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('update-billing-status', pan, billingStatus),
   saveGroup: (group) => ipcRenderer.invoke('save-group', group),
   loadGroups: () => ipcRenderer.invoke('load-groups'),
-  getAcknoFromFile: (pan: string, directory: string) =>
-    ipcRenderer.invoke('get-ackno-from-file', pan, directory),
+  getAcknoFromFile: (pan: string, directory: string, year: string) =>
+    ipcRenderer.invoke('get-ackno-from-file', pan, directory, year),
   updateEntryAckno: (pan, ackno, filePath) =>
     ipcRenderer.invoke('update-entry-ackno', pan, ackno, filePath),
   deleteEntry: (pan) => ipcRenderer.invoke('delete-entry', pan),
   openContainingFolder: (filePath: string) => ipcRenderer.invoke('open-containing-folder', filePath)
 })
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+// Expose Electron APIs based on context isolation
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -32,8 +30,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // @ts-ignore
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-ignore
   window.api = api
 }

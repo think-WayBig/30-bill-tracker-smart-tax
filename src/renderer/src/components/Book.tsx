@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react'
 import Layout from './Layout'
 
+type AcknoEntry = {
+  num: string
+  year: string
+  filePath: string
+}
+
 type Entry = {
   name: string
   fileCode: string
   pan: string
-  ackno?: string
+  ackno?: AcknoEntry[]
   billingStatus?: 'Not started' | 'Pending' | 'Paid'
   group?: string
-  filePath?: string
 }
 
 const Book = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [search, setSearch] = useState('')
+
+  const currentYear = localStorage.getItem('selectedYear')!
 
   useEffect(() => {
     const loadAndRender = async () => {
@@ -22,13 +29,25 @@ const Book = () => {
 
       if (folderPath) {
         for (const entry of loaded) {
-          if (!entry.ackno) {
+          const alreadyHas = entry.ackno?.some((a) => a.year === currentYear)
+
+          if (!alreadyHas) {
             try {
-              const result = await window.electronAPI.getAcknoFromFile(entry.pan, folderPath)
-              if (result.success && result.ackno && result.filePath) {
-                entry.ackno = result.ackno
-                entry.filePath = result.filePath
-                await window.electronAPI.updateEntryAckno(entry.pan, result.ackno, result.filePath)
+              const result = await window.electronAPI.getAcknoFromFile(
+                entry.pan,
+                folderPath,
+                currentYear
+              )
+
+              if (result.success && result.ackno) {
+                const currentAck = result.ackno
+
+                if (!Array.isArray(entry.ackno)) {
+                  entry.ackno = []
+                }
+
+                entry.ackno.push(currentAck)
+                await window.electronAPI.updateEntryAckno(entry.pan, entry.ackno)
               }
             } catch (err) {
               console.error(`Error fetching ackNo for ${entry.pan}`, err)
@@ -41,15 +60,16 @@ const Book = () => {
     }
 
     loadAndRender()
-  }, [])
+  }, [currentYear])
 
   const filtered = entries.filter((e) => {
     const q = search.toLowerCase()
+    const ack = e.ackno?.find((a) => a.year === currentYear)?.num || ''
     return (
       e.fileCode.toLowerCase().includes(q) ||
       e.name.toLowerCase().includes(q) ||
       e.pan.toLowerCase().includes(q) ||
-      (e.ackno || '').toLowerCase().includes(q) ||
+      ack.toLowerCase().includes(q) ||
       (e.billingStatus || '').toLowerCase().includes(q) ||
       (e.group || '').toLowerCase().includes(q)
     )
@@ -112,27 +132,33 @@ const Book = () => {
               </td>
             </tr>
           ) : (
-            filtered.map((entry) => (
-              <tr key={entry.pan} className="hoverable-row">
-                <td style={tdStyle}>{entry.fileCode}</td>
-                <td style={tdStyle}>{entry.name}</td>
-                <td style={tdStyle}>{entry.pan}</td>
-                <td style={tdStyle}>
-                  {entry.ackno && entry.filePath ? (
-                    <a
-                      className="ack-link"
-                      onClick={() => window.electronAPI.openContainingFolder(entry.filePath!)}
-                    >
-                      {entry.ackno}
-                    </a>
-                  ) : (
-                    entry.ackno || 'N/A'
-                  )}
-                </td>
-                <td style={tdStyle}>{entry.billingStatus}</td>
-                <td style={tdStyle}>{entry.group || 'None'}</td>
-              </tr>
-            ))
+            filtered.map((entry) => {
+              const ackEntry = entry.ackno?.find((a) => a.year === currentYear)
+
+              console.log('Ack Entry:', ackEntry)
+
+              return (
+                <tr key={entry.pan} className="hoverable-row">
+                  <td style={tdStyle}>{entry.fileCode}</td>
+                  <td style={tdStyle}>{entry.name}</td>
+                  <td style={tdStyle}>{entry.pan}</td>
+                  <td style={tdStyle}>
+                    {ackEntry?.num && ackEntry?.filePath ? (
+                      <a
+                        className="ack-link"
+                        onClick={() => window.electronAPI.openContainingFolder(ackEntry.filePath)}
+                      >
+                        {ackEntry.num}
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
+                  </td>
+                  <td style={tdStyle}>{entry.billingStatus}</td>
+                  <td style={tdStyle}>{entry.group || 'None'}</td>
+                </tr>
+              )
+            })
           )}
         </tbody>
       </table>
