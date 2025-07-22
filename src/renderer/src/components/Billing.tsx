@@ -8,12 +8,12 @@ type BillingEntry = {
   pan: string
   billingStatus?: BillingStatus[]
   fileCode: string
+  group?: string
 }
 
 export default function Billing() {
   const [entries, setEntries] = useState<BillingEntry[]>([])
   const [search, setSearch] = useState('')
-
   const currentYear = localStorage.getItem('selectedYear') || new Date().getFullYear().toString()
 
   useEffect(() => {
@@ -24,36 +24,81 @@ export default function Billing() {
     fetchEntries()
   }, [])
 
-  const handleBillingStatusChange = async (pan: string, newStatus: BillingStatus['status']) => {
+  const handleBillingStatusChange = async (
+    panOrGroup: string,
+    newStatus: BillingStatus['status'],
+    isGroup: boolean
+  ) => {
     setEntries((prev) =>
       prev.map((entry) => {
-        if (entry.pan !== pan) return entry
+        const match = isGroup ? entry.group === panOrGroup : entry.pan === panOrGroup
+        if (!match) return entry
 
         const updatedStatus: BillingStatus[] = Array.isArray(entry.billingStatus)
-          ? (() => {
-              const others = entry.billingStatus.filter((b) => b.year !== currentYear)
-              return [...others, { status: newStatus, year: currentYear }]
-            })()
+          ? [
+              ...entry.billingStatus.filter((b) => b.year !== currentYear),
+              { status: newStatus, year: currentYear }
+            ]
           : [{ status: newStatus, year: currentYear }]
 
         return { ...entry, billingStatus: updatedStatus }
       })
     )
-    await window.electronAPI.updateBillingStatus(
-      pan,
-      {
-        status: newStatus,
-        year: currentYear
-      },
-      currentYear
+
+    const matchedEntries = entries.filter((entry) =>
+      isGroup ? entry.group === panOrGroup : entry.pan === panOrGroup
     )
+
+    for (const entry of matchedEntries) {
+      await window.electronAPI.updateBillingStatus(
+        entry.pan,
+        { status: newStatus, year: currentYear },
+        currentYear
+      )
+    }
   }
 
-  const filteredEntries = entries.filter(
-    (e) =>
-      e.fileCode.toLowerCase().includes(search.toLowerCase()) ||
-      e.name.toLowerCase().includes(search.toLowerCase()) ||
-      e.pan.toLowerCase().includes(search.toLowerCase())
+  const groupedMap = new Map<string, BillingEntry[]>()
+  const individualEntries: BillingEntry[] = []
+
+  for (const entry of entries) {
+    if (entry.group) {
+      if (!groupedMap.has(entry.group)) groupedMap.set(entry.group, [])
+      groupedMap.get(entry.group)!.push(entry)
+    } else {
+      individualEntries.push(entry)
+    }
+  }
+
+  const mergedDisplayRows = [
+    ...Array.from(groupedMap.entries()).map(([groupName, groupEntries]) => {
+      const displayName = groupName
+      const billingStatus = groupEntries
+        .find((e) => e.billingStatus?.some((b) => b.year === currentYear))
+        ?.billingStatus?.find((b) => b.year === currentYear)?.status
+
+      return {
+        name: displayName,
+        pan: groupName,
+        fileCode: 'N/A',
+        billingStatus,
+        isGroup: true
+      }
+    }),
+    ...individualEntries.map((e) => ({
+      name: e.name,
+      pan: e.pan,
+      fileCode: e.fileCode,
+      billingStatus: e.billingStatus?.find((b) => b.year === currentYear)?.status,
+      isGroup: false
+    }))
+  ]
+
+  const filteredRows = mergedDisplayRows.filter(
+    (row) =>
+      row.name.toLowerCase().includes(search.toLowerCase()) ||
+      row.pan.toLowerCase().includes(search.toLowerCase()) ||
+      row.fileCode.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -107,42 +152,37 @@ export default function Billing() {
           </tr>
         </thead>
         <tbody>
-          {filteredEntries.length === 0 ? (
+          {filteredRows.length === 0 ? (
             <tr>
               <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
                 No data available
               </td>
             </tr>
           ) : (
-            filteredEntries.map((entry) => {
-              const statusForCurrentYear = Array.isArray(entry.billingStatus)
-                ? entry.billingStatus.find((b) => b.year === currentYear)?.status
-                : undefined
-
-              return (
-                <tr key={entry.pan} className="hoverable-row">
-                  <td style={tdStyle}>{entry.fileCode || '—'}</td>
-                  <td style={tdStyle}>{entry.name}</td>
-                  <td style={tdStyle}>{entry.pan}</td>
-                  <td style={tdStyle}>
-                    <select
-                      className="billing-dropdown"
-                      value={statusForCurrentYear || 'Not started'}
-                      onChange={(e) =>
-                        handleBillingStatusChange(
-                          entry.pan,
-                          e.target.value as BillingStatus['status']
-                        )
-                      }
-                    >
-                      <option value="Not started">Not started</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Paid">Paid</option>
-                    </select>
-                  </td>
-                </tr>
-              )
-            })
+            filteredRows.map((row) => (
+              <tr key={row.pan} className="hoverable-row">
+                <td style={tdStyle}>{row.fileCode}</td>
+                <td style={tdStyle}>{row.name}</td>
+                <td style={tdStyle}>{row.isGroup ? 'Group' : row.pan}</td>
+                <td style={tdStyle}>
+                  <select
+                    className="billing-dropdown"
+                    value={row.billingStatus || 'Not started'}
+                    onChange={(e) =>
+                      handleBillingStatusChange(
+                        row.pan,
+                        e.target.value as BillingStatus['status'],
+                        row.isGroup
+                      )
+                    }
+                  >
+                    <option value="Not started">Not started</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
+                </td>
+              </tr>
+            ))
           )}
         </tbody>
       </table>
