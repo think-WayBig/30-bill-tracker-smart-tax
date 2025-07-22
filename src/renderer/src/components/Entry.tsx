@@ -9,11 +9,14 @@ const Entry: React.FC = () => {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const currentYear = localStorage.getItem('selectedYear') || new Date().getFullYear().toString()
+
     const result = await window.electronAPI.saveEntry({
       name,
       pan,
       fileCode,
-      billingStatus: 'Not started'
+      billingStatus: [{ status: 'Not started', year: currentYear }]
     })
 
     if (result.success) {
