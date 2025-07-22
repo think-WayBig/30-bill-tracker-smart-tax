@@ -10,6 +10,7 @@ declare global {
         ackno?: { num: string; year: string; filePath: string }[]
         billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
         group?: string
+        remarks?: { remark: string; year: string }[]
       }) => Promise<{ success: boolean; error?: string }>
 
       loadEntries: () => Promise<
@@ -20,6 +21,7 @@ declare global {
           ackno?: { num: string; year: string; filePath: string }[]
           billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
           group?: string
+          remarks?: { remark: string; year: string }[]
         }[]
       >
 
@@ -31,7 +33,13 @@ declare global {
           ackno?: { num: string; year: string; filePath: string }[]
           billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
           group?: string
+          remarks?: { remark: string; year: string }[]
         }[]
+      ) => Promise<{ success: boolean; error?: string }>
+
+      updateRemarks: (
+        pan: string,
+        remarks: { remark: string; year: string }[]
       ) => Promise<{ success: boolean; error?: string }>
 
       updateBillingStatus: (

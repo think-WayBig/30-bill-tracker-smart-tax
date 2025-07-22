@@ -14,6 +14,7 @@ type Entry = {
   ackno?: AcknoEntry[]
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
+  remarks?: { remark: string; year: string }[]
 }
 
 const Book = () => {
@@ -66,6 +67,7 @@ const Book = () => {
     const q = search.toLowerCase()
     const ack = e.ackno?.find((a) => a.year === currentYear)?.num || ''
     const billingStatus = e.billingStatus?.find((b) => b.year === currentYear)?.status || ''
+    const remarks = e.remarks?.find((r) => r.year === currentYear)?.remark || ''
 
     return (
       e.fileCode.toLowerCase().includes(q) ||
@@ -73,7 +75,8 @@ const Book = () => {
       e.pan.toLowerCase().includes(q) ||
       ack.toLowerCase().includes(q) ||
       billingStatus.toLowerCase().includes(q) ||
-      (e.group || '').toLowerCase().includes(q)
+      (e.group || '').toLowerCase().includes(q) ||
+      remarks.toLowerCase().includes(q)
     )
   })
 
@@ -124,6 +127,7 @@ const Book = () => {
             <th style={thStyle}>Acknowledgement No.</th>
             <th style={thStyle}>Billing Status</th>
             <th style={thStyle}>Group</th>
+            <th style={thStyle}>Remarks</th>
           </tr>
         </thead>
         <tbody>
@@ -157,6 +161,55 @@ const Book = () => {
                   </td>
                   <td style={tdStyle}>{billingStatus || 'Not started'}</td>
                   <td style={tdStyle}>{entry.group || 'None'}</td>
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      value={entry.remarks?.find((r) => r.year === currentYear)?.remark || ''}
+                      onChange={async (e) => {
+                        const newRemark = e.target.value
+
+                        // update UI
+                        setEntries((prev) =>
+                          prev.map((en) => {
+                            if (en.pan !== entry.pan) return en
+
+                            const remarks = Array.isArray(en.remarks) ? [...en.remarks] : []
+                            const index = remarks.findIndex((r) => r.year === currentYear)
+
+                            if (index !== -1) {
+                              remarks[index].remark = newRemark
+                            } else {
+                              remarks.push({ remark: newRemark, year: currentYear })
+                            }
+
+                            return { ...en, remarks }
+                          })
+                        )
+
+                        // update backend
+                        const updatedRemarks = Array.isArray(entry.remarks)
+                          ? [...entry.remarks]
+                          : []
+                        const idx = updatedRemarks.findIndex((r) => r.year === currentYear)
+
+                        if (idx !== -1) {
+                          updatedRemarks[idx].remark = newRemark
+                        } else {
+                          updatedRemarks.push({ remark: newRemark, year: currentYear })
+                        }
+
+                        await window.electronAPI.updateRemarks(entry.pan, updatedRemarks)
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px',
+                        fontSize: '14px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        outline: 'none'
+                      }}
+                    />
+                  </td>
                 </tr>
               )
             })
