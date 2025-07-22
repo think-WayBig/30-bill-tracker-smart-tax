@@ -52,6 +52,8 @@ declare global {
 
       loadGroups: () => Promise<string[]>
 
+      deleteGroup: (group: string) => Promise<{ success: boolean; error?: string }>
+
       assignUserToGroup: (payload: {
         pan: string
         group: string

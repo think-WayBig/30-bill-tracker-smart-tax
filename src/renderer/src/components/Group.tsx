@@ -13,9 +13,9 @@ const Group = () => {
   const [users, setUsers] = useState<User[]>([])
   const [newGroup, setNewGroup] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [showGroupsPanel, setShowGroupsPanel] = useState(false)
 
   useEffect(() => {
-    // Load users and groups from files
     const fetchData = async () => {
       const loadedUsers = await window.electronAPI.loadEntries()
       setUsers(loadedUsers)
@@ -48,6 +48,24 @@ const Group = () => {
     window.electronAPI.saveEntries(updatedUsers)
   }
 
+  const handleDeleteGroup = async (group: string) => {
+    if (
+      confirm(
+        `Are you sure you want to delete the group "${group}"? This will also remove it from all users.`
+      )
+    ) {
+      const res = await window.electronAPI.deleteGroup(group)
+      if (res.success) {
+        const updatedGroups = await window.electronAPI.loadGroups()
+        const updatedUsers = await window.electronAPI.loadEntries()
+        setGroups(updatedGroups)
+        setUsers(updatedUsers)
+      } else {
+        alert(res.error || 'Failed to delete group')
+      }
+    }
+  }
+
   const filteredUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase()
     return (
@@ -60,66 +78,135 @@ const Group = () => {
 
   return (
     <Layout title="📂 Manage Groups">
-      <style>
-        {`
-          .group-row:hover {
-            background-color: #eef2ff;
-          }
-        `}
-      </style>
-
-      {/* Search bar and Group creation */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          placeholder="Search Entry"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      {/* Expansion Panel */}
+      <div style={{ marginBottom: '30px', border: '1px solid #ccc', borderRadius: '6px' }}>
+        <div
+          onClick={() => setShowGroupsPanel(!showGroupsPanel)}
           style={{
-            padding: '10px',
-            fontSize: '16px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            flex: '1 1 300px',
-            outline: 'none'
+            background: '#f3f4f6',
+            padding: '12px 16px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
           }}
-        />
+        >
+          📁 Manage Groups {showGroupsPanel ? '▲' : '▼'}
+        </div>
 
-        <form style={{ display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
-            placeholder="Enter new group name"
-            value={newGroup}
-            onChange={(e) => setNewGroup(e.target.value)}
-            style={{
-              padding: '10px',
-              fontSize: '16px',
-              borderRadius: '6px',
-              border: '1px solid #ccc',
-              outline: 'none',
-              flex: '1 1 200px'
-            }}
-            required
-          />
-          <button
-            type="submit"
-            onClick={handleCreateGroup}
-            style={{
-              padding: '10px 15px',
-              backgroundColor: '#4f46e5',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              flex: '0 0 auto'
-            }}
-          >
-            Create Group
-          </button>
-        </form>
+        {showGroupsPanel && (
+          <div style={{ padding: '16px' }}>
+            {/* Create Group */}
+            <form
+              style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleCreateGroup()
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Enter new group name"
+                value={newGroup}
+                onChange={(e) => setNewGroup(e.target.value)}
+                style={{
+                  padding: '10px',
+                  fontSize: '16px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                  flex: '1 1 200px'
+                }}
+                required
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '10px 15px',
+                  backgroundColor: '#4f46e5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Create Group
+              </button>
+            </form>
+
+            {/* Group Member Table */}
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                backgroundColor: 'white',
+                marginBottom: '20px'
+              }}
+            >
+              <thead>
+                <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+                  <th style={thStyle}>Group</th>
+                  <th style={thStyle}>Members</th>
+                  <th style={thStyle}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groups.map((group) => {
+                  const members = users.filter((u) => u.group === group)
+                  return (
+                    <tr key={group}>
+                      <td style={tdStyle}>{group}</td>
+                      <td style={tdStyle}>
+                        {members.length > 0 ? (
+                          <ol style={{ margin: 0, paddingLeft: '20px' }}>
+                            {members.map((m) => (
+                              <li key={m.pan}>
+                                {m.name} ({m.fileCode})
+                              </li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <span style={{ color: '#999' }}>No members</span>
+                        )}
+                      </td>
+                      <td style={tdStyle}>
+                        <button
+                          onClick={() => handleDeleteGroup(group)}
+                          style={{
+                            padding: '6px 10px',
+                            backgroundColor: '#dc2626',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Users Table */}
+      {/* Assign User to Group */}
+      <input
+        type="text"
+        placeholder="Search Entry"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          padding: '10px',
+          fontSize: '16px',
+          borderRadius: '6px',
+          border: '1px solid #ccc',
+          marginBottom: '20px',
+          outline: 'none',
+          width: '100%'
+        }}
+      />
+
       <table
         style={{
           width: '100%',
@@ -183,7 +270,8 @@ const thStyle: React.CSSProperties = {
 }
 
 const tdStyle: React.CSSProperties = {
-  padding: '10px 16px'
+  padding: '10px 16px',
+  verticalAlign: 'top'
 }
 
 export default Group

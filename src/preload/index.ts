@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateBillingStatus: (pan, billingStatus, year) =>
     ipcRenderer.invoke('update-billing-status', pan, billingStatus, year),
   saveGroup: (group) => ipcRenderer.invoke('save-group', group),
+  deleteGroup: (group: string) => ipcRenderer.invoke('delete-group', group),
   loadGroups: () => ipcRenderer.invoke('load-groups'),
   getAcknoFromFile: (pan: string, directory: string, year: string) =>
     ipcRenderer.invoke('get-ackno-from-file', pan, directory, year),

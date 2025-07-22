@@ -152,6 +152,29 @@ ipcMain.handle('save-group', async (_event, group) => {
   }
 })
 
+ipcMain.handle('delete-group', async (_event, groupName: string) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const groupsPath = path.join(dir, 'groups.json')
+    const entriesPath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(groupsPath)) throw new Error('Groups file not found')
+    const groups = JSON.parse(fs.readFileSync(groupsPath, 'utf-8')).filter((g) => g !== groupName)
+    fs.writeFileSync(groupsPath, JSON.stringify(groups, null, 2))
+
+    // Also remove group reference from entries
+    if (fs.existsSync(entriesPath)) {
+      const entries = JSON.parse(fs.readFileSync(entriesPath, 'utf-8'))
+      const updatedEntries = entries.map((e) => (e.group === groupName ? { ...e, group: '' } : e))
+      fs.writeFileSync(entriesPath, JSON.stringify(updatedEntries, null, 2))
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    return { success: false, error: err.message }
+  }
+})
+
 // Load all groups
 ipcMain.handle('load-groups', async () => {
   try {
