@@ -87,7 +87,7 @@ const sidebarStyle: React.CSSProperties = {
   flexDirection: 'column',
   padding: '10px',
   borderRight: '1px solid #ddd',
-  width: '200px',
+  width: '180px',
   boxSizing: 'border-box',
   backgroundColor: '#f9fafb',
   boxShadow: '2px 0 6px rgba(0,0,0,0.05)'
