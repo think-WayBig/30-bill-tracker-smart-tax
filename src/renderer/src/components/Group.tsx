@@ -76,6 +76,29 @@ const Group = () => {
     )
   })
 
+  const [sortKey, setSortKey] = useState<'fileCode' | 'name' | 'pan' | 'group' | ''>('')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortOrder('asc')
+    }
+  }
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!sortKey) return 0
+
+    const aVal = (a[sortKey] || '').toString()
+    const bVal = (b[sortKey] || '').toString()
+
+    return sortOrder === 'asc'
+      ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
+      : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
+  })
+
   return (
     <Layout title="📂 Manage Groups">
       {/* Expansion Panel */}
@@ -83,7 +106,7 @@ const Group = () => {
         <div
           onClick={() => setShowGroupsPanel(!showGroupsPanel)}
           style={{
-            background: '#f3f4f6',
+            background: '#ecececff',
             padding: '12px 16px',
             cursor: 'pointer',
             fontWeight: 'bold'
@@ -191,21 +214,45 @@ const Group = () => {
       </div>
 
       {/* Assign User to Group */}
-      <input
-        type="text"
-        placeholder="Search Entry"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+      <div
         style={{
-          padding: '10px',
-          fontSize: '16px',
-          borderRadius: '6px',
-          border: '1px solid #ccc',
-          marginBottom: '20px',
-          outline: 'none',
-          width: '100%'
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 4,
+          marginBottom: '20px'
         }}
-      />
+      >
+        <input
+          type="text"
+          placeholder="Search Entry"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            padding: '10px',
+            fontSize: '16px',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            outline: 'none',
+            width: '100%'
+          }}
+        />
+
+        <div
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '6px',
+            fontSize: '15px',
+            fontWeight: 500,
+            color: '#374151',
+            display: 'inline-block',
+            flexShrink: 0
+          }}
+        >
+          <b>Total entries:</b> {sortedUsers.length}
+        </div>
+      </div>
 
       <table
         style={{
@@ -217,21 +264,28 @@ const Group = () => {
       >
         <thead>
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-            <th style={thStyle}>File Code</th>
-            <th style={thStyle}>Name</th>
-            <th style={thStyle}>PAN</th>
-            <th style={thStyle}>Group</th>
+            {['fileCode', 'name', 'pan', 'group'].map((key) => (
+              <th
+                key={key}
+                style={{ ...thStyle, cursor: 'pointer', userSelect: 'none' }}
+                onClick={() => handleSort(key as typeof sortKey)}
+              >
+                {key === 'fileCode' ? 'File Code' : key.charAt(0).toUpperCase() + key.slice(1)}
+                {sortKey === key && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+              </th>
+            ))}
           </tr>
         </thead>
+
         <tbody>
-          {filteredUsers.length === 0 ? (
+          {sortedUsers.length === 0 ? (
             <tr>
               <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                 No data available
               </td>
             </tr>
           ) : (
-            filteredUsers.map((user) => (
+            sortedUsers.map((user) => (
               <tr key={user.pan} className="group-row">
                 <td style={tdStyle}>{user.fileCode}</td>
                 <td style={tdStyle}>{user.name}</td>

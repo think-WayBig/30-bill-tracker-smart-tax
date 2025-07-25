@@ -116,6 +116,29 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
       return row.billingStatus === billingStatusFilter
     })
 
+  const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | ''>('')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortOrder('asc')
+    }
+  }
+
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    if (!sortKey) return 0
+
+    const aVal = (a[sortKey] || '').toString()
+    const bVal = (b[sortKey] || '').toString()
+
+    return sortOrder === 'asc'
+      ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
+      : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
+  })
+
   return (
     <Layout title="💳 Manage Billing">
       <style>
@@ -134,21 +157,45 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
       `}
       </style>
 
-      <input
-        type="text"
-        placeholder="Search Entry"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+      <div
         style={{
-          width: '100%',
-          padding: '10px 15px',
-          fontSize: '16px',
-          borderRadius: '6px',
-          border: '1px solid #ccc',
-          marginBottom: '20px',
-          outline: 'none'
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 4,
+          marginBottom: '20px'
         }}
-      />
+      >
+        <input
+          type="text"
+          placeholder="Search Entry"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 15px',
+            fontSize: '16px',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            outline: 'none'
+          }}
+        />
+
+        <div
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '6px',
+            fontSize: '15px',
+            fontWeight: 500,
+            color: '#374151',
+            display: 'inline-block',
+            flexShrink: 0
+          }}
+        >
+          <b>Total entries:</b> {sortedRows.length}
+        </div>
+      </div>
 
       <table
         style={{
@@ -160,21 +207,29 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
       >
         <thead>
           <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-            <th style={thStyle}>File Code</th>
-            <th style={thStyle}>Name</th>
-            <th style={thStyle}>PAN</th>
+            {['fileCode', 'name', 'pan'].map((key) => (
+              <th
+                key={key}
+                style={{ ...thStyle, cursor: 'pointer', userSelect: 'none' }}
+                onClick={() => handleSort(key as typeof sortKey)}
+              >
+                {key === 'fileCode' ? 'File Code' : key.charAt(0).toUpperCase() + key.slice(1)}
+                {sortKey === key && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+              </th>
+            ))}
             <th style={thStyle}>Billing Status</th>
           </tr>
         </thead>
+
         <tbody>
-          {filteredRows.length === 0 ? (
+          {sortedRows.length === 0 ? (
             <tr>
               <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
                 No data available
               </td>
             </tr>
           ) : (
-            filteredRows.map((row) => (
+            sortedRows.map((row) => (
               <tr key={row.pan} className="hoverable-row">
                 <td style={tdStyle}>{row.fileCode}</td>
                 <td style={tdStyle}>{row.name}</td>
