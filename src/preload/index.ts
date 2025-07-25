@@ -36,6 +36,8 @@ const api = {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   saveEntry: (entry: Entry) => ipcRenderer.invoke('save-entry', entry),
+  updateEndYear: (fileCode: string, endYear: string) =>
+    ipcRenderer.invoke('update-end-year', fileCode, endYear),
   loadEntries: (): Promise<Entry[]> => ipcRenderer.invoke('load-entries'),
   saveEntries: (entries: Entry[]): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('save-multiple-entries', entries),

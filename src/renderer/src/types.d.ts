@@ -17,6 +17,11 @@ declare global {
     electronAPI: {
       saveEntry: (entry: Entry) => Promise<{ success: boolean; error?: string }>
 
+      updateEndYear: (
+        fileCode: string,
+        endYear: string
+      ) => Promise<{ success: boolean; error?: string }>
+
       loadEntries: () => Promise<Entry[]>
 
       saveEntries: (entries: Entry[]) => Promise<{ success: boolean; error?: string }>

@@ -16,14 +16,13 @@ const Entry: React.FC = () => {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const selectedYear = localStorage.getItem('selectedYear') || currentYear.toString()
 
     const result = await window.electronAPI.saveEntry({
       name,
       pan,
       fileCode,
       startYear,
-      billingStatus: [{ status: 'Not started', year: selectedYear }]
+      billingStatus: [{ status: 'Not started', year: startYear }]
     })
 
     if (result.success) {
@@ -64,9 +63,7 @@ const Entry: React.FC = () => {
       return
     }
 
-    const updated = { ...match, endYear: newEndYear }
-
-    const save = await window.electronAPI.saveEntry(updated)
+    const save = await window.electronAPI.updateEndYear(updateFileCode, newEndYear)
 
     if (save.success) {
       alert('✅ End year updated successfully!')
