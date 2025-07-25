@@ -1,22 +1,29 @@
 import React, { useState } from 'react'
 import Layout from './Layout'
 
+const currentYear = new Date().getFullYear()
+const yearOptions = Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())
+
 const Entry: React.FC = () => {
   const [name, setName] = useState('')
   const [fileCode, setFileCode] = useState('')
   const [pan, setPan] = useState('')
+  const [startYear, setStartYear] = useState(currentYear.toString())
   const [deletePan, setDeletePan] = useState('')
+
+  const [updateFileCode, setUpdateFileCode] = useState('')
+  const [newEndYear, setNewEndYear] = useState(currentYear.toString())
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    const currentYear = localStorage.getItem('selectedYear') || new Date().getFullYear().toString()
+    const selectedYear = localStorage.getItem('selectedYear') || currentYear.toString()
 
     const result = await window.electronAPI.saveEntry({
       name,
       pan,
       fileCode,
-      billingStatus: [{ status: 'Not started', year: currentYear }]
+      startYear,
+      billingStatus: [{ status: 'Not started', year: selectedYear }]
     })
 
     if (result.success) {
@@ -24,6 +31,7 @@ const Entry: React.FC = () => {
       setName('')
       setFileCode('')
       setPan('')
+      setStartYear(currentYear.toString())
     } else {
       alert(`❌ Error: ${result.error}`)
     }
@@ -45,8 +53,32 @@ const Entry: React.FC = () => {
     }
   }
 
+  const handleEndYearUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const entries = await window.electronAPI.loadEntries()
+    const match = entries.find((e) => e.fileCode === updateFileCode)
+
+    if (!match) {
+      alert('❌ No entry found for that file code')
+      return
+    }
+
+    const updated = { ...match, endYear: newEndYear }
+
+    const save = await window.electronAPI.saveEntry(updated)
+
+    if (save.success) {
+      alert('✅ End year updated successfully!')
+      setUpdateFileCode('')
+      setNewEndYear(currentYear.toString())
+    } else {
+      alert(`❌ Error: ${save.error}`)
+    }
+  }
+
   return (
-    <Layout title="👤 Add or Remove Entry">
+    <Layout title="👤 Add, Remove or Update Entry">
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
         {/* Add Entry Form */}
         <form onSubmit={handleAddSubmit} style={formStyle}>
@@ -80,6 +112,19 @@ const Entry: React.FC = () => {
             style={inputStyle}
           />
 
+          <label style={labelStyle}>Start Year</label>
+          <select
+            value={startYear}
+            onChange={(e) => setStartYear(e.target.value)}
+            style={inputStyle}
+          >
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+
           <button type="submit" style={buttonStyle}>
             Save Entry
           </button>
@@ -99,6 +144,36 @@ const Entry: React.FC = () => {
 
           <button type="submit" style={{ ...buttonStyle, backgroundColor: '#dc2626' }}>
             Delete Entry
+          </button>
+        </form>
+
+        {/* Update End Year Form */}
+        <form onSubmit={handleEndYearUpdate} style={formStyle}>
+          <label style={labelStyle}>File Code</label>
+          <input
+            type="text"
+            placeholder="Enter File Code"
+            value={updateFileCode}
+            onChange={(e) => setUpdateFileCode(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <label style={labelStyle}>End Year</label>
+          <select
+            value={newEndYear}
+            onChange={(e) => setNewEndYear(e.target.value)}
+            style={inputStyle}
+          >
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+
+          <button type="submit" style={{ ...buttonStyle, backgroundColor: '#059669' }}>
+            Update End Year
           </button>
         </form>
       </div>

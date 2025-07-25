@@ -1,30 +1,66 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+// Typed interfaces for better clarity and consistency
+interface Ackno {
+  num: string
+  year: string
+  filePath: string
+}
+
+interface BillingStatus {
+  status: 'Not started' | 'Pending' | 'Paid'
+  year: string
+}
+
+interface Remark {
+  remark: string
+  year: string
+}
+
+interface Entry {
+  name: string
+  fileCode: string
+  pan: string
+  startYear: string
+  endYear?: string
+  ackno?: Ackno[]
+  billingStatus?: BillingStatus[]
+  group?: string
+  remarks?: Remark[]
+}
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  saveEntry: (entry: { name: string; pan: string }) => ipcRenderer.invoke('save-entry', entry),
-  loadEntries: () => ipcRenderer.invoke('load-entries'),
-  saveEntries: (entries: Array<any>) => ipcRenderer.invoke('save-multiple-entries', entries),
-  updateRemarks: (pan: string, remarks: { remark: string; year: string }[]) =>
+  saveEntry: (entry: Entry) => ipcRenderer.invoke('save-entry', entry),
+  loadEntries: (): Promise<Entry[]> => ipcRenderer.invoke('load-entries'),
+  saveEntries: (entries: Entry[]): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('save-multiple-entries', entries),
+
+  updateRemarks: (pan: string, remarks: Remark[]) =>
     ipcRenderer.invoke('update-remarks', pan, remarks),
-  updateBillingStatus: (pan, billingStatus, year) =>
+
+  updateBillingStatus: (pan: string, billingStatus: BillingStatus, year: string) =>
     ipcRenderer.invoke('update-billing-status', pan, billingStatus, year),
-  saveGroup: (group) => ipcRenderer.invoke('save-group', group),
+
+  saveGroup: (group: string) => ipcRenderer.invoke('save-group', group),
   deleteGroup: (group: string) => ipcRenderer.invoke('delete-group', group),
   loadGroups: () => ipcRenderer.invoke('load-groups'),
+
   getAcknoFromFile: (pan: string, directory: string, year: string) =>
     ipcRenderer.invoke('get-ackno-from-file', pan, directory, year),
-  updateEntryAckno: (pan, ackno, filePath) =>
-    ipcRenderer.invoke('update-entry-ackno', pan, ackno, filePath),
-  deleteEntry: (pan) => ipcRenderer.invoke('delete-entry', pan),
+
+  updateEntryAckno: (pan: string, ackno?: Ackno[]) =>
+    ipcRenderer.invoke('update-entry-ackno', pan, ackno),
+
+  deleteEntry: (pan: string) => ipcRenderer.invoke('delete-entry', pan),
+
   openContainingFolder: (filePath: string) => ipcRenderer.invoke('open-containing-folder', filePath)
 })
 
-// Expose Electron APIs based on context isolation
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)

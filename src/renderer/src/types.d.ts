@@ -1,41 +1,25 @@
 export {}
 
 declare global {
+  interface Entry {
+    name: string
+    fileCode: string
+    pan: string
+    startYear: string
+    endYear?: string
+    ackno?: { num: string; year: string; filePath: string }[]
+    billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
+    group?: string
+    remarks?: { remark: string; year: string }[]
+  }
+
   interface Window {
     electronAPI: {
-      saveEntry: (entry: {
-        name: string
-        fileCode: string
-        pan: string
-        ackno?: { num: string; year: string; filePath: string }[]
-        billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
-        group?: string
-        remarks?: { remark: string; year: string }[]
-      }) => Promise<{ success: boolean; error?: string }>
+      saveEntry: (entry: Entry) => Promise<{ success: boolean; error?: string }>
 
-      loadEntries: () => Promise<
-        {
-          name: string
-          fileCode: string
-          pan: string
-          ackno?: { num: string; year: string; filePath: string }[]
-          billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
-          group?: string
-          remarks?: { remark: string; year: string }[]
-        }[]
-      >
+      loadEntries: () => Promise<Entry[]>
 
-      saveEntries: (
-        entries: {
-          name: string
-          fileCode: string
-          pan: string
-          ackno?: { num: string; year: string; filePath: string }[]
-          billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
-          group?: string
-          remarks?: { remark: string; year: string }[]
-        }[]
-      ) => Promise<{ success: boolean; error?: string }>
+      saveEntries: (entries: Entry[]) => Promise<{ success: boolean; error?: string }>
 
       updateRemarks: (
         pan: string,
@@ -45,7 +29,7 @@ declare global {
       updateBillingStatus: (
         pan: string,
         billingStatus: { status: 'Not started' | 'Pending' | 'Paid'; year: string },
-        year
+        year: string
       ) => Promise<{ success: boolean; error?: string }>
 
       saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>

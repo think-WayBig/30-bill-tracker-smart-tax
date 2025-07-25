@@ -104,6 +104,18 @@ ipcMain.handle('save-entry', async (_event, entry) => {
       }
     }
 
+    // Check if fileCode already exists (case-insensitive match)
+    const fileCodeExists = existing.some(
+      (e: any) => e.fileCode?.toLowerCase() === entry.fileCode?.toLowerCase()
+    )
+
+    if (fileCodeExists) {
+      return {
+        success: false,
+        error: 'Entry with this File Code already exists.'
+      }
+    }
+
     existing.push(entry)
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
 
