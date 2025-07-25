@@ -108,11 +108,15 @@ export default function Settings() {
           <option value="" disabled>
             -- Choose Year --
           </option>
-          {yearOptions.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
+          {yearOptions.map((y) => {
+            const startYear = Number(y)
+            const endYear = (startYear + 1).toString().slice(-2)
+            return (
+              <option key={y} value={y}>
+                {`${startYear}-${endYear}`}
+              </option>
+            )
+          })}
         </select>
       </div>
     </Layout>

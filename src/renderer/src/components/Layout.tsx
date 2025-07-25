@@ -75,7 +75,7 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
               transition: 'all 0.3s ease'
             }}
           >
-            Assessment Year: {year} ▾
+            Assessment Year: {`${year}-${(Number(year) + 1).toString().slice(-2)}`} ▾
           </button>
 
           {showDropdown && (
@@ -95,30 +95,34 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
                 scrollbarWidth: 'thin'
               }}
             >
-              {yearOptions.map((y) => (
-                <div
-                  key={y}
-                  onClick={() => handleYearChange(y)}
-                  style={{
-                    padding: '6px 12px', // tighter padding
-                    cursor: 'pointer',
-                    backgroundColor: y === year ? '#e0e7ff' : '#fff',
-                    color: '#333',
-                    fontWeight: y === year ? 600 : 400,
-                    fontSize: '0.9rem', // smaller font
-                    lineHeight: '1.3',
-                    transition: 'background 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = y === year ? '#e0e7ff' : '#fff'
-                  }}
-                >
-                  {y}
-                </div>
-              ))}
+              {yearOptions.map((y) => {
+                const startYear = Number(y)
+                const endYear = (startYear + 1).toString().slice(-2)
+                return (
+                  <div
+                    key={y}
+                    onClick={() => handleYearChange(y)}
+                    style={{
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      backgroundColor: y === year ? '#e0e7ff' : '#fff',
+                      color: '#333',
+                      fontWeight: y === year ? 600 : 400,
+                      fontSize: '0.9rem',
+                      lineHeight: '1.3',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = y === year ? '#e0e7ff' : '#fff'
+                    }}
+                  >
+                    {`${startYear}-${endYear}`}
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
