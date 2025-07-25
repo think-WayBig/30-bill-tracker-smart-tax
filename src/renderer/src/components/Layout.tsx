@@ -89,8 +89,8 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 zIndex: 1000,
                 overflow: 'hidden',
-                minWidth: '160px',
-                maxHeight: '200px',
+                minWidth: '130px', // reduced from 160px
+                maxHeight: '160px', // reduced height
                 overflowY: 'auto',
                 scrollbarWidth: 'thin'
               }}
@@ -100,11 +100,13 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
                   key={y}
                   onClick={() => handleYearChange(y)}
                   style={{
-                    padding: '10px 16px',
+                    padding: '6px 12px', // tighter padding
                     cursor: 'pointer',
                     backgroundColor: y === year ? '#e0e7ff' : '#fff',
                     color: '#333',
                     fontWeight: y === year ? 600 : 400,
+                    fontSize: '0.9rem', // smaller font
+                    lineHeight: '1.3',
                     transition: 'background 0.2s ease'
                   }}
                   onMouseEnter={(e) => {

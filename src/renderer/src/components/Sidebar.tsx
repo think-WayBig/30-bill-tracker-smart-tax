@@ -4,16 +4,14 @@ type SidebarProps = {
   setActiveScreen: (screen: string) => void
 }
 
-const billingSubPages = ['billing-not-started', 'billing-pending', 'billing-paid']
+const billingSubPages = ['billing-pending', 'billing-paid']
+const bookSubPages = ['book-entries-pending', 'book-entries-completed']
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [hovered, setHovered] = useState<string | null>(null)
-  const [active, setActive] = useState<string>(() => {
+  const [active, setActive] = useState(() => {
     return localStorage.getItem('activeScreen') || 'add'
   })
-
-  // Automatically show nested billing items only if current screen is billing-related
-  const showBillingOptions = active.startsWith('billing')
 
   useEffect(() => {
     setActiveScreen(active)
@@ -25,8 +23,21 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
     setActiveScreen(key)
   }
 
-  const renderButton = (key: string, label: string, icon: string) => {
-    const isActive = active === key || (key === 'billing' && billingSubPages.includes(active))
+  // Logic to show submenu if active is on a subpage
+  const showBillingOptions = active === 'billing' || billingSubPages.includes(active)
+  const showBookOptions = active === 'manage' || bookSubPages.includes(active)
+
+  const renderButton = (
+    key: string,
+    label: string,
+    icon: string,
+    hasCaret = false,
+    expanded = false
+  ) => {
+    const isActive =
+      active === key ||
+      (key === 'billing' && billingSubPages.includes(active)) ||
+      (key === 'manage' && bookSubPages.includes(active))
 
     return (
       <button
@@ -41,7 +52,9 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
           fontWeight: isActive ? '600' : 'normal'
         }}
       >
-        <span style={{ marginRight: '10px' }}>{icon}</span> {label}
+        <span style={{ marginRight: '10px' }}>{icon}</span>
+        {label}
+        {hasCaret && <span style={{ marginLeft: 'auto' }}>{expanded ? '▾' : '▸'}</span>}
       </button>
     )
   }
@@ -51,14 +64,42 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       <div style={titleStyle}>📚 Bill Tracker</div>
 
       {renderButton('add', 'Entry', '👤')}
-      {renderButton('manage', 'Book', '📚')}
+      {renderButton('manage', 'Book', '📚', true, showBookOptions)}
+
+      {showBookOptions && (
+        <div style={{ marginLeft: '20px' }}>
+          <button
+            key="book-entries-pending"
+            onClick={() => handleClick('book-entries-pending')}
+            style={{
+              ...subButtonStyle,
+              backgroundColor: active === 'book-entries-pending' ? '#e0e7ff' : 'transparent',
+              fontWeight: active === 'book-entries-pending' ? '600' : 'normal'
+            }}
+          >
+            Pending
+          </button>
+          <button
+            key="book-entries-completed"
+            onClick={() => handleClick('book-entries-completed')}
+            style={{
+              ...subButtonStyle,
+              backgroundColor: active === 'book-entries-completed' ? '#e0e7ff' : 'transparent',
+              fontWeight: active === 'book-entries-completed' ? '600' : 'normal'
+            }}
+          >
+            Non Pending
+          </button>
+        </div>
+      )}
+
       {renderButton('group', 'Groups', '📂')}
-      {renderButton('billing', 'Billing', '💳')}
+      {renderButton('billing', 'Billing', '💳', true, showBillingOptions)}
 
       {showBillingOptions && (
-        <div style={{ marginLeft: '20px', marginTop: '4px' }}>
-          {['Not started', 'Pending', 'Paid'].map((status) => {
-            const screenKey = `billing-${status.toLowerCase().replace(' ', '-')}`
+        <div style={{ marginLeft: '20px' }}>
+          {['Pending', 'Paid'].map((status) => {
+            const screenKey = `billing-${status.toLowerCase()}`
             return (
               <button
                 key={screenKey}
@@ -81,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   )
 }
 
-// Shared styles
+// Styles
 const sidebarStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',

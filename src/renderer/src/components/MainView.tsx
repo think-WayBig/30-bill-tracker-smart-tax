@@ -21,13 +21,17 @@ const MainView = () => {
   }, [activeScreen])
 
   const isBillingScreen = activeScreen.startsWith('billing')
+  const isBookScreen =
+    activeScreen === 'manage' ||
+    activeScreen === 'book-entries-pending' ||
+    activeScreen === 'book-entries-completed'
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <Sidebar setActiveScreen={setActiveScreen} />
       <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f5f7ff' }}>
         {activeScreen === 'add' && <Entry />}
-        {activeScreen === 'manage' && <Book />}
+        {isBookScreen && <Book activeScreen={activeScreen} />}
         {activeScreen === 'group' && <Group />}
         {isBillingScreen && <Billing activeScreen={activeScreen} />}
         {activeScreen === 'settings' && <Settings />}
