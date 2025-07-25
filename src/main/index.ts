@@ -38,6 +38,30 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  const isWindows = process.platform === 'win32'
+  let needsFocusFix = false
+  let triggeringProgrammaticBlur = false
+
+  mainWindow.on('blur', (event) => {
+    if (!triggeringProgrammaticBlur) {
+      needsFocusFix = true
+    }
+  })
+
+  mainWindow.on('focus', (event) => {
+    if (isWindows && needsFocusFix) {
+      needsFocusFix = false
+      triggeringProgrammaticBlur = true
+      setTimeout(function () {
+        win.blur()
+        win.focus()
+        setTimeout(function () {
+          triggeringProgrammaticBlur = false
+        }, 100)
+      }, 100)
+    }
+  })
 }
 
 // This method will be called when Electron has finished
@@ -142,6 +166,16 @@ ipcMain.handle('update-end-year', async (_event, fileCode, endYear) => {
 
     if (index === -1) {
       return { success: false, error: 'Entry not found for this File Code.' }
+    }
+
+    const startYear = parseInt(entries[index].startYear)
+    const newEndYear = parseInt(endYear)
+
+    if (newEndYear < startYear) {
+      return {
+        success: false,
+        error: `End year (${newEndYear}) cannot be less than start year (${startYear}).`
+      }
     }
 
     entries[index].endYear = endYear
@@ -376,6 +410,30 @@ ipcMain.handle(
   'get-ackno-from-file',
   async (_event, pan: string, directory: string, year: string) => {
     try {
+      const entriesPath = path.join(app.getPath('userData'), 'data', 'entries.json')
+
+      if (!fs.existsSync(entriesPath)) {
+        return { success: false, error: 'Entries data not found' }
+      }
+
+      const entries = JSON.parse(fs.readFileSync(entriesPath, 'utf-8'))
+      const entry = entries.find((e: any) => e.pan?.toLowerCase() === pan?.toLowerCase())
+
+      if (!entry) {
+        return { success: false, error: 'PAN not found in entries' }
+      }
+
+      const startYear = parseInt(entry.startYear)
+      const endYear = entry.endYear ? parseInt(entry.endYear) : undefined
+      const requestedYear = parseInt(year)
+
+      if (isNaN(startYear) || requestedYear < startYear || (endYear && requestedYear > endYear)) {
+        return {
+          success: false,
+          error: `Year ${year} is not within the allowed range for PAN ${pan}`
+        }
+      }
+
       const fileName = `${pan}_ITRV.txt`
       const filePath = findFileRecursive(directory, fileName)
 

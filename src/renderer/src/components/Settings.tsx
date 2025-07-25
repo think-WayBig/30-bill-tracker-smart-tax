@@ -18,6 +18,7 @@ export default function Settings() {
     if (selected) {
       localStorage.setItem('selectedFolder', selected)
       setFolderPath(selected)
+      window.location.reload()
     }
   }
 
@@ -25,12 +26,10 @@ export default function Settings() {
     const selectedYear = e.target.value
     setYear(selectedYear)
     localStorage.setItem('selectedYear', selectedYear)
+    window.location.reload() // ✅ Force full app reload
   }
 
-  const yearOptions = Array.from({ length: 5 }, (_, i) => {
-    const y = new Date().getFullYear() + i - 1 // e.g. 2024 to 2028
-    return y.toString()
-  })
+  const yearOptions = Array.from({ length: 11 }, (_, i) => (2020 + i).toString())
 
   return (
     <Layout title="⚙️ Manage Settings">
@@ -97,7 +96,7 @@ export default function Settings() {
       {/* Year Selection */}
       <div className="settings-box">
         <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>
-          📅 Select Financial Year
+          📅 Select Assessment Year
         </label>
 
         <select

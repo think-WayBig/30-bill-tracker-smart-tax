@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Layout from './Layout'
 
 const currentYear = new Date().getFullYear()
-const yearOptions = Array.from({ length: 10 }, (_, i) => (currentYear - i).toString())
+const yearOptions = Array.from({ length: 11 }, (_, i) => (2020 + i).toString())
 
 const Entry: React.FC = () => {
   const [name, setName] = useState('')

@@ -9,9 +9,19 @@ type BillingEntry = {
   billingStatus?: BillingStatus[]
   fileCode: string
   group?: string
+  startYear: string
+  endYear?: string
 }
 
-export default function Billing() {
+export default function Billing({ activeScreen }: { activeScreen: string }) {
+  const billingStatusFilterMap: Record<string, BillingStatus['status']> = {
+    'billing-not-started': 'Not started',
+    'billing-pending': 'Pending',
+    'billing-paid': 'Paid'
+  }
+
+  const billingStatusFilter = billingStatusFilterMap[activeScreen] || null
+
   const [entries, setEntries] = useState<BillingEntry[]>([])
   const [search, setSearch] = useState('')
   const currentYear = localStorage.getItem('selectedYear') || new Date().getFullYear().toString()
@@ -94,12 +104,17 @@ export default function Billing() {
     }))
   ]
 
-  const filteredRows = mergedDisplayRows.filter(
-    (row) =>
-      row.name.toLowerCase().includes(search.toLowerCase()) ||
-      row.pan.toLowerCase().includes(search.toLowerCase()) ||
-      row.fileCode.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredRows = mergedDisplayRows
+    .filter(
+      (row) =>
+        row.name.toLowerCase().includes(search.toLowerCase()) ||
+        row.pan.toLowerCase().includes(search.toLowerCase()) ||
+        row.fileCode.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((row) => {
+      if (!billingStatusFilter) return true // show all
+      return row.billingStatus === billingStatusFilter
+    })
 
   return (
     <Layout title="💳 Manage Billing">
