@@ -366,7 +366,7 @@ ipcMain.handle('update-billing-status', async (_event, pan, newStatus, year: str
   }
 })
 
-ipcMain.handle('delete-entry', async (_event, pan) => {
+ipcMain.handle('delete-entry', async (_event, fileCode) => {
   try {
     const dir = path.join(app.getPath('userData'), 'data')
     const filePath = path.join(dir, 'entries.json')
@@ -375,12 +375,16 @@ ipcMain.handle('delete-entry', async (_event, pan) => {
 
     const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
 
-    const match = existing.find((entry: any) => entry.pan?.toLowerCase() === pan.toLowerCase())
+    const match = existing.find(
+      (entry: any) => entry.fileCode?.toLowerCase() === fileCode.toLowerCase()
+    )
     if (!match) {
       return { success: false, error: 'Entry does not exist' }
     }
 
-    const updated = existing.filter((entry: any) => entry.pan?.toLowerCase() !== pan.toLowerCase())
+    const updated = existing.filter(
+      (entry: any) => entry.fileCode?.toLowerCase() !== fileCode.toLowerCase()
+    )
     fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
 
     return { success: true }

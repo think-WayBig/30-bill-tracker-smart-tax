@@ -48,7 +48,7 @@ declare global {
         group: string
       }) => Promise<{ success: boolean; error?: string }>
 
-      deleteEntry: (pan: string) => Promise<{ success: boolean; error?: string }>
+      deleteEntry: (fileCode: string) => Promise<{ success: boolean; error?: string }>
 
       getAcknoFromFile: (
         pan: string,

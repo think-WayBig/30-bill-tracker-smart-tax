@@ -9,7 +9,7 @@ const Entry: React.FC = () => {
   const [fileCode, setFileCode] = useState('')
   const [pan, setPan] = useState('')
   const [startYear, setStartYear] = useState(currentYear.toString())
-  const [deletePan, setDeletePan] = useState('')
+  const [deleteFileCode, setDeleteFileCode] = useState('')
 
   const [updateFileCode, setUpdateFileCode] = useState('')
   const [newEndYear, setNewEndYear] = useState(currentYear.toString())
@@ -39,14 +39,16 @@ const Entry: React.FC = () => {
   const handleDeleteSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const confirmDelete = confirm(`Are you sure you want to delete entry with PAN: ${deletePan}?`)
+    const confirmDelete = confirm(
+      `Are you sure you want to delete entry with PAN: ${deleteFileCode}?`
+    )
     if (!confirmDelete) return
 
-    const result = await window.electronAPI.deleteEntry(deletePan)
+    const result = await window.electronAPI.deleteEntry(deleteFileCode)
 
     if (result.success) {
       alert('✅ Entry deleted successfully!')
-      setDeletePan('')
+      setDeleteFileCode('')
     } else {
       alert(`❌ Error: ${result.error}`)
     }
@@ -129,12 +131,12 @@ const Entry: React.FC = () => {
 
         {/* Delete Entry Form */}
         <form onSubmit={handleDeleteSubmit} style={formStyle}>
-          <label style={labelStyle}>PAN Card to Delete</label>
+          <label style={labelStyle}>File Code to Delete</label>
           <input
             type="text"
-            placeholder="Enter PAN to delete"
-            value={deletePan}
-            onChange={(e) => setDeletePan(e.target.value)}
+            placeholder="Enter File Code to delete"
+            value={deleteFileCode}
+            onChange={(e) => setDeleteFileCode(e.target.value)}
             required
             style={inputStyle}
           />
