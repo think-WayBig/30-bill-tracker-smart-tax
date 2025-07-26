@@ -54,8 +54,8 @@ function createWindow(): void {
       needsFocusFix = false
       triggeringProgrammaticBlur = true
       setTimeout(function () {
-        win.blur()
-        win.focus()
+        mainWindow.blur()
+        mainWindow.focus()
         setTimeout(function () {
           triggeringProgrammaticBlur = false
         }, 100)
