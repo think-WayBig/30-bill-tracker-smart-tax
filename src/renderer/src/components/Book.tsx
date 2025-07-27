@@ -11,6 +11,8 @@ type Entry = {
   name: string
   fileCode: string
   pan: string
+  startYear: string
+  endYear: string
   ackno?: AcknoEntry[]
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
@@ -180,13 +182,15 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
             <th style={thStyle}>AckNo.</th>
             <th style={thStyle}>Billing Status</th>
             <th style={thStyle}>Remarks</th>
+            <th style={thStyle}>Start Year</th>
+            <th style={thStyle}>End Year</th>
           </tr>
         </thead>
 
         <tbody>
           {sorted.length === 0 ? (
             <tr>
-              <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              <td colSpan={9} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                 No data available
               </td>
             </tr>
@@ -250,6 +254,8 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                       }}
                     />
                   </td>
+                  <td style={tdStyle}>{entry.startYear}</td>
+                  <td style={tdStyle}>{entry.endYear || 'Not set'}</td>
                 </tr>
               )
             })
