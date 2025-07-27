@@ -23,6 +23,8 @@ const MainView = () => {
   const isBillingScreen = activeScreen.startsWith('billing')
   const isBookScreen =
     activeScreen === 'manage' ||
+    activeScreen === 'book-entries-docs-complete' ||
+    activeScreen === 'book-entries-docs-incomplete' ||
     activeScreen === 'book-entries-pending' ||
     activeScreen === 'book-entries-completed'
 

@@ -27,6 +27,8 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
   const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | 'group' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
+  const isDocsCompleteView = activeScreen === 'book-entries-docs-complete'
+  const isDocsIncompleteView = activeScreen === 'book-entries-docs-incomplete'
   const isManagePending = activeScreen === 'book-entries-pending'
   const isManageNonPending = activeScreen === 'book-entries-completed'
 
@@ -69,6 +71,11 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
 
       if (isManagePending) return !hasAck
       if (isManageNonPending) return hasAck
+
+      const docsStatus = e.docsComplete?.find((d) => d.year === currentYear)?.value ?? false
+      if (isDocsCompleteView) return docsStatus
+      if (isDocsIncompleteView) return !docsStatus
+
       return true
     })
     .filter((e) => {
