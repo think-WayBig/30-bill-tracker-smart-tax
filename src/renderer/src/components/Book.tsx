@@ -138,7 +138,16 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
       `}
       </style>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+      <div
+        style={{
+          display: 'flex',
+          top: '80px',
+          position: 'sticky',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 20
+        }}
+      >
         <input
           type="text"
           placeholder="Search Entry"

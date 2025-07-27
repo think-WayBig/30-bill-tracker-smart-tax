@@ -217,6 +217,8 @@ const Group = () => {
       <div
         style={{
           display: 'flex',
+          top: '80px',
+          position: 'sticky',
           justifyContent: 'center',
           alignItems: 'center',
           gap: 4,

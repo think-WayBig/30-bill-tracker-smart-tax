@@ -159,6 +159,8 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
 
       <div
         style={{
+          top: '80px',
+          position: 'sticky',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',

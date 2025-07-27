@@ -89,8 +89,8 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 zIndex: 1000,
                 overflow: 'hidden',
-                minWidth: '130px', // reduced from 160px
-                maxHeight: '160px', // reduced height
+                minWidth: '130px',
+                maxHeight: '250px',
                 overflowY: 'auto',
                 scrollbarWidth: 'thin'
               }}
