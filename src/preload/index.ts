@@ -70,6 +70,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateEntryAckno: (pan: string, ackno?: Ackno[]) =>
     ipcRenderer.invoke('update-entry-ackno', pan, ackno),
 
+  updateEntryAckDate: (pan, ackDate) => ipcRenderer.invoke('update-entry-ack-date', pan, ackDate),
+
   deleteEntry: (fileCode: string) => ipcRenderer.invoke('delete-entry', fileCode),
 
   openContainingFolder: (filePath: string) => ipcRenderer.invoke('open-containing-folder', filePath)

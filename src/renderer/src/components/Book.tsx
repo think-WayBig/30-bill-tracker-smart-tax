@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Layout from './Layout'
 
 type AcknoEntry = {
@@ -14,6 +14,7 @@ type Entry = {
   startYear: string
   endYear?: string
   ackno?: AcknoEntry[]
+  ackDate?: { date: string; year: string }[]
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
   remarks?: { remark: string; year: string }[]
@@ -27,9 +28,8 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
   const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | 'group' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
-  const isDocsCompleteView = activeScreen === 'book-entries-docs-complete'
   const isDocsIncompleteView = activeScreen === 'book-entries-docs-incomplete'
-  const isManagePending = activeScreen === 'book-entries-pending'
+  const isDocsCompleteView = activeScreen === 'book-entries-docs-complete'
   const isManageNonPending = activeScreen === 'book-entries-completed'
 
   useEffect(() => {
@@ -37,26 +37,46 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
       const folderPath = localStorage.getItem('selectedFolder')
       const loaded = await window.electronAPI.loadEntries()
 
+      const extractAckDate = (ackNum: string): string | undefined => {
+        if (!ackNum || ackNum.length < 6) return undefined
+        const dateDigits = ackNum.slice(-6)
+        const day = dateDigits.slice(0, 2)
+        const month = dateDigits.slice(2, 4)
+        const year = dateDigits.slice(4)
+        return `${day}-${month}-${year}`
+      }
+
       if (folderPath) {
-        for (const entry of loaded) {
-          const alreadyHas = entry.ackno?.some((a) => a.year === currentYear)
-          if (!alreadyHas) {
-            try {
-              const result = await window.electronAPI.getAcknoFromFile(
-                entry.pan,
-                folderPath,
-                currentYear
-              )
-              if (result.success && result.ackno) {
-                if (!Array.isArray(entry.ackno)) entry.ackno = []
-                entry.ackno.push(result.ackno)
-                await window.electronAPI.updateEntryAckno(entry.pan, entry.ackno)
+        await Promise.all(
+          loaded.map(async (entry) => {
+            const alreadyHas = entry.ackno?.some((a) => a.year === currentYear)
+            if (!alreadyHas) {
+              try {
+                const result = await window.electronAPI.getAcknoFromFile(
+                  entry.pan,
+                  folderPath,
+                  currentYear
+                )
+                if (result.success && result.ackno) {
+                  if (!Array.isArray(entry.ackno)) entry.ackno = []
+                  entry.ackno.push(result.ackno)
+
+                  const ackDate = extractAckDate(result.ackno.num)
+                  if (!Array.isArray(entry.ackDate)) entry.ackDate = []
+                  entry.ackDate = entry.ackDate.filter((a) => a.year !== currentYear)
+                  if (ackDate) {
+                    entry.ackDate.push({ year: currentYear, date: ackDate })
+                  }
+
+                  await window.electronAPI.updateEntryAckno(entry.pan, entry.ackno)
+                  await window.electronAPI.updateEntryAckDate(entry.pan, entry.ackDate)
+                }
+              } catch (err) {
+                console.error(`Error fetching ackNo for ${entry.pan}`, err)
               }
-            } catch (err) {
-              console.error(`Error fetching ackNo for ${entry.pan}`, err)
             }
-          }
-        }
+          })
+        )
       }
 
       setEntries(loaded)
@@ -65,36 +85,37 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
     loadAndRender()
   }, [currentYear])
 
-  const filtered = entries
-    .filter((e) => {
-      const hasAck = e.ackno?.some((a) => a.year === currentYear && a.num?.trim())
+  const filtered = useMemo(() => {
+    return entries
+      .filter((e) => {
+        const hasAck = e.ackno?.some((a) => a.year === currentYear && a.num?.trim())
 
-      if (isManagePending) return !hasAck
-      if (isManageNonPending) return hasAck
+        if (isManageNonPending) return hasAck
 
-      const docsStatus = e.docsComplete?.find((d) => d.year === currentYear)?.value ?? false
-      if (isDocsCompleteView) return docsStatus
-      if (isDocsIncompleteView) return !docsStatus
+        const docsStatus = e.docsComplete?.find((d) => d.year === currentYear)?.value ?? false
+        if (isDocsCompleteView) return docsStatus && !hasAck
+        if (isDocsIncompleteView) return !docsStatus
 
-      return true
-    })
-    .filter((e) => {
-      const q = search.toLowerCase()
-      const ack = e.ackno?.find((a) => a.year === currentYear)?.num || ''
-      const billingStatus =
-        e.billingStatus?.find((b) => b.year === currentYear)?.status || 'Not started'
-      const remarks = e.remarks?.find((r) => r.year === currentYear)?.remark || ''
+        return true
+      })
+      .filter((e) => {
+        const q = search.toLowerCase()
+        const ack = e.ackno?.find((a) => a.year === currentYear)?.num || ''
+        const billingStatus =
+          e.billingStatus?.find((b) => b.year === currentYear)?.status || 'Not started'
+        const remarks = e.remarks?.find((r) => r.year === currentYear)?.remark || ''
 
-      return (
-        e.fileCode.toLowerCase().includes(q) ||
-        e.name.toLowerCase().includes(q) ||
-        e.pan.toLowerCase().includes(q) ||
-        ack.toLowerCase().includes(q) ||
-        billingStatus.toLowerCase().includes(q) ||
-        (e.group || '').toLowerCase().includes(q) ||
-        remarks.toLowerCase().includes(q)
-      )
-    })
+        return (
+          e.fileCode.toLowerCase().includes(q) ||
+          e.name.toLowerCase().includes(q) ||
+          e.pan.toLowerCase().includes(q) ||
+          ack.toLowerCase().includes(q) ||
+          billingStatus.toLowerCase().includes(q) ||
+          (e.group || '').toLowerCase().includes(q) ||
+          remarks.toLowerCase().includes(q)
+        )
+      })
+  }, [entries, currentYear, isManageNonPending, isDocsCompleteView, isDocsIncompleteView, search])
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) {
@@ -105,13 +126,17 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
     }
   }
 
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal = (a[sortKey] || '').toString()
-    const bVal = (b[sortKey] || '').toString()
-    return sortOrder === 'asc'
-      ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
-      : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
-  })
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered
+
+    return [...filtered].sort((a, b) => {
+      const aVal = (a[sortKey] || '').toString()
+      const bVal = (b[sortKey] || '').toString()
+      return sortOrder === 'asc'
+        ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
+        : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
+    })
+  }, [filtered, sortKey, sortOrder])
 
   const keyLabelMap = {
     fileCode: 'File Code',
@@ -211,6 +236,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
 
               <th style={thStyle}>Docs Complete</th>
               <th style={thStyle}>AckNo.</th>
+              <th style={thStyle}>Ack Date</th>
               <th style={thStyle}>Billing Status</th>
               <th style={thStyle}>Remarks</th>
               <th style={thStyle}>Start Year</th>
@@ -292,6 +318,10 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                         'Pending'
                       )}
                     </td>
+                    <td style={tdStyle}>
+                      {entry.ackDate?.find((a) => a.year === currentYear)?.date || '-'}
+                    </td>
+
                     <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
                       {billing || 'Not started'}
                     </td>

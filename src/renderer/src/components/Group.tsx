@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Layout from './Layout'
 
 interface User {
@@ -45,7 +45,7 @@ const Group = () => {
 
   const handleGroupChange = (pan: string, group: string) => {
     const updatedUsers = users.map((u) => (u.pan === pan ? { ...u, group } : u))
-    setUsers(updatedUsers)
+    setUsers((prev) => prev.map((u) => (u.group === group ? { ...u, group: undefined } : u)))
     window.electronAPI.saveEntries(updatedUsers)
   }
 
@@ -67,15 +67,16 @@ const Group = () => {
     }
   }
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = useMemo(() => {
     const search = searchTerm.toLowerCase()
-    return (
-      user.fileCode.toLowerCase().includes(search) ||
-      user.name.toLowerCase().includes(search) ||
-      user.pan.toLowerCase().includes(search) ||
-      (user.group?.toLowerCase() || '').includes(search)
+    return users.filter(
+      (user) =>
+        user.fileCode.toLowerCase().includes(search) ||
+        user.name.toLowerCase().includes(search) ||
+        user.pan.toLowerCase().includes(search) ||
+        (user.group?.toLowerCase() || '').includes(search)
     )
-  })
+  }, [users, searchTerm])
 
   const [sortKey, setSortKey] = useState<'fileCode' | 'name' | 'pan' | 'group' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -89,16 +90,24 @@ const Group = () => {
     }
   }
 
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (!sortKey) return 0
+  const sortedUsers = useMemo(() => {
+    const sorted = [...filteredUsers]
+    if (!sortKey) return sorted
 
-    const aVal = (a[sortKey] || '').toString()
-    const bVal = (b[sortKey] || '').toString()
+    return sorted.sort((a, b) => {
+      const aVal = (a[sortKey] || '').toString()
+      const bVal = (b[sortKey] || '').toString()
+      return sortOrder === 'asc'
+        ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
+        : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
+    })
+  }, [filteredUsers, sortKey, sortOrder])
 
-    return sortOrder === 'asc'
-      ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
-      : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
-  })
+  const sortedGroups = useMemo(() => {
+    return [...groups].sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    )
+  }, [groups])
 
   return (
     <Layout title="📂 Manage Groups">
@@ -304,7 +313,7 @@ const Group = () => {
                     }}
                   >
                     <option value="">Select Group</option>
-                    {groups.map((group) => (
+                    {sortedGroups.map((group) => (
                       <option key={group} value={group}>
                         {group}
                       </option>

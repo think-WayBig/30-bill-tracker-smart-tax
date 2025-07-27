@@ -7,7 +7,10 @@ declare global {
     pan: string
     startYear: string
     endYear?: string
+
     ackno?: { num: string; year: string; filePath: string }[]
+    ackDate?: { date: string; year: string }[] // ✅ Year-wise ackDate
+
     billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
     group?: string
     remarks?: { remark: string; year: string }[]
@@ -24,7 +27,6 @@ declare global {
       ) => Promise<{ success: boolean; error?: string }>
 
       loadEntries: () => Promise<Entry[]>
-
       saveEntries: (entries: Entry[]) => Promise<{ success: boolean; error?: string }>
 
       updateRemarks: (
@@ -39,15 +41,12 @@ declare global {
       ) => Promise<{ success: boolean; error?: string }>
 
       updateDocsComplete: (
-        // ✅ NEW METHOD
         pan: string,
         docsComplete: { value: boolean; year: string }[]
       ) => Promise<{ success: boolean; error?: string }>
 
       saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>
-
       loadGroups: () => Promise<string[]>
-
       deleteGroup: (group: string) => Promise<{ success: boolean; error?: string }>
 
       assignUserToGroup: (payload: {
@@ -70,6 +69,11 @@ declare global {
       updateEntryAckno: (
         pan: string,
         ackno?: { num: string; year: string; filePath: string }[]
+      ) => Promise<{ success: boolean; error?: string }>
+
+      updateEntryAckDate: (
+        pan: string,
+        ackDate: { date: string; year: string }[]
       ) => Promise<{ success: boolean; error?: string }>
 
       openContainingFolder: (filePath: string) => Promise<void>

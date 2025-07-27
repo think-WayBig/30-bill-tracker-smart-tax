@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Layout from './Layout'
 
 type BillingStatus = { status: 'Not started' | 'Pending' | 'Paid'; year: string }
@@ -68,53 +68,54 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
     }
   }
 
-  const groupedMap = new Map<string, BillingEntry[]>()
-  const individualEntries: BillingEntry[] = []
+  const filteredRows = useMemo(() => {
+    const groupedMap = new Map<string, BillingEntry[]>()
+    const individualEntries: BillingEntry[] = []
 
-  for (const entry of entries) {
-    if (entry.group) {
-      if (!groupedMap.has(entry.group)) groupedMap.set(entry.group, [])
-      groupedMap.get(entry.group)!.push(entry)
-    } else {
-      individualEntries.push(entry)
-    }
-  }
-
-  const mergedDisplayRows = [
-    ...Array.from(groupedMap.entries()).map(([groupName, groupEntries]) => {
-      const displayName = groupName
-      const billingStatus = groupEntries
-        .find((e) => e.billingStatus?.some((b) => b.year === currentYear))
-        ?.billingStatus?.find((b) => b.year === currentYear)?.status
-
-      return {
-        name: displayName,
-        pan: groupName,
-        fileCode: 'N/A',
-        billingStatus,
-        isGroup: true
+    for (const entry of entries) {
+      if (entry.group) {
+        if (!groupedMap.has(entry.group)) groupedMap.set(entry.group, [])
+        groupedMap.get(entry.group)!.push(entry)
+      } else {
+        individualEntries.push(entry)
       }
-    }),
-    ...individualEntries.map((e) => ({
-      name: e.name,
-      pan: e.pan,
-      fileCode: e.fileCode,
-      billingStatus: e.billingStatus?.find((b) => b.year === currentYear)?.status,
-      isGroup: false
-    }))
-  ]
+    }
+    const mergedDisplayRows = [
+      ...Array.from(groupedMap.entries()).map(([groupName, groupEntries]) => {
+        const displayName = groupName
+        const billingStatus = groupEntries
+          .find((e) => e.billingStatus?.some((b) => b.year === currentYear))
+          ?.billingStatus?.find((b) => b.year === currentYear)?.status
 
-  const filteredRows = mergedDisplayRows
-    .filter(
-      (row) =>
-        row.name.toLowerCase().includes(search.toLowerCase()) ||
-        row.pan.toLowerCase().includes(search.toLowerCase()) ||
-        row.fileCode.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((row) => {
-      if (!billingStatusFilter) return true // show all
-      return row.billingStatus === billingStatusFilter
-    })
+        return {
+          name: displayName,
+          pan: groupName,
+          fileCode: '-',
+          billingStatus,
+          isGroup: true
+        }
+      }),
+      ...individualEntries.map((e) => ({
+        name: e.name,
+        pan: e.pan,
+        fileCode: e.fileCode,
+        billingStatus: e.billingStatus?.find((b) => b.year === currentYear)?.status,
+        isGroup: false
+      }))
+    ]
+
+    return mergedDisplayRows
+      .filter(
+        (row) =>
+          row.name.toLowerCase().includes(search.toLowerCase()) ||
+          row.pan.toLowerCase().includes(search.toLowerCase()) ||
+          row.fileCode.toLowerCase().includes(search.toLowerCase())
+      )
+      .filter((row) => {
+        if (!billingStatusFilter) return true
+        return row.billingStatus === billingStatusFilter
+      })
+  }, [entries, currentYear, search, billingStatusFilter])
 
   const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -128,16 +129,22 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
     }
   }
 
-  const sortedRows = [...filteredRows].sort((a, b) => {
-    if (!sortKey) return 0
+  const sortedRows = useMemo(() => {
+    if (!sortKey) return filteredRows
+    return [...filteredRows].sort((a, b) => {
+      if (sortKey === 'pan') {
+        // Optional: put groups at bottom
+        if (a.isGroup !== b.isGroup) return a.isGroup ? 1 : -1
+      }
 
-    const aVal = (a[sortKey] || '').toString()
-    const bVal = (b[sortKey] || '').toString()
+      const aVal = (a[sortKey] || '').toString()
+      const bVal = (b[sortKey] || '').toString()
 
-    return sortOrder === 'asc'
-      ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
-      : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
-  })
+      return sortOrder === 'asc'
+        ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
+        : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
+    })
+  }, [filteredRows, sortKey, sortOrder])
 
   return (
     <Layout title="💳 Manage Billing">
@@ -235,7 +242,9 @@ export default function Billing({ activeScreen }: { activeScreen: string }) {
               <tr key={row.pan} className="hoverable-row">
                 <td style={tdStyle}>{row.fileCode}</td>
                 <td style={tdStyle}>{row.name}</td>
-                <td style={tdStyle}>{row.isGroup ? 'Group' : row.pan}</td>
+                <td style={tdStyle}>
+                  {row.isGroup ? <span style={{ fontStyle: 'italic' }}>Group</span> : row.pan}
+                </td>
                 <td style={tdStyle}>
                   <select
                     className="billing-dropdown"

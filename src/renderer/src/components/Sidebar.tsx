@@ -8,7 +8,6 @@ const billingSubPages = ['billing-pending', 'billing-paid']
 const bookSubPages = [
   'book-entries-docs-complete',
   'book-entries-docs-incomplete',
-  'book-entries-pending',
   'book-entries-completed'
 ]
 
@@ -17,6 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [active, setActive] = useState(() => {
     return localStorage.getItem('activeScreen') || 'add'
   })
+  const [closeHover, setCloseHover] = useState(false)
 
   useEffect(() => {
     setActiveScreen(active)
@@ -73,7 +73,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
 
       {showBookOptions && (
         <div style={{ marginLeft: '20px' }}>
-          <div style={{ fontSize: '13px', marginBottom: '4px', color: '#6b7280' }}>📄 Docs</div>
           <button
             key="book-entries-docs-incomplete"
             onClick={() => handleClick('book-entries-docs-incomplete')}
@@ -84,8 +83,13 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               fontWeight: active === 'book-entries-docs-incomplete' ? '600' : 'normal'
             }}
           >
-            Incomplete
+            Assessee List
           </button>
+          <div
+            style={{ fontSize: '13px', marginTop: '8px', marginBottom: '4px', color: '#6b7280' }}
+          >
+            📄 ITR
+          </div>
           <button
             key="book-entries-docs-complete"
             onClick={() => handleClick('book-entries-docs-complete')}
@@ -93,23 +97,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               ...subButtonStyle,
               backgroundColor: active === 'book-entries-docs-complete' ? '#e0e7ff' : 'transparent',
               fontWeight: active === 'book-entries-docs-complete' ? '600' : 'normal'
-            }}
-          >
-            Complete
-          </button>
-
-          <div
-            style={{ fontSize: '13px', marginTop: '8px', marginBottom: '4px', color: '#6b7280' }}
-          >
-            📄 ITR
-          </div>
-          <button
-            key="book-entries-pending"
-            onClick={() => handleClick('book-entries-pending')}
-            style={{
-              ...subButtonStyle,
-              backgroundColor: active === 'book-entries-pending' ? '#e0e7ff' : 'transparent',
-              fontWeight: active === 'book-entries-pending' ? '600' : 'normal'
             }}
           >
             Pending
@@ -153,6 +140,18 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       )}
 
       {renderButton('settings', 'Settings', '⚙️')}
+      <button
+        onClick={() => window.close()}
+        style={{
+          ...closeButtonStyle,
+          backgroundColor: closeHover ? '#dc2626' : 'transparent',
+          color: closeHover ? 'white' : '#000'
+        }}
+        onMouseEnter={() => setCloseHover(true)}
+        onMouseLeave={() => setCloseHover(false)}
+      >
+        ❌ Close
+      </button>
     </div>
   )
 }
@@ -199,6 +198,19 @@ const subButtonStyle: React.CSSProperties = {
   marginBottom: '8px',
   width: '100%',
   background: 'transparent'
+}
+
+const closeButtonStyle: React.CSSProperties = {
+  marginTop: 'auto',
+  border: '2px solid #dc2626',
+  backgroundColor: 'transparent',
+  color: '#000',
+  fontSize: '15px',
+  padding: '10px 16px',
+  borderRadius: '8px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  transition: 'background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease'
 }
 
 export default Sidebar

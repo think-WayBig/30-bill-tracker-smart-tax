@@ -495,6 +495,35 @@ ipcMain.handle(
   }
 )
 
+ipcMain.handle(
+  'update-entry-ack-date',
+  async (_event, pan: string, ackDate: { date: string; year: string }[]) => {
+    try {
+      const entriesPath = path.join(app.getPath('userData'), 'data', 'entries.json')
+
+      if (!fs.existsSync(entriesPath)) {
+        return { success: false, error: 'Entries data not found' }
+      }
+
+      const entries = JSON.parse(fs.readFileSync(entriesPath, 'utf-8'))
+
+      const index = entries.findIndex((e: any) => e.pan?.toLowerCase() === pan?.toLowerCase())
+
+      if (index === -1) {
+        return { success: false, error: 'PAN not found in entries' }
+      }
+
+      entries[index].ackDate = ackDate
+
+      fs.writeFileSync(entriesPath, JSON.stringify(entries, null, 2), 'utf-8')
+
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  }
+)
+
 ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string, filePath: string) => {
   try {
     const entriesPath = path.join(app.getPath('userData'), 'data', 'entries.json')
