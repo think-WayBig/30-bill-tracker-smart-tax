@@ -167,101 +167,115 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
         </div>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-            {(['fileCode', 'name', 'pan', 'group'] as const).map((key) => (
-              <th
-                key={key}
-                style={{ ...thStyle, cursor: 'pointer' }}
-                onClick={() => handleSort(key)}
-              >
-                {keyLabelMap[key]} {sortKey === key && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>
-            ))}
-            <th style={thStyle}>AckNo.</th>
-            <th style={thStyle}>Billing Status</th>
-            <th style={thStyle}>Remarks</th>
-            <th style={thStyle}>Start Year</th>
-            <th style={thStyle}>End Year</th>
-          </tr>
-        </thead>
+      <div style={{ overflowX: 'auto', width: '100%' }}>
+        <table
+          style={{
+            minWidth: '100%',
+            width: 'max-content',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+              {(['fileCode', 'name', 'pan', 'group'] as const).map((key) => (
+                <th
+                  key={key}
+                  style={{
+                    ...thStyle,
+                    cursor: 'pointer',
+                    width: key === 'name' ? '300px' : undefined // adjust width here
+                  }}
+                  onClick={() => handleSort(key)}
+                >
+                  {keyLabelMap[key]} {sortKey === key && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+              ))}
 
-        <tbody>
-          {sorted.length === 0 ? (
-            <tr>
-              <td colSpan={9} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                No data available
-              </td>
+              <th style={thStyle}>AckNo.</th>
+              <th style={thStyle}>Billing Status</th>
+              <th style={thStyle}>Remarks</th>
+              <th style={thStyle}>Start Year</th>
+              <th style={thStyle}>End Year</th>
             </tr>
-          ) : (
-            sorted.map((entry) => {
-              const ack = entry.ackno?.find((a) => a.year === currentYear)
-              const billing = entry.billingStatus?.find((b) => b.year === currentYear)?.status
-              const remark = entry.remarks?.find((r) => r.year === currentYear)?.remark || ''
+          </thead>
 
-              return (
-                <tr key={entry.pan} className="hoverable-row">
-                  <td style={tdStyle}>{entry.fileCode}</td>
-                  <td style={tdStyle}>{entry.name}</td>
-                  <td style={tdStyle}>{entry.pan}</td>
-                  <td style={tdStyle}>{entry.group || 'None'}</td>
-                  <td style={tdStyle}>
-                    {ack?.num && ack.filePath ? (
-                      <a
-                        className="ack-link"
-                        onClick={() => window.electronAPI.openContainingFolder(ack.filePath)}
-                      >
-                        {ack.num}
-                      </a>
-                    ) : (
-                      'Pending'
-                    )}
-                  </td>
-                  <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
-                    {billing || 'Not started'}
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      value={remark}
-                      onChange={async (e) => {
-                        const newRemark = e.target.value
-                        setEntries((prev) =>
-                          prev.map((en) => {
-                            if (en.pan !== entry.pan) return en
-                            const remarks = [...(en.remarks || [])]
-                            const index = remarks.findIndex((r) => r.year === currentYear)
-                            if (index !== -1) remarks[index].remark = newRemark
-                            else remarks.push({ year: currentYear, remark: newRemark })
-                            return { ...en, remarks }
-                          })
-                        )
+          <tbody>
+            {sorted.length === 0 ? (
+              <tr>
+                <td colSpan={9} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No data available
+                </td>
+              </tr>
+            ) : (
+              sorted.map((entry) => {
+                const ack = entry.ackno?.find((a) => a.year === currentYear)
+                const billing = entry.billingStatus?.find((b) => b.year === currentYear)?.status
+                const remark = entry.remarks?.find((r) => r.year === currentYear)?.remark || ''
 
-                        const remarksCopy = [...(entry.remarks || [])]
-                        const idx = remarksCopy.findIndex((r) => r.year === currentYear)
-                        if (idx !== -1) remarksCopy[idx].remark = newRemark
-                        else remarksCopy.push({ year: currentYear, remark: newRemark })
-                        await window.electronAPI.updateRemarks(entry.pan, remarksCopy)
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '6px 10px',
-                        fontSize: '14px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        outline: 'none'
-                      }}
-                    />
-                  </td>
-                  <td style={tdStyle}>{entry.startYear}</td>
-                  <td style={tdStyle}>{entry.endYear || 'Not set'}</td>
-                </tr>
-              )
-            })
-          )}
-        </tbody>
-      </table>
+                return (
+                  <tr key={entry.pan} className="hoverable-row">
+                    <td style={tdStyle}>{entry.fileCode}</td>
+                    <td style={tdStyle}>{entry.name}</td>
+                    <td style={tdStyle}>{entry.pan}</td>
+                    <td style={tdStyle}>{entry.group || 'None'}</td>
+                    <td style={tdStyle}>
+                      {ack?.num && ack.filePath ? (
+                        <a
+                          className="ack-link"
+                          onClick={() => window.electronAPI.openContainingFolder(ack.filePath)}
+                        >
+                          {ack.num}
+                        </a>
+                      ) : (
+                        'Pending'
+                      )}
+                    </td>
+                    <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
+                      {billing || 'Not started'}
+                    </td>
+                    <td style={tdStyle}>
+                      <input
+                        type="text"
+                        value={remark}
+                        onChange={async (e) => {
+                          const newRemark = e.target.value
+                          setEntries((prev) =>
+                            prev.map((en) => {
+                              if (en.pan !== entry.pan) return en
+                              const remarks = [...(en.remarks || [])]
+                              const index = remarks.findIndex((r) => r.year === currentYear)
+                              if (index !== -1) remarks[index].remark = newRemark
+                              else remarks.push({ year: currentYear, remark: newRemark })
+                              return { ...en, remarks }
+                            })
+                          )
+
+                          const remarksCopy = [...(entry.remarks || [])]
+                          const idx = remarksCopy.findIndex((r) => r.year === currentYear)
+                          if (idx !== -1) remarksCopy[idx].remark = newRemark
+                          else remarksCopy.push({ year: currentYear, remark: newRemark })
+                          await window.electronAPI.updateRemarks(entry.pan, remarksCopy)
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          fontSize: '14px',
+                          borderRadius: '4px',
+                          border: '1px solid #ccc',
+                          outline: 'none'
+                        }}
+                      />
+                    </td>
+                    <td style={tdStyle}>{entry.startYear}</td>
+                    <td style={tdStyle}>{entry.endYear || 'Not set'}</td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
     </Layout>
   )
 }
