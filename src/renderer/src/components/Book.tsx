@@ -17,6 +17,7 @@ type Entry = {
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
   remarks?: { remark: string; year: string }[]
+  docsComplete?: { value: boolean; year: string }[]
 }
 
 const Book = ({ activeScreen }: { activeScreen: string }) => {
@@ -193,7 +194,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                   style={{
                     ...thStyle,
                     cursor: 'pointer',
-                    width: key === 'name' ? '300px' : undefined // adjust width here
+                    width: key === 'name' || key === 'group' ? '300px' : undefined // adjust width here
                   }}
                   onClick={() => handleSort(key)}
                 >
@@ -201,6 +202,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                 </th>
               ))}
 
+              <th style={thStyle}>Docs Complete</th>
               <th style={thStyle}>AckNo.</th>
               <th style={thStyle}>Billing Status</th>
               <th style={thStyle}>Remarks</th>
@@ -228,6 +230,49 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                     <td style={tdStyle}>{entry.name}</td>
                     <td style={tdStyle}>{entry.pan}</td>
                     <td style={tdStyle}>{entry.group || 'None'}</td>
+                    <td
+                      style={{
+                        ...tdStyle,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: '7px'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        style={{ transform: 'scale(1.8)' }}
+                        checked={
+                          entry.docsComplete?.find((d) => d.year === currentYear)?.value ?? false
+                        }
+                        onChange={async (e) => {
+                          const value = e.target.checked
+
+                          // Update UI state
+                          setEntries((prev) =>
+                            prev.map((en) => {
+                              if (en.pan !== entry.pan) return en
+                              const updatedDocs = [...(en.docsComplete || [])]
+                              const index = updatedDocs.findIndex((d) => d.year === currentYear)
+                              if (index !== -1) {
+                                updatedDocs[index].value = value
+                              } else {
+                                updatedDocs.push({ year: currentYear, value })
+                              }
+                              return { ...en, docsComplete: updatedDocs }
+                            })
+                          )
+
+                          // Persist to backend
+                          const updatedDocs = [...(entry.docsComplete || [])]
+                          const idx = updatedDocs.findIndex((d) => d.year === currentYear)
+                          if (idx !== -1) updatedDocs[idx].value = value
+                          else updatedDocs.push({ year: currentYear, value })
+
+                          await window.electronAPI.updateDocsComplete(entry.pan, updatedDocs)
+                        }}
+                      />
+                    </td>
                     <td style={tdStyle}>
                       {ack?.num && ack.filePath ? (
                         <a
@@ -243,7 +288,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                     <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
                       {billing || 'Not started'}
                     </td>
-                    <td style={tdStyle}>
+                    <td style={{ ...tdStyle, width: '300px' }}>
                       <input
                         type="text"
                         value={remark}

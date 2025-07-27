@@ -18,6 +18,11 @@ interface Remark {
   year: string
 }
 
+interface DocsComplete {
+  value: boolean
+  year: string
+}
+
 interface Entry {
   name: string
   fileCode: string
@@ -28,6 +33,7 @@ interface Entry {
   billingStatus?: BillingStatus[]
   group?: string
   remarks?: Remark[]
+  docsComplete?: DocsComplete[]
 }
 
 const api = {
@@ -36,9 +42,12 @@ const api = {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   saveEntry: (entry: Entry) => ipcRenderer.invoke('save-entry', entry),
+
   updateEndYear: (fileCode: string, endYear: string) =>
     ipcRenderer.invoke('update-end-year', fileCode, endYear),
+
   loadEntries: (): Promise<Entry[]> => ipcRenderer.invoke('load-entries'),
+
   saveEntries: (entries: Entry[]): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('save-multiple-entries', entries),
 
@@ -47,6 +56,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   updateBillingStatus: (pan: string, billingStatus: BillingStatus, year: string) =>
     ipcRenderer.invoke('update-billing-status', pan, billingStatus, year),
+
+  updateDocsComplete: (pan: string, docsComplete: DocsComplete[]) =>
+    ipcRenderer.invoke('update-docs-complete', pan, docsComplete),
 
   saveGroup: (group: string) => ipcRenderer.invoke('save-group', group),
   deleteGroup: (group: string) => ipcRenderer.invoke('delete-group', group),

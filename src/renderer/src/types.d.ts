@@ -11,6 +11,7 @@ declare global {
     billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
     group?: string
     remarks?: { remark: string; year: string }[]
+    docsComplete?: { value: boolean; year: string }[] // ✅ NEW FIELD
   }
 
   interface Window {
@@ -35,6 +36,12 @@ declare global {
         pan: string,
         billingStatus: { status: 'Not started' | 'Pending' | 'Paid'; year: string },
         year: string
+      ) => Promise<{ success: boolean; error?: string }>
+
+      updateDocsComplete: (
+        // ✅ NEW METHOD
+        pan: string,
+        docsComplete: { value: boolean; year: string }[]
       ) => Promise<{ success: boolean; error?: string }>
 
       saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>

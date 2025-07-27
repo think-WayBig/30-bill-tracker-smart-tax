@@ -288,6 +288,29 @@ ipcMain.handle('assign-user-to-group', async (_event, { pan, group }) => {
   }
 })
 
+ipcMain.handle('update-docs-complete', async (_event, pan: string, docsComplete) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
+
+    const entries = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const index = entries.findIndex((entry: any) => entry.pan === pan)
+    if (index === -1) return { success: false, error: 'Entry not found' }
+
+    entries[index].docsComplete = docsComplete
+
+    fs.writeFileSync(filePath, JSON.stringify(entries, null, 2), 'utf-8')
+
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error updating docsComplete:', error)
+    return { success: false, error: error.message }
+  }
+})
+
 ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
   try {
     const dir = path.join(app.getPath('userData'), 'data')
