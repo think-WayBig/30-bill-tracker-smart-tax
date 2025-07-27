@@ -5,6 +5,7 @@ interface User {
   name: string
   pan: string
   fileCode: string
+  startYear: string
   group?: string
 }
 

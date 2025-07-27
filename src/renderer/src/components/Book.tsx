@@ -12,7 +12,7 @@ type Entry = {
   fileCode: string
   pan: string
   startYear: string
-  endYear: string
+  endYear?: string
   ackno?: AcknoEntry[]
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string

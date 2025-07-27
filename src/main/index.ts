@@ -43,13 +43,13 @@ function createWindow(): void {
   let needsFocusFix = false
   let triggeringProgrammaticBlur = false
 
-  mainWindow.on('blur', (event) => {
+  mainWindow.on('blur', () => {
     if (!triggeringProgrammaticBlur) {
       needsFocusFix = true
     }
   })
 
-  mainWindow.on('focus', (event) => {
+  mainWindow.on('focus', () => {
     if (isWindows && needsFocusFix) {
       needsFocusFix = false
       triggeringProgrammaticBlur = true

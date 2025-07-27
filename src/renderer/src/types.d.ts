@@ -11,7 +11,7 @@ declare global {
     billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
     group?: string
     remarks?: { remark: string; year: string }[]
-    docsComplete?: { value: boolean; year: string }[] // ✅ NEW FIELD
+    docsComplete?: { value: boolean; year: string }[]
   }
 
   interface Window {
