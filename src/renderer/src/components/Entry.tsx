@@ -186,13 +186,14 @@ const formStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',
-  maxWidth: '450px',
+  width: '100%',
+  maxWidth: '380px',
+  flex: '1 1 calc(33.33% - 2rem)',
   backgroundColor: '#fff',
   borderRadius: '12px',
   padding: '2rem',
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-  border: '1px solid #e0e7ff',
-  flex: '1'
+  border: '1px solid #e0e7ff'
 }
 
 const inputStyle: React.CSSProperties = {

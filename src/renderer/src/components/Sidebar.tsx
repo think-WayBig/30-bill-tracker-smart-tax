@@ -11,6 +11,8 @@ const bookSubPages = [
   'book-entries-completed'
 ]
 
+const noticesSubPages = []
+
 const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [hovered, setHovered] = useState<string | null>(null)
   const [active, setActive] = useState(() => {
@@ -31,6 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   // Logic to show submenu if active is on a subpage
   const showBillingOptions = active === 'billing' || billingSubPages.includes(active)
   const showBookOptions = active === 'manage' || bookSubPages.includes(active)
+  const showNoticesOptions = active === 'notices' || noticesSubPages.includes(active)
 
   const renderButton = (
     key: string,
@@ -42,7 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
     const isActive =
       active === key ||
       (key === 'billing' && billingSubPages.includes(active)) ||
-      (key === 'manage' && bookSubPages.includes(active))
+      (key === 'manage' && bookSubPages.includes(active)) ||
+      (key === 'notices' && noticesSubPages.includes(active))
 
     return (
       <button
@@ -140,6 +144,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       )}
 
       {renderButton('settings', 'Settings', '⚙️')}
+      {renderButton('notices', 'Notices', '📬', false, showNoticesOptions)}
+
       <button
         onClick={() => window.close()}
         style={{

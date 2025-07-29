@@ -74,7 +74,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   deleteEntry: (fileCode: string) => ipcRenderer.invoke('delete-entry', fileCode),
 
-  openContainingFolder: (filePath: string) => ipcRenderer.invoke('open-containing-folder', filePath)
+  openContainingFolder: (filePath: string) =>
+    ipcRenderer.invoke('open-containing-folder', filePath),
+
+  /** Notices Code */
+  saveGstNotice: (notice: { name: string; date: string }) =>
+    ipcRenderer.invoke('save-gst-notice', notice),
+
+  saveItrNotice: (notice: { name: string; date: string }) =>
+    ipcRenderer.invoke('save-itr-notice', notice),
+
+  loadNotices: (): Promise<{ name: string; date: string; type: 'GST' | 'ITR' }[]> =>
+    ipcRenderer.invoke('load-notices')
 })
 
 if (process.contextIsolated) {

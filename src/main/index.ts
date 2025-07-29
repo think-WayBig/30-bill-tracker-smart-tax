@@ -563,3 +563,65 @@ ipcMain.handle('open-containing-folder', async (_event, filePath: string) => {
     return { success: false, error: error.message }
   }
 })
+
+/** Notices Code */
+const getNoticesPath = () => {
+  const dir = path.join(app.getPath('userData'), 'data')
+  const filePath = path.join(dir, 'notices.json')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return filePath
+}
+
+ipcMain.handle('save-gst-notice', async (_event, notice) => {
+  try {
+    const filePath = getNoticesPath()
+    const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
+
+    const isDuplicate = existing.some(
+      (n: any) => n.type === 'GST' && n.name.toLowerCase() === notice.name.toLowerCase()
+    )
+
+    if (isDuplicate) {
+      return { success: false, error: 'A GST notice with this name already exists.' }
+    }
+
+    existing.push({ ...notice, type: 'GST' })
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('save-itr-notice', async (_event, notice) => {
+  try {
+    const filePath = getNoticesPath()
+    const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
+
+    const isDuplicate = existing.some(
+      (n: any) => n.type === 'ITR' && n.name.toLowerCase() === notice.name.toLowerCase()
+    )
+
+    if (isDuplicate) {
+      return { success: false, error: 'An ITR notice with this name already exists.' }
+    }
+
+    existing.push({ ...notice, type: 'ITR' })
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('load-notices', async () => {
+  try {
+    const filePath = getNoticesPath()
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Failed to load notices:', error)
+    return []
+  }
+})
