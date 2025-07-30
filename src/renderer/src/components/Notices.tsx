@@ -35,6 +35,9 @@ const Notices: React.FC = () => {
   const [gstSortAsc, setGstSortAsc] = useState(true)
   const [itrSortAsc, setItrSortAsc] = useState(true)
 
+  const [showDoneGst, setShowDoneGst] = useState(false)
+  const [showDoneItr, setShowDoneItr] = useState(false)
+
   useEffect(() => {
     const loadNotices = async () => {
       const data = await window.electronAPI.loadNotices()
@@ -113,6 +116,12 @@ const Notices: React.FC = () => {
     }
   }
 
+  const gstActive = gstNotices.filter((n) => !n.done)
+  const gstDone = gstNotices.filter((n) => n.done)
+
+  const itrActive = itrNotices.filter((n) => !n.done)
+  const itrDone = itrNotices.filter((n) => n.done)
+
   return (
     <Layout title="📬 Add GST / ITR Notices">
       <div style={containerStyle}>
@@ -168,10 +177,13 @@ const Notices: React.FC = () => {
             />
           </div>
           <NoticeTable
-            notices={gstNotices}
+            notices={gstActive}
+            doneNotices={gstDone}
             onToggleSort={() => setGstSortAsc((prev) => !prev)}
             sortAsc={gstSortAsc}
             onToggleDone={handleToggleDone}
+            showDone={showDoneGst}
+            onToggleShowDone={() => setShowDoneGst((v) => !v)}
           />
         </div>
 
@@ -227,10 +239,13 @@ const Notices: React.FC = () => {
             />
           </div>
           <NoticeTable
-            notices={itrNotices}
+            notices={itrActive}
+            doneNotices={itrDone}
             onToggleSort={() => setItrSortAsc((prev) => !prev)}
             sortAsc={itrSortAsc}
             onToggleDone={handleToggleDone}
+            showDone={showDoneItr}
+            onToggleShowDone={() => setShowDoneItr((v) => !v)}
           />
         </div>
       </div>
@@ -242,16 +257,22 @@ export default Notices
 
 const NoticeTable = ({
   notices,
+  doneNotices,
   onToggleSort,
   sortAsc,
-  onToggleDone
+  onToggleDone,
+  showDone,
+  onToggleShowDone
 }: {
   notices: Notice[]
+  doneNotices: Notice[]
   onToggleSort: () => void
   sortAsc: boolean
   onToggleDone: (updated: Notice) => void
+  showDone: boolean
+  onToggleShowDone: () => void
 }) => (
-  <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+  <div style={{ marginTop: '1rem' }}>
     <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
       <thead>
         <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
@@ -266,8 +287,8 @@ const NoticeTable = ({
       <tbody>
         {notices.length === 0 ? (
           <tr>
-            <td colSpan={3} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
-              No notices yet
+            <td colSpan={4} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
+              No pending notices
             </td>
           </tr>
         ) : (
@@ -289,6 +310,43 @@ const NoticeTable = ({
         )}
       </tbody>
     </table>
+
+    {doneNotices.length > 0 && (
+      <div style={{ marginTop: '1rem' }}>
+        <button onClick={onToggleShowDone} style={expanderButtonStyle}>
+          {showDone ? 'Hide' : 'Show'} Done ({doneNotices.length})
+        </button>
+
+        {showDone && (
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              background: '#f8f8f8',
+              marginTop: '0.5rem'
+            }}
+          >
+            <tbody>
+              {doneNotices.map((n, i) => (
+                <tr key={i} className="hoverable-row">
+                  <td style={tdStyle}>{n.name}</td>
+                  <td style={tdStyle}>{n.year || '-'}</td>
+                  <td style={tdStyle}>{n.date}</td>
+                  <td style={tdStyle}>
+                    <input
+                      type="checkbox"
+                      checked={n.done ?? false}
+                      onChange={() => onToggleDone({ ...n, done: !n.done })}
+                      style={{ transform: 'scale(1.8)' }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    )}
   </div>
 )
 
@@ -371,4 +429,15 @@ const searchBarStyle: React.CSSProperties = {
   borderRadius: '8px',
   border: '1px solid #ccc',
   outline: 'none'
+}
+
+const expanderButtonStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  backgroundColor: '#e0e7ff',
+  color: '#1e1b4b',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  fontSize: '14px',
+  fontWeight: 600
 }
