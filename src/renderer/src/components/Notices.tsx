@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Layout from './Layout'
 
-type Notice = { name: string; date: string; type: 'GST' | 'ITR' }
+type Notice = {
+  name: string
+  date: string
+  type: 'GST' | 'ITR'
+  done?: boolean
+}
 
 const Notices: React.FC = () => {
   const [gstName, setGstName] = useState('')
@@ -65,6 +70,23 @@ const Notices: React.FC = () => {
         : new Date(b.date).getTime() - new Date(a.date).getTime()
     )
 
+  const handleToggleDone = async (updatedNotice: Notice) => {
+    const result = await window.electronAPI.updateNotice(updatedNotice)
+    if (result.success) {
+      setNotices((prev) =>
+        prev.map((n) =>
+          n.name === updatedNotice.name &&
+          n.date === updatedNotice.date &&
+          n.type === updatedNotice.type
+            ? updatedNotice
+            : n
+        )
+      )
+    } else {
+      alert(`❌ Error: ${result.error}`)
+    }
+  }
+
   return (
     <Layout title="📬 Add GST / ITR Notices">
       <div style={containerStyle}>
@@ -95,8 +117,8 @@ const Notices: React.FC = () => {
             </button>
           </form>
 
-          <h3 style={tableHeadingStyle}>📄 GST Notices</h3>
           <div style={searchBarWrapperStyle}>
+            <h3 style={tableHeadingStyle}>📄 GST Notices</h3>
             <input
               type="text"
               value={gstSearch}
@@ -109,6 +131,7 @@ const Notices: React.FC = () => {
             notices={gstNotices}
             onToggleSort={() => setGstSortAsc((prev) => !prev)}
             sortAsc={gstSortAsc}
+            onToggleDone={handleToggleDone}
           />
         </div>
 
@@ -139,8 +162,8 @@ const Notices: React.FC = () => {
             </button>
           </form>
 
-          <h3 style={tableHeadingStyle}>📄 ITR Notices</h3>
           <div style={searchBarWrapperStyle}>
+            <h3 style={tableHeadingStyle}>📄 ITR Notices</h3>
             <input
               type="text"
               value={itrSearch}
@@ -153,6 +176,7 @@ const Notices: React.FC = () => {
             notices={itrNotices}
             onToggleSort={() => setItrSortAsc((prev) => !prev)}
             sortAsc={itrSortAsc}
+            onToggleDone={handleToggleDone}
           />
         </div>
       </div>
@@ -165,11 +189,13 @@ export default Notices
 const NoticeTable = ({
   notices,
   onToggleSort,
-  sortAsc
+  sortAsc,
+  onToggleDone
 }: {
   notices: Notice[]
   onToggleSort: () => void
   sortAsc: boolean
+  onToggleDone: (updated: Notice) => void
 }) => (
   <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
     <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
@@ -179,12 +205,13 @@ const NoticeTable = ({
           <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
             Date {sortAsc ? '↑' : '↓'}
           </th>
+          <th style={thStyle}>Done</th>
         </tr>
       </thead>
       <tbody>
         {notices.length === 0 ? (
           <tr>
-            <td colSpan={2} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
+            <td colSpan={3} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
               No notices yet
             </td>
           </tr>
@@ -193,6 +220,14 @@ const NoticeTable = ({
             <tr key={i} className="hoverable-row">
               <td style={tdStyle}>{n.name}</td>
               <td style={tdStyle}>{n.date}</td>
+              <td style={tdStyle}>
+                <input
+                  type="checkbox"
+                  checked={n.done ?? false}
+                  onChange={() => onToggleDone({ ...n, done: !n.done })}
+                  style={{ transform: 'scale(1.8)' }}
+                />
+              </td>
             </tr>
           ))
         )}
@@ -250,8 +285,10 @@ const buttonStyle: React.CSSProperties = {
 }
 
 const tableHeadingStyle: React.CSSProperties = {
-  margin: '1.5rem 0 0.5rem',
-  color: '#4f46e5'
+  color: '#4f46e5',
+  backgroundColor: '#f5f7ff',
+  paddingTop: 40,
+  paddingBottom: 15
 }
 
 const thStyle: React.CSSProperties = {
@@ -266,7 +303,7 @@ const tdStyle: React.CSSProperties = {
 
 const searchBarWrapperStyle: React.CSSProperties = {
   position: 'sticky',
-  top: '80px',
+  top: '70px',
   zIndex: 10,
   paddingBottom: '0.5rem'
 }

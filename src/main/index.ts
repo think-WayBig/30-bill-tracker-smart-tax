@@ -625,3 +625,24 @@ ipcMain.handle('load-notices', async () => {
     return []
   }
 })
+
+ipcMain.handle('update-notice', async (_event, updatedNotice) => {
+  try {
+    const filePath = getNoticesPath()
+    if (!fs.existsSync(filePath)) return { success: false, error: 'No notices file found' }
+
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Notice[]
+    const updated = data.map((n) =>
+      n.name === updatedNotice.name &&
+      n.date === updatedNotice.date &&
+      n.type === updatedNotice.type
+        ? { ...n, done: updatedNotice.done }
+        : n
+    )
+
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
+    return { success: true }
+  } catch (err: any) {
+    return { success: false, error: err.message }
+  }
+})

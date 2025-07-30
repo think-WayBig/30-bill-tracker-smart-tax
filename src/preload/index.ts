@@ -36,6 +36,13 @@ interface Entry {
   docsComplete?: DocsComplete[]
 }
 
+type Notice = {
+  name: string
+  date: string
+  type: 'GST' | 'ITR'
+  done?: boolean
+}
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
@@ -85,7 +92,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('save-itr-notice', notice),
 
   loadNotices: (): Promise<{ name: string; date: string; type: 'GST' | 'ITR' }[]> =>
-    ipcRenderer.invoke('load-notices')
+    ipcRenderer.invoke('load-notices'),
+
+  updateNotice: (notice: Notice) => ipcRenderer.invoke('update-notice', notice)
 })
 
 if (process.contextIsolated) {
