@@ -40,6 +40,7 @@ type Notice = {
   name: string
   date: string
   type: 'GST' | 'ITR'
+  year: string
   done?: boolean
 }
 

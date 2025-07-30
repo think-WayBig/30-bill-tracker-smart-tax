@@ -585,7 +585,7 @@ ipcMain.handle('save-gst-notice', async (_event, notice) => {
       return { success: false, error: 'A GST notice with this name already exists.' }
     }
 
-    existing.push({ ...notice, type: 'GST' })
+    existing.push({ ...notice, type: 'GST', year: notice.year })
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
     return { success: true }
   } catch (error: any) {
@@ -606,7 +606,7 @@ ipcMain.handle('save-itr-notice', async (_event, notice) => {
       return { success: false, error: 'An ITR notice with this name already exists.' }
     }
 
-    existing.push({ ...notice, type: 'ITR' })
+    existing.push({ ...notice, type: 'ITR', year: notice.year })
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
     return { success: true }
   } catch (error: any) {

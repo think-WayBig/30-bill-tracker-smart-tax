@@ -5,7 +5,18 @@ type Notice = {
   name: string
   date: string
   type: 'GST' | 'ITR'
+  year: string
   done?: boolean
+}
+const currentYear = new Date().getFullYear().toString()
+
+const generateYears = () => {
+  const currentYear = new Date().getFullYear()
+  const years: string[] = []
+  for (let i = currentYear + 1; i >= 2020; i--) {
+    years.push(`${i - 1}-${i}`) // format: 2024-2025
+  }
+  return years
 }
 
 const Notices: React.FC = () => {
@@ -14,6 +25,9 @@ const Notices: React.FC = () => {
   const [itrName, setItrName] = useState('')
   const [itrDate, setItrDate] = useState('')
   const [notices, setNotices] = useState<Notice[]>([])
+
+  const [gstYear, setGstYear] = useState(currentYear)
+  const [itrYear, setItrYear] = useState(currentYear)
 
   const [gstSearch, setGstSearch] = useState('')
   const [itrSearch, setItrSearch] = useState('')
@@ -32,10 +46,16 @@ const Notices: React.FC = () => {
 
   const handleGstSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await window.electronAPI.saveGstNotice({ name: gstName, date: gstDate })
+    const result = await window.electronAPI.saveGstNotice({
+      name: gstName,
+      date: gstDate,
+      year: gstYear
+    })
+
     if (result.success) {
       alert('✅ GST Notice saved successfully!')
       setGstName('')
+      setGstYear('')
       setGstDate('')
     } else {
       alert(`❌ Error: ${result.error}`)
@@ -44,10 +64,16 @@ const Notices: React.FC = () => {
 
   const handleItrSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await window.electronAPI.saveItrNotice({ name: itrName, date: itrDate })
+    const result = await window.electronAPI.saveItrNotice({
+      name: itrName,
+      date: itrDate,
+      year: itrYear
+    })
+
     if (result.success) {
       alert('✅ ITR Notice saved successfully!')
       setItrName('')
+      setItrYear('')
       setItrDate('')
     } else {
       alert(`❌ Error: ${result.error}`)
@@ -103,6 +129,20 @@ const Notices: React.FC = () => {
               style={inputStyle}
             />
 
+            <label style={labelStyle}>Financial Year</label>
+            <select
+              value={gstYear}
+              onChange={(e) => setGstYear(e.target.value)}
+              required
+              style={inputStyle}
+            >
+              {generateYears().map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+
             <label style={labelStyle}>GST Date</label>
             <input
               type="date"
@@ -147,6 +187,20 @@ const Notices: React.FC = () => {
               required
               style={inputStyle}
             />
+
+            <label style={labelStyle}>Assessment Year</label>
+            <select
+              value={itrYear}
+              onChange={(e) => setItrYear(e.target.value)}
+              required
+              style={inputStyle}
+            >
+              {generateYears().map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
 
             <label style={labelStyle}>ITR Date</label>
             <input
@@ -202,6 +256,7 @@ const NoticeTable = ({
       <thead>
         <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
           <th style={thStyle}>Name</th>
+          <th style={thStyle}>Year</th>
           <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
             Date {sortAsc ? '↑' : '↓'}
           </th>
@@ -219,6 +274,7 @@ const NoticeTable = ({
           notices.map((n, i) => (
             <tr key={i} className="hoverable-row">
               <td style={tdStyle}>{n.name}</td>
+              <td style={tdStyle}>{n.year || '-'}</td>
               <td style={tdStyle}>{n.date}</td>
               <td style={tdStyle}>
                 <input
