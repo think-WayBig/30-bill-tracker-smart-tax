@@ -18,7 +18,7 @@ type Entry = {
   billingStatus?: { status: 'Not started' | 'Pending' | 'Paid'; year: string }[]
   group?: string
   remarks?: { remark: string; year: string }[]
-  docsComplete?: { value: boolean; year: string }[]
+  docsComplete?: { value: boolean; year: string; completedOn?: string }[]
 }
 
 const Book = ({ activeScreen }: { activeScreen: string }) => {
@@ -255,6 +255,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
               ))}
 
               <th style={thStyle}>Docs Complete</th>
+              <th style={thStyle}>Docs Received On</th>
               <th style={thStyle}>AckNo.</th>
               <th style={thStyle}>Billing Status</th>
               <th style={thStyle}>Remarks</th>
@@ -309,10 +310,14 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                               if (en.pan !== entry.pan) return en
                               const updatedDocs = [...(en.docsComplete || [])]
                               const index = updatedDocs.findIndex((d) => d.year === currentYear)
+                              const dateNow = value
+                                ? new Date().toISOString().split('T')[0]
+                                : undefined
                               if (index !== -1) {
                                 updatedDocs[index].value = value
+                                updatedDocs[index].completedOn = dateNow
                               } else {
-                                updatedDocs.push({ year: currentYear, value })
+                                updatedDocs.push({ year: currentYear, value, completedOn: dateNow })
                               }
                               return { ...en, docsComplete: updatedDocs }
                             })
@@ -321,12 +326,20 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                           // Persist to backend
                           const updatedDocs = [...(entry.docsComplete || [])]
                           const idx = updatedDocs.findIndex((d) => d.year === currentYear)
-                          if (idx !== -1) updatedDocs[idx].value = value
-                          else updatedDocs.push({ year: currentYear, value })
-
+                          const dateNow = value ? new Date().toISOString().split('T')[0] : undefined
+                          if (idx !== -1) {
+                            updatedDocs[idx].value = value
+                            updatedDocs[idx].completedOn = dateNow
+                          } else {
+                            updatedDocs.push({ year: currentYear, value, completedOn: dateNow })
+                          }
                           await window.electronAPI.updateDocsComplete(entry.pan, updatedDocs)
                         }}
                       />
+                    </td>
+                    <td style={tdStyle}>
+                      {entry.docsComplete?.find((d) => d.year === currentYear && d.value)
+                        ?.completedOn || '-'}
                     </td>
                     <td style={tdStyle}>
                       {ack?.num && ack.filePath ? (
