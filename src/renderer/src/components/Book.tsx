@@ -25,7 +25,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
   const currentYear = localStorage.getItem('selectedYear')!
   const [entries, setEntries] = useState<Entry[]>([])
   const [search, setSearch] = useState('')
-  const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | 'group' | ''>('')
+  const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | 'group' | 'ackDate' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const isDocsIncompleteView = activeScreen === 'book-entries-docs-incomplete'
@@ -130,19 +130,39 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
     if (!sortKey) return filtered
 
     return [...filtered].sort((a, b) => {
-      const aVal = (a[sortKey] || '').toString()
-      const bVal = (b[sortKey] || '').toString()
+      let aVal: string = ''
+      let bVal: string = ''
+
+      if (sortKey === 'ackDate') {
+        aVal =
+          a.ackDate
+            ?.find((d) => d.year === currentYear)
+            ?.date?.split('-')
+            .reverse()
+            .join('-') || ''
+        bVal =
+          b.ackDate
+            ?.find((d) => d.year === currentYear)
+            ?.date?.split('-')
+            .reverse()
+            .join('-') || ''
+      } else {
+        aVal = (a[sortKey] || '').toString()
+        bVal = (b[sortKey] || '').toString()
+      }
+
       return sortOrder === 'asc'
         ? aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' })
         : bVal.localeCompare(aVal, undefined, { numeric: true, sensitivity: 'base' })
     })
-  }, [filtered, sortKey, sortOrder])
+  }, [filtered, sortKey, sortOrder, currentYear])
 
   const keyLabelMap = {
     fileCode: 'File Code',
     name: 'Name',
     pan: 'PAN',
-    group: 'Group'
+    group: 'Group',
+    ackDate: 'Ack Date'
   }
 
   const getStatusColor = (status: string) => {
@@ -220,7 +240,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
         >
           <thead>
             <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-              {(['fileCode', 'name', 'pan', 'group'] as const).map((key) => (
+              {(['fileCode', 'name', 'pan', 'group', 'ackDate'] as const).map((key) => (
                 <th
                   key={key}
                   style={{
@@ -236,7 +256,6 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
 
               <th style={thStyle}>Docs Complete</th>
               <th style={thStyle}>AckNo.</th>
-              <th style={thStyle}>Ack Date</th>
               <th style={thStyle}>Billing Status</th>
               <th style={thStyle}>Remarks</th>
               <th style={thStyle}>Start Year</th>
@@ -263,6 +282,9 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                     <td style={tdStyle}>{entry.name}</td>
                     <td style={tdStyle}>{entry.pan}</td>
                     <td style={tdStyle}>{entry.group || 'None'}</td>
+                    <td style={tdStyle}>
+                      {entry.ackDate?.find((a) => a.year === currentYear)?.date || '-'}
+                    </td>
                     <td
                       style={{
                         ...tdStyle,
@@ -317,9 +339,6 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                       ) : (
                         'Pending'
                       )}
-                    </td>
-                    <td style={tdStyle}>
-                      {entry.ackDate?.find((a) => a.year === currentYear)?.date || '-'}
                     </td>
 
                     <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
