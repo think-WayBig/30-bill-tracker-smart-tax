@@ -95,7 +95,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadNotices: (): Promise<{ name: string; date: string; type: 'GST' | 'ITR' }[]> =>
     ipcRenderer.invoke('load-notices'),
 
-  updateNotice: (notice: Notice) => ipcRenderer.invoke('update-notice', notice)
+  updateNotice: (notice: Notice) => ipcRenderer.invoke('update-notice', notice),
+
+  deleteNotice: (notice: Notice) => ipcRenderer.invoke('deleteNotice', notice)
 })
 
 if (process.contextIsolated) {

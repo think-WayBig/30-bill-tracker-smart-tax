@@ -646,3 +646,27 @@ ipcMain.handle('update-notice', async (_event, updatedNotice) => {
     return { success: false, error: err.message }
   }
 })
+
+ipcMain.handle('deleteNotice', async (_event, notice) => {
+  try {
+    const filePath = getNoticesPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Notices file not found' }
+    }
+
+    const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Notice[]
+
+    const filtered = existing.filter(
+      (n) => !(n.name === notice.name && n.date === notice.date && n.type === notice.type)
+    )
+
+    if (filtered.length === existing.length) {
+      return { success: false, error: 'Notice not found' }
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})

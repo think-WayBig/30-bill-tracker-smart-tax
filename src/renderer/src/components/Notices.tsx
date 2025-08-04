@@ -116,6 +116,22 @@ const Notices: React.FC = () => {
     }
   }
 
+  const handleDelete = async (toDelete: Notice) => {
+    const confirmed = window.confirm(`Delete "${toDelete.name}" notice?`)
+    if (!confirmed) return
+
+    const result = await window.electronAPI.deleteNotice(toDelete)
+    if (result.success) {
+      setNotices((prev) =>
+        prev.filter(
+          (n) => !(n.name === toDelete.name && n.date === toDelete.date && n.type === toDelete.type)
+        )
+      )
+    } else {
+      alert(`❌ Error deleting notice: ${result.error}`)
+    }
+  }
+
   const gstActive = gstNotices.filter((n) => !n.done)
   const gstDone = gstNotices.filter((n) => n.done)
 
@@ -184,6 +200,7 @@ const Notices: React.FC = () => {
             onToggleDone={handleToggleDone}
             showDone={showDoneGst}
             onToggleShowDone={() => setShowDoneGst((v) => !v)}
+            onDelete={handleDelete}
           />
         </div>
 
@@ -246,6 +263,7 @@ const Notices: React.FC = () => {
             onToggleDone={handleToggleDone}
             showDone={showDoneItr}
             onToggleShowDone={() => setShowDoneItr((v) => !v)}
+            onDelete={handleDelete}
           />
         </div>
       </div>
@@ -261,6 +279,7 @@ const NoticeTable = ({
   onToggleSort,
   sortAsc,
   onToggleDone,
+  onDelete,
   showDone,
   onToggleShowDone
 }: {
@@ -269,6 +288,7 @@ const NoticeTable = ({
   onToggleSort: () => void
   sortAsc: boolean
   onToggleDone: (updated: Notice) => void
+  onDelete: (notice: Notice) => void
   showDone: boolean
   onToggleShowDone: () => void
 }) => (
@@ -281,7 +301,8 @@ const NoticeTable = ({
           <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
             Date {sortAsc ? '↑' : '↓'}
           </th>
-          <th style={thStyle}>Done</th>
+          <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
+          <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -297,13 +318,29 @@ const NoticeTable = ({
               <td style={tdStyle}>{n.name}</td>
               <td style={tdStyle}>{n.year || '-'}</td>
               <td style={tdStyle}>{n.date}</td>
-              <td style={tdStyle}>
+              <td style={{ ...tdStyle, textAlign: 'center' }}>
                 <input
                   type="checkbox"
                   checked={n.done ?? false}
                   onChange={() => onToggleDone({ ...n, done: !n.done })}
                   style={{ transform: 'scale(1.8)' }}
                 />
+              </td>
+              <td style={{ ...tdStyle, textAlign: 'center' }}>
+                <button
+                  onClick={() => onDelete(n)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '20px'
+                  }}
+                  title="Delete notice"
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))
@@ -339,6 +376,21 @@ const NoticeTable = ({
                       onChange={() => onToggleDone({ ...n, done: !n.done })}
                       style={{ transform: 'scale(1.8)' }}
                     />
+                  </td>
+                  <td style={tdStyle}>
+                    <button
+                      onClick={() => onDelete(n)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                      title="Delete notice"
+                    >
+                      🗑️
+                    </button>
                   </td>
                 </tr>
               ))}
