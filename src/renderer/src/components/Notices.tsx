@@ -10,6 +10,18 @@ type Notice = {
   done?: boolean
 }
 
+const isDueSoon = (dueDate: string) => {
+  const due = new Date(dueDate)
+  const now = new Date()
+
+  // Clear time part
+  due.setHours(0, 0, 0, 0)
+  now.setHours(0, 0, 0, 0)
+
+  const diffInDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  return diffInDays >= 0 && diffInDays <= 3
+}
+
 const generateYears = () => {
   const currentYear = new Date().getFullYear()
   const years: string[] = []
@@ -36,8 +48,14 @@ const Notices: React.FC = () => {
   const [gstDueDate, setGstDueDate] = useState('')
   const [itrDueDate, setItrDueDate] = useState('')
 
-  const [gstSortAsc, setGstSortAsc] = useState(true)
-  const [itrSortAsc, setItrSortAsc] = useState(true)
+  const [gstSort, setGstSort] = useState<{ field: keyof Notice; asc: boolean }>({
+    field: 'date',
+    asc: true
+  })
+  const [itrSort, setItrSort] = useState<{ field: keyof Notice; asc: boolean }>({
+    field: 'date',
+    asc: true
+  })
 
   const [showDoneGst, setShowDoneGst] = useState(false)
   const [showDoneItr, setShowDoneItr] = useState(false)
@@ -92,20 +110,52 @@ const Notices: React.FC = () => {
   }
 
   const gstNotices = notices
-    .filter((n) => n.type === 'GST' && n.name.toLowerCase().includes(gstSearch.toLowerCase()))
-    .sort((a, b) =>
-      gstSortAsc
-        ? new Date(a.date).getTime() - new Date(b.date).getTime()
-        : new Date(b.date).getTime() - new Date(a.date).getTime()
+    .filter(
+      (n) =>
+        n.type === 'GST' &&
+        [n.name, n.date, n.dueDate, n.year].some((field) =>
+          field.toLowerCase().includes(gstSearch.toLowerCase())
+        )
     )
+    .sort((a, b) => {
+      const { field, asc } = gstSort
+      const valA = a[field] ?? ''
+      const valB = b[field] ?? ''
+
+      if (field === 'date' || field === 'dueDate') {
+        return asc
+          ? new Date(valA).getTime() - new Date(valB).getTime()
+          : new Date(valB).getTime() - new Date(valA).getTime()
+      }
+
+      return asc
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA))
+    })
 
   const itrNotices = notices
-    .filter((n) => n.type === 'ITR' && n.name.toLowerCase().includes(itrSearch.toLowerCase()))
-    .sort((a, b) =>
-      itrSortAsc
-        ? new Date(a.date).getTime() - new Date(b.date).getTime()
-        : new Date(b.date).getTime() - new Date(a.date).getTime()
+    .filter(
+      (n) =>
+        n.type === 'ITR' &&
+        [n.name, n.date, n.dueDate, n.year].some((field) =>
+          field.toLowerCase().includes(itrSearch.toLowerCase())
+        )
     )
+    .sort((a, b) => {
+      const { field, asc } = itrSort
+      const valA = a[field] ?? ''
+      const valB = b[field] ?? ''
+
+      if (field === 'date' || field === 'dueDate') {
+        return asc
+          ? new Date(valA).getTime() - new Date(valB).getTime()
+          : new Date(valB).getTime() - new Date(valA).getTime()
+      }
+
+      return asc
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA))
+    })
 
   const handleToggleDone = async (updatedNotice: Notice) => {
     const result = await window.electronAPI.updateNotice(updatedNotice)
@@ -212,8 +262,14 @@ const Notices: React.FC = () => {
           <NoticeTable
             notices={gstActive}
             doneNotices={gstDone}
-            onToggleSort={() => setGstSortAsc((prev) => !prev)}
-            sortAsc={gstSortAsc}
+            sortField={gstSort.field}
+            sortAsc={gstSort.asc}
+            onSort={(field) =>
+              setGstSort((prev) => ({
+                field,
+                asc: prev.field === field ? !prev.asc : true
+              }))
+            }
             onToggleDone={handleToggleDone}
             showDone={showDoneGst}
             onToggleShowDone={() => setShowDoneGst((v) => !v)}
@@ -284,8 +340,14 @@ const Notices: React.FC = () => {
           <NoticeTable
             notices={itrActive}
             doneNotices={itrDone}
-            onToggleSort={() => setItrSortAsc((prev) => !prev)}
-            sortAsc={itrSortAsc}
+            sortField={itrSort.field}
+            sortAsc={itrSort.asc}
+            onSort={(field) =>
+              setItrSort((prev) => ({
+                field,
+                asc: prev.field === field ? !prev.asc : true
+              }))
+            }
             onToggleDone={handleToggleDone}
             showDone={showDoneItr}
             onToggleShowDone={() => setShowDoneItr((v) => !v)}
@@ -302,7 +364,8 @@ export default Notices
 const NoticeTable = ({
   notices,
   doneNotices,
-  onToggleSort,
+  onSort,
+  sortField,
   sortAsc,
   onToggleDone,
   onDelete,
@@ -311,7 +374,8 @@ const NoticeTable = ({
 }: {
   notices: Notice[]
   doneNotices: Notice[]
-  onToggleSort: () => void
+  onSort: (field: keyof Notice) => void
+  sortField: keyof Notice
   sortAsc: boolean
   onToggleDone: (updated: Notice) => void
   onDelete: (notice: Notice) => void
@@ -322,12 +386,18 @@ const NoticeTable = ({
     <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
       <thead>
         <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-          <th style={thStyle}>Name</th>
-          <th style={thStyle}>Year</th>
-          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
-            Issue Date {sortAsc ? '↑' : '↓'}
+          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
+            Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
           </th>
-          <th style={thStyle}>Due Date</th>
+          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('year')}>
+            Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
+          </th>
+          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('date')}>
+            Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
+          </th>
+          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('dueDate')}>
+            Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
+          </th>
           <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
           <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
         </tr>
@@ -345,7 +415,9 @@ const NoticeTable = ({
               <td style={{ ...tdStyle, maxWidth: '200px' }}>{n.name}</td>
               <td style={tdStyle}>{n.year || '-'}</td>
               <td style={tdStyle}>{n.date}</td>
-              <td style={tdStyle}>{n.dueDate}</td>
+              <td style={{ ...tdStyle, color: isDueSoon(n.dueDate) ? 'red' : undefined }}>
+                {n.dueDate}
+              </td>
               <td style={{ ...tdStyle, textAlign: 'center' }}>
                 <input
                   type="checkbox"
@@ -393,12 +465,18 @@ const NoticeTable = ({
           >
             <thead>
               <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-                <th style={thStyle}>Name</th>
-                <th style={thStyle}>Year</th>
-                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
-                  Issue Date {sortAsc ? '↑' : '↓'}
+                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
+                  Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
                 </th>
-                <th style={thStyle}>Due Date</th>
+                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('year')}>
+                  Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
+                </th>
+                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('date')}>
+                  Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
+                </th>
+                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('dueDate')}>
+                  Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
+                </th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
               </tr>
