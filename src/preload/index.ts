@@ -38,6 +38,7 @@ interface Entry {
 
 type Notice = {
   name: string
+  dueDate: string
   date: string
   type: 'GST' | 'ITR'
   year: string

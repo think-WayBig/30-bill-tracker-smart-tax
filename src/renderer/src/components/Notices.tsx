@@ -5,10 +5,10 @@ type Notice = {
   name: string
   date: string
   type: 'GST' | 'ITR'
+  dueDate: string
   year: string
   done?: boolean
 }
-const currentYear = new Date().getFullYear().toString()
 
 const generateYears = () => {
   const currentYear = new Date().getFullYear()
@@ -26,11 +26,15 @@ const Notices: React.FC = () => {
   const [itrDate, setItrDate] = useState('')
   const [notices, setNotices] = useState<Notice[]>([])
 
-  const [gstYear, setGstYear] = useState(currentYear)
-  const [itrYear, setItrYear] = useState(currentYear)
+  const years = generateYears()
+  const [gstYear, setGstYear] = useState(years[0])
+  const [itrYear, setItrYear] = useState(years[0])
 
   const [gstSearch, setGstSearch] = useState('')
   const [itrSearch, setItrSearch] = useState('')
+
+  const [gstDueDate, setGstDueDate] = useState('')
+  const [itrDueDate, setItrDueDate] = useState('')
 
   const [gstSortAsc, setGstSortAsc] = useState(true)
   const [itrSortAsc, setItrSortAsc] = useState(true)
@@ -52,13 +56,15 @@ const Notices: React.FC = () => {
     const result = await window.electronAPI.saveGstNotice({
       name: gstName,
       date: gstDate,
+      dueDate: gstDueDate,
       year: gstYear
     })
 
     if (result.success) {
       alert('✅ GST Notice saved successfully!')
       setGstName('')
-      setGstYear('')
+      setGstYear(years[0])
+      setGstDueDate('')
       setGstDate('')
     } else {
       alert(`❌ Error: ${result.error}`)
@@ -70,13 +76,15 @@ const Notices: React.FC = () => {
     const result = await window.electronAPI.saveItrNotice({
       name: itrName,
       date: itrDate,
+      dueDate: itrDueDate,
       year: itrYear
     })
 
     if (result.success) {
       alert('✅ ITR Notice saved successfully!')
       setItrName('')
-      setItrYear('')
+      setItrYear(years[0])
+      setItrDueDate('')
       setItrDate('')
     } else {
       alert(`❌ Error: ${result.error}`)
@@ -168,11 +176,20 @@ const Notices: React.FC = () => {
               ))}
             </select>
 
-            <label style={labelStyle}>GST Date</label>
+            <label style={labelStyle}>GST Issue Date</label>
             <input
               type="date"
               value={gstDate}
               onChange={(e) => setGstDate(e.target.value)}
+              required
+              style={inputStyle}
+            />
+
+            <label style={labelStyle}>GST Due Date</label>
+            <input
+              type="date"
+              value={gstDueDate}
+              onChange={(e) => setGstDueDate(e.target.value)}
               required
               style={inputStyle}
             />
@@ -231,11 +248,20 @@ const Notices: React.FC = () => {
               ))}
             </select>
 
-            <label style={labelStyle}>ITR Date</label>
+            <label style={labelStyle}>ITR Issue Date</label>
             <input
               type="date"
               value={itrDate}
               onChange={(e) => setItrDate(e.target.value)}
+              required
+              style={inputStyle}
+            />
+
+            <label style={labelStyle}>ITR Due Date</label>
+            <input
+              type="date"
+              value={itrDueDate}
+              onChange={(e) => setItrDueDate(e.target.value)}
               required
               style={inputStyle}
             />
@@ -299,8 +325,9 @@ const NoticeTable = ({
           <th style={thStyle}>Name</th>
           <th style={thStyle}>Year</th>
           <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
-            Date {sortAsc ? '↑' : '↓'}
+            Issue Date {sortAsc ? '↑' : '↓'}
           </th>
+          <th style={thStyle}>Due Date</th>
           <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
           <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
         </tr>
@@ -308,16 +335,17 @@ const NoticeTable = ({
       <tbody>
         {notices.length === 0 ? (
           <tr>
-            <td colSpan={4} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
+            <td colSpan={6} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
               No pending notices
             </td>
           </tr>
         ) : (
           notices.map((n, i) => (
             <tr key={i} className="hoverable-row">
-              <td style={tdStyle}>{n.name}</td>
+              <td style={{ ...tdStyle, maxWidth: '200px' }}>{n.name}</td>
               <td style={tdStyle}>{n.year || '-'}</td>
               <td style={tdStyle}>{n.date}</td>
+              <td style={tdStyle}>{n.dueDate}</td>
               <td style={{ ...tdStyle, textAlign: 'center' }}>
                 <input
                   type="checkbox"
@@ -363,13 +391,26 @@ const NoticeTable = ({
               marginTop: '0.5rem'
             }}
           >
+            <thead>
+              <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+                <th style={thStyle}>Name</th>
+                <th style={thStyle}>Year</th>
+                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={onToggleSort}>
+                  Issue Date {sortAsc ? '↑' : '↓'}
+                </th>
+                <th style={thStyle}>Due Date</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
+              </tr>
+            </thead>
             <tbody>
               {doneNotices.map((n, i) => (
                 <tr key={i} className="hoverable-row">
-                  <td style={tdStyle}>{n.name}</td>
+                  <td style={{ ...tdStyle, maxWidth: '200px' }}>{n.name}</td>
                   <td style={tdStyle}>{n.year || '-'}</td>
                   <td style={tdStyle}>{n.date}</td>
-                  <td style={tdStyle}>
+                  <td style={tdStyle}>{n.dueDate}</td>
+                  <td style={{ ...tdStyle, textAlign: 'center' }}>
                     <input
                       type="checkbox"
                       checked={n.done ?? false}
@@ -377,7 +418,7 @@ const NoticeTable = ({
                       style={{ transform: 'scale(1.8)' }}
                     />
                   </td>
-                  <td style={tdStyle}>
+                  <td style={{ ...tdStyle, textAlign: 'center' }}>
                     <button
                       onClick={() => onDelete(n)}
                       style={{
@@ -385,7 +426,8 @@ const NoticeTable = ({
                         border: 'none',
                         color: '#ef4444',
                         cursor: 'pointer',
-                        fontWeight: 600
+                        fontWeight: 600,
+                        fontSize: '20px'
                       }}
                       title="Delete notice"
                     >

@@ -585,7 +585,7 @@ ipcMain.handle('save-gst-notice', async (_event, notice) => {
       return { success: false, error: 'A GST notice with this name already exists.' }
     }
 
-    existing.push({ ...notice, type: 'GST', year: notice.year })
+    existing.push({ ...notice, type: 'GST' })
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
     return { success: true }
   } catch (error: any) {
@@ -606,7 +606,7 @@ ipcMain.handle('save-itr-notice', async (_event, notice) => {
       return { success: false, error: 'An ITR notice with this name already exists.' }
     }
 
-    existing.push({ ...notice, type: 'ITR', year: notice.year })
+    existing.push({ ...notice, type: 'ITR' })
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
     return { success: true }
   } catch (error: any) {
@@ -631,7 +631,7 @@ ipcMain.handle('update-notice', async (_event, updatedNotice) => {
     const filePath = getNoticesPath()
     if (!fs.existsSync(filePath)) return { success: false, error: 'No notices file found' }
 
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Notice[]
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
     const updated = data.map((n) =>
       n.name === updatedNotice.name &&
       n.date === updatedNotice.date &&
@@ -654,7 +654,7 @@ ipcMain.handle('deleteNotice', async (_event, notice) => {
       return { success: false, error: 'Notices file not found' }
     }
 
-    const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Notice[]
+    const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
 
     const filtered = existing.filter(
       (n) => !(n.name === notice.name && n.date === notice.date && n.type === notice.type)

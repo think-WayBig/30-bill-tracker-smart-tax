@@ -20,6 +20,7 @@ declare global {
   interface Notice {
     name: string
     date: string
+    dueDate: string
     type: 'GST' | 'ITR'
     year: string
     done?: boolean
@@ -82,6 +83,7 @@ declare global {
       saveItrNotice: (notice: Omit<Notice, 'type'>) => Promise<{ success: boolean; error?: string }>
       loadNotices: () => Promise<Notice[]>
       updateNotice: (notice: Notice) => Promise<{ success: boolean; error?: string }>
+      deleteNotice: (notice: Notice) => Promise<{ success: boolean; error?: string }>
     }
 
     api: {
