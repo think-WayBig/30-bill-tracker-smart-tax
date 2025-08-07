@@ -124,7 +124,9 @@ const Notices: React.FC = () => {
 
       if (field === 'date' || field === 'dueDate') {
         return asc
+          // @ts-ignore
           ? new Date(valA).getTime() - new Date(valB).getTime()
+          // @ts-ignore
           : new Date(valB).getTime() - new Date(valA).getTime()
       }
 
@@ -148,7 +150,9 @@ const Notices: React.FC = () => {
 
       if (field === 'date' || field === 'dueDate') {
         return asc
+          // @ts-ignore
           ? new Date(valA).getTime() - new Date(valB).getTime()
+          // @ts-ignore
           : new Date(valB).getTime() - new Date(valA).getTime()
       }
 
