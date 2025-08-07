@@ -25,7 +25,7 @@ const isDueSoon = (dueDate: string) => {
 const generateYears = () => {
   const currentYear = new Date().getFullYear()
   const years: string[] = []
-  for (let i = currentYear + 1; i >= 2020; i--) {
+  for (let i = currentYear + 1; i >= 2010; i--) {
     years.push(`${i - 1}-${i}`) // format: 2024-2025
   }
   return years
