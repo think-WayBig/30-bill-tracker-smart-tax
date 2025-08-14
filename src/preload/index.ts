@@ -72,6 +72,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveGroup: (group: string) => ipcRenderer.invoke('save-group', group),
   deleteGroup: (group: string) => ipcRenderer.invoke('delete-group', group),
   loadGroups: () => ipcRenderer.invoke('load-groups'),
+  assignUserToGroup: (pan: string, group: string) =>
+    ipcRenderer.invoke('assign-user-to-group', pan, group),
 
   getAcknoFromFile: (pan: string, directory: string, year: string) =>
     ipcRenderer.invoke('get-ackno-from-file', pan, directory, year),

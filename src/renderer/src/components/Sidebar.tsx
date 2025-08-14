@@ -31,7 +31,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   // Logic to show submenu if active is on a subpage
   const showBillingOptions = active === 'billing' || billingSubPages.includes(active)
   const showBookOptions = active === 'manage' || bookSubPages.includes(active)
-  const showNoticesOptions = active === 'notices'
 
   const renderButton = (
     key: string,
@@ -43,8 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
     const isActive =
       active === key ||
       (key === 'billing' && billingSubPages.includes(active)) ||
-      (key === 'manage' && bookSubPages.includes(active)) ||
-      (key === 'notices')
+      (key === 'manage' && bookSubPages.includes(active))
 
     return (
       <button
@@ -142,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       )}
 
       {renderButton('settings', 'Settings', '⚙️')}
-      {renderButton('notices', 'Notices', '📬', false, showNoticesOptions)}
+      {renderButton('notices', 'Notices', '📬')}
 
       <button
         onClick={() => window.close()}

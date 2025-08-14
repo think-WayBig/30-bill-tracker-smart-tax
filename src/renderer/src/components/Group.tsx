@@ -142,7 +142,7 @@ const Group = () => {
       next[idx] = { ...next[idx], group: group || undefined }
       return next
     })
-    const res = await window.electronAPI.assignUserToGroup({ pan, group })
+    const res = await window.electronAPI.assignUserToGroup(pan, group)
     if (!res.success) {
       alert(res.error || 'Failed to assign group')
       const fresh = await window.electronAPI.loadEntries()

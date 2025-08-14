@@ -26,6 +26,15 @@ function createWindow(): void {
     mainWindow.show()
   })
 
+  // Listen for Ctrl+R / Cmd+R
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    // Ctrl+R on Windows/Linux or Cmd+R on macOS
+    if (input.key.toLowerCase() === 'r' && (input.control || input.meta)) {
+      event.preventDefault()
+      mainWindow.reload()
+    }
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -267,20 +276,20 @@ ipcMain.handle('load-groups', async () => {
 })
 
 // Update user's group assignment
-ipcMain.handle('assign-user-to-group', async (_event, { pan, group }) => {
+ipcMain.handle('assign-user-to-group', async (_event, pan: string, group: string) => {
   try {
     const dir = path.join(app.getPath('userData'), 'data')
     const filePath = path.join(dir, 'entries.json')
 
     if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
 
-    const users = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const entries = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
 
-    const index = users.findIndex((user: any) => user.pan === pan)
-    if (index === -1) return { success: false, error: 'User not found' }
+    const index = entries.findIndex((entry) => entry.pan === pan)
+    if (index === -1) return { success: false, error: 'Entry not found' }
 
-    users[index].group = group // only modify the group field
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2))
+    entries[index].group = group // only modify the group field
+    fs.writeFileSync(filePath, JSON.stringify(entries, null, 2))
 
     return { success: true }
   } catch (error: any) {

@@ -73,10 +73,10 @@ declare global {
       saveGroup: (group: string) => Promise<{ success: boolean; error?: string }>
       loadGroups: () => Promise<string[]>
       deleteGroup: (group: string) => Promise<{ success: boolean; error?: string }>
-      assignUserToGroup: (payload: {
-        pan: string
+      assignUserToGroup: (
+        pan: string,
         group: string
-      }) => Promise<{ success: boolean; error?: string }>
+      ) => Promise<{ success: boolean; error?: string }>
 
       // Notice-related APIs
       saveGstNotice: (notice: Omit<Notice, 'type'>) => Promise<{ success: boolean; error?: string }>
