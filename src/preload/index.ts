@@ -100,7 +100,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   updateNotice: (notice: Notice) => ipcRenderer.invoke('update-notice', notice),
 
-  deleteNotice: (notice: Notice) => ipcRenderer.invoke('deleteNotice', notice)
+  deleteNotice: (notice: Notice) => ipcRenderer.invoke('deleteNotice', notice),
+
+  /** Bills Code */
+  saveGstBill: (bill: {
+    name: string
+    pan: string
+    paymentType: string
+    year?: string
+    month?: string
+  }) => ipcRenderer.invoke('save-gst-bill', bill),
+
+  saveTdsBill: (bill: {
+    name: string
+    pan: string
+    paymentType: string
+    year?: string
+    quarter?: string
+  }) => ipcRenderer.invoke('save-tds-bill', bill),
+
+  loadBills: () => ipcRenderer.invoke('load-bills')
 })
 
 if (process.contextIsolated) {

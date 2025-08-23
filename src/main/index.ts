@@ -679,3 +679,81 @@ ipcMain.handle('deleteNotice', async (_event, notice) => {
     return { success: false, error: error.message }
   }
 })
+
+const getBillsPath = () => {
+  const dir = path.join(app.getPath('userData'), 'data')
+  const filePath = path.join(dir, 'bills.json')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return filePath
+}
+
+interface Bill {
+  name: string
+  gstNumber?: string
+  pan?: string
+  paymentType: string
+  month?: string
+  quarter?: string
+  bill?: {
+    year: number
+    amount: number
+    date: string
+    remarks?: string
+  }
+  type: 'GST' | 'TDS'
+}
+
+// Save GST Bill
+ipcMain.handle('save-gst-bill', async (_event, bill: Bill) => {
+  try {
+    const filePath = getBillsPath()
+    const existing: Bill[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    // ✅ Check duplicate GST Number
+    if (bill.gstNumber && existing.some((b) => b.gstNumber === bill.gstNumber)) {
+      throw new Error(`GST Number ${bill.gstNumber} already exists`)
+    }
+
+    existing.push({ ...bill, type: 'GST' })
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Save TDS Bill
+ipcMain.handle('save-tds-bill', async (_event, bill: Bill) => {
+  try {
+    const filePath = getBillsPath()
+    const existing: Bill[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    // ✅ Check duplicate PAN
+    if (bill.pan && existing.some((b) => b.pan === bill.pan)) {
+      throw new Error(`PAN ${bill.pan} already exists`)
+    }
+
+    existing.push({ ...bill, type: 'TDS' })
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Load Bills
+ipcMain.handle('load-bills', async () => {
+  try {
+    const filePath = getBillsPath()
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Failed to load bills:', error)
+    return []
+  }
+})

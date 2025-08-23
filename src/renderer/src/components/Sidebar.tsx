@@ -54,7 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
           ...buttonStyle,
           backgroundColor: isActive ? '#4f46e5' : hovered === key ? '#e0e7ff' : 'transparent',
           color: isActive ? '#fff' : '#333',
-          fontWeight: isActive ? '600' : 'normal'
+          fontWeight: isActive ? '600' : 'normal',
+          width: '100%'
         }}
       >
         <span style={{ marginRight: '10px' }}>{icon}</span>
@@ -139,9 +140,17 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         </div>
       )}
 
-      {renderButton('settings', 'Settings', '⚙️')}
       {renderButton('notices', 'Notices', '📬')}
+      {renderButton('taxes', 'GST/TDS', '📝')}
 
+      <div
+        style={{
+          marginTop: 'auto',
+          width: '100%'
+        }}
+      >
+        {renderButton('settings', 'Settings', '⚙️')}
+      </div>
       <button
         onClick={() => window.close()}
         style={{
@@ -203,7 +212,6 @@ const subButtonStyle: React.CSSProperties = {
 }
 
 const closeButtonStyle: React.CSSProperties = {
-  marginTop: 'auto',
   border: '2px solid #dc2626',
   backgroundColor: 'transparent',
   color: '#000',

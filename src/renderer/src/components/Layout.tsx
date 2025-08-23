@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+const Layout: React.FC<{
+  title: string
+  hideAssessmentYear?: boolean
+  financialYear?: boolean
+  children: React.ReactNode
+}> = ({ title, hideAssessmentYear, financialYear, children }) => {
   const [year, setYear] = useState<string>('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -60,72 +65,75 @@ const Layout: React.FC<{ title: string; children: React.ReactNode }> = ({ title,
       >
         <span>{title}</span>
 
-        <div ref={dropdownRef} style={{ position: 'relative' }}>
-          <button
-            onClick={() => setShowDropdown((prev) => !prev)}
-            style={{
-              backgroundColor: '#6366f1',
-              padding: scrolled ? '6px 14px' : '8px 16px',
-              borderRadius: '999px',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-              color: '#fff',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Assessment Year: {`${year}-${(Number(year) + 1).toString().slice(-2)}`} ▾
-          </button>
-
-          {showDropdown && (
-            <div
+        {!hideAssessmentYear && (
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowDropdown((prev) => !prev)}
               style={{
-                position: 'absolute',
-                top: '110%',
-                right: 0,
-                backgroundColor: '#fff',
-                borderRadius: '10px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                zIndex: 1000,
-                overflow: 'hidden',
-                minWidth: '130px',
-                maxHeight: '250px',
-                overflowY: 'auto',
-                scrollbarWidth: 'thin'
+                backgroundColor: '#6366f1',
+                padding: scrolled ? '6px 14px' : '8px 16px',
+                borderRadius: '999px',
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+                color: '#fff',
+                transition: 'all 0.3s ease'
               }}
             >
-              {yearOptions.map((y) => {
-                const startYear = Number(y)
-                const endYear = (startYear + 1).toString().slice(-2)
-                return (
-                  <div
-                    key={y}
-                    onClick={() => handleYearChange(y)}
-                    style={{
-                      padding: '6px 12px',
-                      cursor: 'pointer',
-                      backgroundColor: y === year ? '#e0e7ff' : '#fff',
-                      color: '#333',
-                      fontWeight: y === year ? 600 : 400,
-                      fontSize: '0.9rem',
-                      lineHeight: '1.3',
-                      transition: 'background 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = y === year ? '#e0e7ff' : '#fff'
-                    }}
-                  >
-                    {`${startYear}-${endYear}`}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+              {financialYear ? 'Financial Year:' : 'Assessment Year:'}{' '}
+              {`${year}-${(Number(year) + 1).toString().slice(-2)}`} ▾
+            </button>
+
+            {showDropdown && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '110%',
+                  right: 0,
+                  backgroundColor: '#fff',
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  zIndex: 1000,
+                  overflow: 'hidden',
+                  minWidth: '130px',
+                  maxHeight: '250px',
+                  overflowY: 'auto',
+                  scrollbarWidth: 'thin'
+                }}
+              >
+                {yearOptions.map((y) => {
+                  const startYear = Number(y)
+                  const endYear = (startYear + 1).toString().slice(-2)
+                  return (
+                    <div
+                      key={y}
+                      onClick={() => handleYearChange(y)}
+                      style={{
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        backgroundColor: y === year ? '#e0e7ff' : '#fff',
+                        color: '#333',
+                        fontWeight: y === year ? 600 : 400,
+                        fontSize: '0.9rem',
+                        lineHeight: '1.3',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = y === year ? '#e0e7ff' : '#fff'
+                      }}
+                    >
+                      {`${startYear}-${endYear}`}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       <main style={{ padding: '2rem' }}>{children}</main>

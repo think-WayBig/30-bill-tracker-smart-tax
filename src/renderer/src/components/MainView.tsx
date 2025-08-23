@@ -6,6 +6,7 @@ import Group from './Group'
 import Billing from './Billing'
 import Settings from './Settings'
 import Notices from './Notices'
+import GstTds from './GstTds'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -39,6 +40,7 @@ const MainView = () => {
         {isBillingScreen && <Billing activeScreen={activeScreen} />}
         {activeScreen === 'settings' && <Settings />}
         {activeScreen === 'notices' && <Notices />}
+        {activeScreen === 'taxes' && <GstTds />}
       </div>
     </div>
   )

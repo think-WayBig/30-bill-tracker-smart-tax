@@ -201,7 +201,7 @@ const Notices: React.FC = () => {
   const itrDone = itrNotices.filter((n) => n.done)
 
   return (
-    <Layout title="📬 Add GST / ITR Notices">
+    <Layout title="📬 Add GST / ITR Notices" hideAssessmentYear>
       <div style={containerStyle}>
         {/* GST Section */}
         <div style={columnStyle}>

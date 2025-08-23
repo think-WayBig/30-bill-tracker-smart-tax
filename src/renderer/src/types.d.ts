@@ -26,6 +26,27 @@ declare global {
     done?: boolean
   }
 
+  /**
+   * Bill type definition
+   * - GST Bills: Have gstNumber, can be Yearly or Monthly
+   * - TDS Bills: Have pan, can be Yearly or QuarterlyD
+   */
+  interface Bill {
+    name: string
+    gstNumber?: string
+    pan?: string
+    paymentType: string
+    month?: string
+    quarter?: string
+    bill?: {
+      year: number
+      amount: number
+      date: string
+      remarks?: string
+    }
+    type: 'GST' | 'TDS'
+  }
+
   interface Window {
     electronAPI: {
       // Entry-related APIs
@@ -84,6 +105,11 @@ declare global {
       loadNotices: () => Promise<Notice[]>
       updateNotice: (notice: Notice) => Promise<{ success: boolean; error?: string }>
       deleteNotice: (notice: Notice) => Promise<{ success: boolean; error?: string }>
+
+      // Bills-related APIs
+      saveGstBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
+      saveTdsBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
+      loadBills: () => Promise<Bill[]>
     }
 
     api: {
