@@ -35,16 +35,28 @@ declare global {
     name: string
     gstNumber?: string
     pan?: string
-    paymentType: string
-    month?: string
-    quarter?: string
+    paymentType: PaymentType
     bill?: {
       year: number
-      amount: number
+      amount: number | MonthlyAmount[] | QuarterlyAmount[]
       date: string
       remarks?: string
     }
     type: 'GST' | 'TDS'
+  }
+
+  const paymentType = ['Yearly', 'Monthly', 'Quarterly'] as const
+
+  type PaymentType = (typeof paymentType)[number]
+
+  interface MonthlyAmount {
+    month: string
+    value: number
+  }
+
+  interface QuarterlyAmount {
+    quarter: string
+    value: number
   }
 
   interface Window {

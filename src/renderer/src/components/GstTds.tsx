@@ -1,37 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Layout from './Layout'
 
-const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-]
-const quarters = ['Q1', 'Q2', 'Q3', 'Q4']
-
-const initialFormState = {
+const initialFormState: Bill = {
   name: '',
   pan: '',
   gstNumber: '',
-  type: undefined,
-  paymentType: 'Yearly',
-  month: months[0],
-  quarter: quarters[0]
+  type: 'GST',
+  paymentType: 'Yearly'
 }
 
 const GstTds = () => {
-  const [activeTab, setActiveTab] = useState<'All' | 'GST' | 'TDS'>('All')
-  const [activeSubTab, setActiveSubTab] = useState<'All' | 'Yearly' | 'Monthly' | 'Quarterly'>(
-    'All'
-  )
+  const [activeTab, setActiveTab] = useState<'GST' | 'TDS'>('GST')
+  const [activeSubTab, setActiveSubTab] = useState<'Yearly' | 'Monthly' | 'Quarterly'>('Yearly')
   const [bills, setBills] = useState<Bill[]>([])
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<'name' | 'pan' | 'paymentType' | ''>('')
@@ -51,18 +31,16 @@ const GstTds = () => {
   const filteredBills = useMemo(() => {
     const q = search.toLowerCase()
     return bills
-      .filter((bill) => activeTab === 'All' || bill.type === activeTab)
-      .filter((bill) => activeSubTab === 'All' || bill.paymentType === activeSubTab)
+      .filter((bill) => bill.type === activeTab)
+      .filter((bill) => bill.paymentType === activeSubTab)
       .filter(
         (bill) =>
           bill.name.toLowerCase().includes(q) ||
           (bill.pan?.toLowerCase() ?? '').includes(q) ||
           (bill.gstNumber?.toLowerCase() ?? '').includes(q) ||
-          bill.paymentType.toLowerCase().includes(q) ||
-          (bill.month ?? '').toLowerCase().includes(q) ||
-          (bill.quarter ?? '').toLowerCase().includes(q)
+          bill.paymentType.toLowerCase().includes(q)
       )
-  }, [bills, activeTab, activeSubTab, search])
+  }, [activeTab, activeSubTab, bills, search])
 
   const sortedBills = useMemo(() => {
     if (!sortKey) return filteredBills
@@ -93,14 +71,11 @@ const GstTds = () => {
 
     const payload: Bill = {
       name: form.name,
-      paymentType: form.paymentType,
+      paymentType: form.paymentType as PaymentType,
       type: form.type,
       ...(form.type === 'GST' ? { gstNumber: form.gstNumber } : {}),
       ...(form.type === 'TDS' ? { pan: form.pan } : {})
     }
-
-    if (form.type === 'GST' && form.paymentType === 'Monthly') payload.month = form.month
-    if (form.type === 'TDS' && form.paymentType === 'Quarterly') payload.quarter = form.quarter
 
     const saveBill =
       form.type === 'GST' ? window.electronAPI.saveGstBill : window.electronAPI.saveTdsBill
@@ -114,10 +89,8 @@ const GstTds = () => {
         name: '',
         pan: '',
         gstNumber: '',
-        type: undefined,
-        paymentType: '',
-        month: months[0],
-        quarter: quarters[0]
+        type: 'GST',
+        paymentType: 'Yearly'
       })
       setShowForm(false)
     } else {
@@ -130,57 +103,39 @@ const GstTds = () => {
       {/* Heading */}
       <div style={{ marginBottom: '20px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#4f46e5' }}>
-          {activeTab === 'All' ? 'All Bills' : activeTab === 'GST' ? 'GST Bills' : 'TDS Bills'}
+          {activeTab === 'GST' ? 'GST Bills' : 'TDS Bills'}
         </h1>
         <p style={{ fontSize: '16px', color: '#6b7280' }}>
-          {activeTab === 'All'
-            ? 'View and manage all GST and TDS bills here.'
-            : activeTab === 'GST'
-              ? 'Manage and track your GST bills here.'
-              : 'Manage and track your TDS bills here.'}
+          {activeTab === 'GST'
+            ? 'Manage and track your GST bills here.'
+            : 'Manage and track your TDS bills here.'}
         </p>
       </div>
 
-      {/* Tabs */}
       <div
         style={{
           display: 'flex',
-          gap: '16px',
-          marginBottom: '20px',
+          gap: '20px',
           borderBottom: '2px solid #e5e7eb',
-          paddingBottom: '10px',
-          alignItems: 'center'
+          marginBottom: '20px'
         }}
       >
-        {/* Main Tabs */}
+        {/* Tabs */}
         <div
           style={{
             display: 'flex',
             gap: '16px',
-            borderRight: activeTab !== 'All' ? '2px solid #e5e7eb' : 'none',
-            paddingRight: '16px'
+            paddingBottom: '10px',
+            paddingRight: '20px',
+            alignItems: 'center',
+            borderRight: '1px solid #e5e7eb'
           }}
         >
-          <button
-            onClick={() => {
-              setActiveTab('All')
-              setActiveSubTab('All')
-            }}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeTab === 'All' ? '#6366f1' : 'transparent',
-              color: activeTab === 'All' ? '#fff' : '#333',
-              cursor: 'pointer'
-            }}
-          >
-            All
-          </button>
+          {/* Main Tabs */}
           <button
             onClick={() => {
               setActiveTab('GST')
-              setActiveSubTab('All')
+              setActiveSubTab('Yearly')
             }}
             style={{
               padding: '10px 20px',
@@ -196,7 +151,7 @@ const GstTds = () => {
           <button
             onClick={() => {
               setActiveTab('TDS')
-              setActiveSubTab('All')
+              setActiveSubTab('Yearly')
             }}
             style={{
               padding: '10px 20px',
@@ -212,66 +167,59 @@ const GstTds = () => {
         </div>
 
         {/* Sub-Tabs */}
-        {activeTab !== 'All' && (
-          <div style={{ display: 'flex', gap: '16px', paddingLeft: '16px' }}>
+
+        <div
+          style={{
+            display: 'flex',
+            gap: '16px',
+            paddingBottom: '10px',
+            alignItems: 'center'
+          }}
+        >
+          <button
+            onClick={() => setActiveSubTab('Yearly')}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeSubTab === 'Yearly' ? '#6366f1' : 'transparent',
+              color: activeSubTab === 'Yearly' ? '#fff' : '#333',
+              cursor: 'pointer'
+            }}
+          >
+            Yearly
+          </button>
+          {activeTab === 'GST' && (
             <button
-              onClick={() => setActiveSubTab('All')}
+              onClick={() => setActiveSubTab('Monthly')}
               style={{
                 padding: '10px 20px',
                 borderRadius: '6px',
                 border: 'none',
-                background: activeSubTab === 'All' ? '#6366f1' : 'transparent',
-                color: activeSubTab === 'All' ? '#fff' : '#333',
+                background: activeSubTab === 'Monthly' ? '#6366f1' : 'transparent',
+                color: activeSubTab === 'Monthly' ? '#fff' : '#333',
                 cursor: 'pointer'
               }}
             >
-              All
+              Monthly
             </button>
+          )}
+          {activeTab === 'TDS' && (
             <button
-              onClick={() => setActiveSubTab('Yearly')}
+              onClick={() => setActiveSubTab('Quarterly')}
               style={{
                 padding: '10px 20px',
                 borderRadius: '6px',
                 border: 'none',
-                background: activeSubTab === 'Yearly' ? '#6366f1' : 'transparent',
-                color: activeSubTab === 'Yearly' ? '#fff' : '#333',
+                background: activeSubTab === 'Quarterly' ? '#6366f1' : 'transparent',
+                color: activeSubTab === 'Quarterly' ? '#fff' : '#333',
                 cursor: 'pointer'
               }}
             >
-              Yearly
+              Quarterly
             </button>
-            {activeTab === 'GST' && (
-              <button
-                onClick={() => setActiveSubTab('Monthly')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: activeSubTab === 'Monthly' ? '#6366f1' : 'transparent',
-                  color: activeSubTab === 'Monthly' ? '#fff' : '#333',
-                  cursor: 'pointer'
-                }}
-              >
-                Monthly
-              </button>
-            )}
-            {activeTab === 'TDS' && (
-              <button
-                onClick={() => setActiveSubTab('Quarterly')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: activeSubTab === 'Quarterly' ? '#6366f1' : 'transparent',
-                  color: activeSubTab === 'Quarterly' ? '#fff' : '#333',
-                  cursor: 'pointer'
-                }}
-              >
-                Quarterly
-              </button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Search */}
@@ -302,7 +250,13 @@ const GstTds = () => {
             fontWeight: 'bold'
           }}
           onClick={() => {
-            setShowForm(true)
+            return (
+              setShowForm(true),
+              setForm({
+                ...initialFormState,
+                ...(activeTab === 'GST' ? { type: 'GST' } : { type: 'TDS' })
+              })
+            )
           }}
         >
           Create Bill
@@ -319,12 +273,7 @@ const GstTds = () => {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns:
-                  activeTab === 'All'
-                    ? '1fr 200px 160px 110px 100px'
-                    : activeSubTab === 'Yearly'
-                      ? '1fr 200px 160px'
-                      : '1fr 200px 160px 110px',
+                gridTemplateColumns: '1fr 200px',
                 backgroundColor: '#4f46e5',
                 color: 'white',
                 fontWeight: 'bold',
@@ -335,22 +284,7 @@ const GstTds = () => {
                 Name {sortKey === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
               </div>
               {/* Unified ID column */}
-              <div>
-                {activeTab === 'All'
-                  ? 'Identifier (GST/TDS)'
-                  : activeTab === 'GST'
-                    ? 'GST No.'
-                    : 'PAN'}
-              </div>
-              <div style={{ cursor: 'pointer' }} onClick={() => handleSort('paymentType')}>
-                Payment Type {sortKey === 'paymentType' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </div>
-              {activeSubTab !== 'Yearly' && (
-                <div>
-                  {activeTab === 'All' ? 'Period' : activeTab === 'GST' ? 'Month' : 'Quarter'}
-                </div>
-              )}
-              {activeTab === 'All' && <div>Type</div>}
+              <div>{activeTab === 'GST' ? 'GST No.' : 'PAN'}</div>
             </div>
 
             {/* Rows */}
@@ -359,30 +293,14 @@ const GstTds = () => {
                 key={index}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns:
-                    activeTab === 'All'
-                      ? '1fr 200px 160px 110px 100px'
-                      : activeSubTab === 'Yearly'
-                        ? '1fr 200px 160px'
-                        : '1fr 200px 160px 110px',
+                  gridTemplateColumns: '1fr 200px ',
                   alignItems: 'center',
                   borderBottom: '1px solid #eee',
                   padding: '10px 16px'
                 }}
               >
                 <div>{bill.name}</div>
-                <div>{bill.pan || bill.gstNumber || '-'}</div>
-                <div>{bill.paymentType}</div>
-                {activeSubTab !== 'Yearly' && (
-                  <div>
-                    {bill.paymentType === 'Monthly'
-                      ? bill.month
-                      : bill.paymentType === 'Quarterly'
-                        ? bill.quarter
-                        : '-'}
-                  </div>
-                )}
-                {activeTab === 'All' && <div>{bill.type}</div>}
+                <div>{bill.pan || bill.gstNumber}</div>
               </div>
             ))}
           </>
@@ -434,7 +352,6 @@ const GstTds = () => {
                   name="type"
                   value={form.type || ''}
                   onChange={handleChange}
-                  autoFocus
                   required
                   style={inputBaseStyle}
                 >
@@ -482,6 +399,7 @@ const GstTds = () => {
                   value={form.name}
                   onChange={handleChange}
                   required
+                  autoFocus
                   style={inputBaseStyle}
                   placeholder="e.g., ABC Pvt Ltd"
                 />
@@ -522,47 +440,6 @@ const GstTds = () => {
                 <div />
               )}
             </div>
-
-            {/* Bottom row: Period selectors (conditional) */}
-            {(form.paymentType === 'Monthly' || form.paymentType === 'Quarterly') && (
-              <div style={{ ...formGridStyle, gridTemplateColumns: '1fr 1fr' }}>
-                {form.paymentType === 'Monthly' && (
-                  <label style={fieldStyle}>
-                    <span style={labelStyle}>Month</span>
-                    <select
-                      name="month"
-                      value={form.month}
-                      onChange={handleChange}
-                      style={inputBaseStyle}
-                    >
-                      {months.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-
-                {form.paymentType === 'Quarterly' && (
-                  <label style={fieldStyle}>
-                    <span style={labelStyle}>Quarter</span>
-                    <select
-                      name="quarter"
-                      value={form.quarter}
-                      onChange={handleChange}
-                      style={inputBaseStyle}
-                    >
-                      {quarters.map((q) => (
-                        <option key={q} value={q}>
-                          {q}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-              </div>
-            )}
 
             {/* Footer */}
             <div style={footerStyle}>
