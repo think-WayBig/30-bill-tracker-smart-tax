@@ -23,9 +23,6 @@ const initialFormState: Bill = {
 }
 
 const MONTHS = [
-  'January',
-  'February',
-  'March',
   'April',
   'May',
   'June',
@@ -34,10 +31,20 @@ const MONTHS = [
   'September',
   'October',
   'November',
-  'December'
+  'December',
+  'January',
+  'February',
+  'March'
 ] as const
 
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const
+
+const LS = {
+  tab: 'taxes.activeTab',
+  subTab: 'taxes.activeSubTab',
+  search: 'taxes.search',
+  unpaid: 'taxes.unpaidOnly'
+}
 
 // Selected year comes from localStorage
 const currentYear = localStorage.getItem('selectedYear')!
@@ -85,14 +92,44 @@ const stickyWrapStyle: React.CSSProperties = {
 const GstTds = () => {
   const [bills, setBills] = useState<Bill[]>([])
 
-  const [activeTab, setActiveTab] = useState<'GST' | 'TDS'>('GST')
-  const [activeSubTab, setActiveSubTab] = useState<'Yearly' | 'Monthly' | 'Quarterly'>('Yearly')
-
-  const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<'name' | 'pan' | 'paymentType' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [periodFilter, setPeriodFilter] = useState<string>('All')
-  const [unpaidOnly, setUnpaidOnly] = useState(false)
+
+  // === local storage initialization ===
+  const [activeTab, setActiveTab] = useState<'GST' | 'TDS'>(() => {
+    const v = localStorage.getItem(LS.tab)
+    return v === 'TDS' ? 'TDS' : 'GST'
+  })
+
+  const [activeSubTab, setActiveSubTab] = useState<'Yearly' | 'Monthly' | 'Quarterly'>(() => {
+    const v = localStorage.getItem(LS.subTab)
+    return v === 'Monthly' || v === 'Quarterly' || v === 'Yearly' ? v : 'Yearly'
+  })
+
+  const [search, setSearch] = useState<string>(() => localStorage.getItem(LS.search) ?? '')
+  const [unpaidOnly, setUnpaidOnly] = useState<boolean>(
+    () => localStorage.getItem(LS.unpaid) === '1'
+  )
+
+  useEffect(() => {
+    localStorage.setItem(LS.tab, activeTab)
+  }, [activeTab])
+  useEffect(() => {
+    localStorage.setItem(LS.subTab, activeSubTab)
+  }, [activeSubTab])
+  useEffect(() => {
+    localStorage.setItem(LS.search, search)
+  }, [search])
+  useEffect(() => {
+    localStorage.setItem(LS.unpaid, unpaidOnly ? '1' : '0')
+  }, [unpaidOnly])
+
+  useEffect(() => {
+    localStorage.setItem('taxes.activeTab', activeTab) // 'GST' | 'TDS'
+    window.dispatchEvent(new CustomEvent('taxes:tab-changed', { detail: activeTab }))
+  }, [activeTab])
+  // === end of local storage initialization ===
 
   const [form, setForm] = useState(initialFormState)
   const [showForm, setShowForm] = useState(false)
@@ -110,6 +147,26 @@ const GstTds = () => {
     transition:
       'background-color 240ms ease, color 240ms ease, border-color 240ms ease, box-shadow 240ms ease'
   }
+
+  const hexMixWithWhite = (hex: string, whiteRatio = 0.88) => {
+    let h = hex.replace('#', '').toLowerCase()
+    if (h.length === 3)
+      h = h
+        .split('')
+        .map((c) => c + c)
+        .join('')
+    if (h.length === 8) h = h.slice(0, 6) // ignore alpha if present
+    if (h.length !== 6) return '#eef2ff' // fallback
+    const r = parseInt(h.slice(0, 2), 16)
+    const g = parseInt(h.slice(2, 4), 16)
+    const b = parseInt(h.slice(4, 6), 16)
+    const mix = (c: number) => Math.round(c + (255 - c) * whiteRatio)
+    const toHex = (n: number) => n.toString(16).padStart(2, '0')
+    return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`
+  }
+
+  const HOVER_BG = hexMixWithWhite(ACCENT.solid, 0.88) // lighter
+  const HOVER_BG_STICKY = hexMixWithWhite(ACCENT.solid, 0.8) // a
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -834,10 +891,9 @@ const GstTds = () => {
       <style>
         {`
           .hoverable-row { transition: background-color 120ms ease-in-out; }
-          .hoverable-row:hover td { background: #eef2ff; }
-          .hoverable-row:hover td.sticky-cell { background: #e0e7ff !important; }
+          .hoverable-row:hover td { background: ${HOVER_BG}; }
+          .hoverable-row:hover td.sticky-cell { background: ${HOVER_BG_STICKY} !important; }
 
-          /* duplicates keep the cell for sticky/hover, hide text after first row */
           .hide-text { visibility: hidden; }
         `}
       </style>
