@@ -65,6 +65,12 @@ declare global {
     remarks?: string
   }
 
+  interface DeleteBillPayload {
+    type: 'GST' | 'TDS'
+    gstNumber?: string
+    pan?: string
+  }
+
   interface Window {
     electronAPI: {
       // Entry-related APIs
@@ -129,6 +135,9 @@ declare global {
       saveTdsBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
       loadBills: () => Promise<Bill[]>
       updateBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
+      deleteBill: (
+        payload: DeleteBillPayload
+      ) => Promise<{ success: boolean; removed?: number; error?: string }>
     }
 
     api: {

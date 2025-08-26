@@ -801,3 +801,49 @@ ipcMain.handle('update-bill', async (_event, updatedBill: Bill) => {
     return { success: false, error: error.message }
   }
 })
+
+interface DeleteBillPayload {
+  type: 'GST' | 'TDS'
+  gstNumber?: string
+  pan?: string
+}
+
+ipcMain.handle('delete-bill', async (_event, payload: DeleteBillPayload) => {
+  try {
+    const filePath = getBillsPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Bills file not found.' }
+    }
+
+    if (!payload?.type) {
+      return { success: false, error: 'Type is required.' }
+    }
+
+    const id = payload.type === 'GST' ? payload.gstNumber?.trim() : payload.pan?.trim()
+    if (!id) {
+      return {
+        success: false,
+        error: payload.type === 'GST' ? 'GST Number is required.' : 'PAN is required.'
+      }
+    }
+
+    const existing: Bill[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    // Remove all matches for safety (in case older data allowed duplicates)
+    const before = existing.length
+    const filtered = existing.filter((b) =>
+      payload.type === 'GST'
+        ? !(b.type === 'GST' && b.gstNumber === id)
+        : !(b.type === 'TDS' && b.pan === id)
+    )
+
+    if (filtered.length === before) {
+      return { success: false, error: 'Bill not found.' }
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2))
+    return { success: true, removed: before - filtered.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})

@@ -50,23 +50,38 @@ interface Bill {
   gstNumber?: string
   pan?: string
   paymentType: 'Yearly' | 'Monthly' | 'Quarterly'
-  bill?: {
-    year: string
-    amount: string | MonthlyAmount[] | QuarterlyAmount[]
-    date: string
-    remarks?: string
-  }
+  bill?: BillBill[]
   type: 'GST' | 'TDS'
+}
+
+type BillBill = {
+  year: string
+  amount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+}
+interface YearlyAmount {
+  value: string
+  date: string
+  remarks?: string
 }
 
 interface MonthlyAmount {
   month: string
   value: string
+  date: string
+  remarks?: string
 }
 
 interface QuarterlyAmount {
   quarter: string
   value: string
+  date: string
+  remarks?: string
+}
+
+interface DeleteBillPayload {
+  type: 'GST' | 'TDS'
+  gstNumber?: string
+  pan?: string
 }
 
 const api = {
@@ -133,7 +148,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   loadBills: () => ipcRenderer.invoke('load-bills'),
 
-  updateBill: (bill: Bill) => ipcRenderer.invoke('update-bill', bill)
+  updateBill: (bill: Bill) => ipcRenderer.invoke('update-bill', bill),
+
+  deleteBill: (bill: DeleteBillPayload) => ipcRenderer.invoke('delete-bill', bill)
 })
 
 if (process.contextIsolated) {

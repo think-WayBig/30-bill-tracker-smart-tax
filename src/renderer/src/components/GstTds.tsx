@@ -622,6 +622,127 @@ const GstTds = () => {
     }
   }
 
+  // --- Edit Bill modal state ---
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editForm, setEditForm] = useState<Bill>({
+    name: '',
+    pan: '',
+    gstNumber: '',
+    type: activeTab, // default to current tab
+    paymentType: 'Yearly'
+  })
+
+  useEffect(() => {
+    // keep type aligned with the active tab when opening a fresh edit
+    if (!showEditForm) {
+      setEditForm((prev) => ({ ...prev, type: activeTab }))
+    }
+  }, [activeTab, showEditForm])
+
+  const resetEditForm = () =>
+    setEditForm({
+      name: '',
+      pan: '',
+      gstNumber: '',
+      type: activeTab,
+      paymentType: 'Yearly'
+    })
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setEditForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Prefill name/paymentType from current list (user enters Type + GST/PAN, clicks Load)
+  const loadExistingIntoEdit = () => {
+    const { type, gstNumber, pan } = editForm
+    const found = bills.find((b) =>
+      type === 'GST'
+        ? b.type === 'GST' && b.gstNumber === gstNumber
+        : b.type === 'TDS' && b.pan === pan
+    )
+    if (found) {
+      setEditForm((prev) => ({
+        ...prev,
+        name: found.name || '',
+        paymentType: found.paymentType || 'Yearly'
+      }))
+    } else {
+      alert('No bill found for that Type and ID.')
+    }
+  }
+
+  // Update an existing bill (Type + GST/PAN used as identifier)
+  const submitEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const payload: Bill = {
+      type: editForm.type,
+      name: editForm.name.trim(),
+      paymentType: editForm.paymentType,
+      ...(editForm.type === 'GST'
+        ? { gstNumber: editForm.gstNumber?.trim(), pan: '' }
+        : { pan: editForm.pan?.trim(), gstNumber: '' })
+    }
+
+    try {
+      const result = await window.electronAPI.updateBill?.(payload)
+      if (!result?.success) throw new Error(result?.error || 'Unknown error')
+
+      // update local state
+      setBills((prev) =>
+        prev.map((b) => {
+          if (payload.type === 'GST') {
+            return b.type === 'GST' && b.gstNumber === payload.gstNumber ? { ...b, ...payload } : b
+          }
+          return b.type === 'TDS' && b.pan === payload.pan ? { ...b, ...payload } : b
+        })
+      )
+
+      alert('✅ Bill updated')
+      setShowEditForm(false)
+      resetEditForm()
+    } catch (err) {
+      alert(`❌ Update failed: ${err}`)
+    }
+  }
+
+  // Delete by Type + GST/PAN only
+  const deleteBillNow = async () => {
+    if (!confirm('Delete this bill? This cannot be undone.')) return
+    const idOk =
+      (editForm.type === 'GST' && editForm.gstNumber?.trim()) ||
+      (editForm.type === 'TDS' && editForm.pan?.trim())
+    if (!idOk) {
+      alert('Please select the Type and enter GST/PAN to delete.')
+      return
+    }
+
+    const payload =
+      editForm.type === 'GST'
+        ? { type: 'GST', gstNumber: editForm.gstNumber?.trim() }
+        : { type: 'TDS', pan: editForm.pan?.trim() }
+
+    try {
+      const result = await window.electronAPI.deleteBill?.(payload as any)
+      if (!result?.success) throw new Error(result?.error || 'Unknown error')
+
+      // remove from local state
+      setBills((prev) =>
+        prev.filter((b) =>
+          editForm.type === 'GST'
+            ? !(b.type === 'GST' && b.gstNumber === editForm.gstNumber?.trim())
+            : !(b.type === 'TDS' && b.pan === editForm.pan?.trim())
+        )
+      )
+
+      alert('🗑️ Bill deleted')
+      setShowEditForm(false)
+      resetEditForm()
+    } catch (err) {
+      alert(`❌ Delete failed: ${err}`)
+    }
+  }
+
   return (
     <Layout title="📝 Track GST/TDS Bills" color={ACCENT.dark} financialYear>
       {/* Sticky top section */}
@@ -864,7 +985,7 @@ const GstTds = () => {
           )}
           <button
             style={{
-              padding: '10px 40px',
+              padding: '10px 20px',
               borderRadius: 6,
               background: ACCENT.solid,
               color: ACCENT.text,
@@ -882,7 +1003,26 @@ const GstTds = () => {
               setPeriodFilter('All')
             )}
           >
-            Create Bill
+            <span style={{ fontSize: '17px' }}>+</span> Create
+          </button>
+
+          <button
+            style={{
+              padding: '10px 20px',
+              borderRadius: 6,
+              background: 'transparent',
+              color: ACCENT.dark,
+              border: `1px solid ${ACCENT.solid}`,
+              cursor: 'pointer',
+              ...SMOOTH,
+              fontWeight: 'bold'
+            }}
+            onClick={() => {
+              resetEditForm()
+              setShowEditForm(true)
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>✎</span> Edit
           </button>
         </div>
       </div>
@@ -1333,6 +1473,224 @@ const GstTds = () => {
                 disabled={!form.type || !form.paymentType}
               >
                 Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      {showEditForm && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowEditForm(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <form
+            onSubmit={submitEdit}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...dialogCardStyle,
+              borderTop: `4px solid ${ACCENT.solid}`,
+              boxShadow: '0 12px 28px rgba(0,0,0,0.12)'
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                ...dialogHeaderStyle
+              }}
+            >
+              <div>
+                <h3>Edit / Delete Bill</h3>
+              </div>
+              <button
+                type="button"
+                aria-label="Close"
+                style={{ ...closeBtnStyle, color: ACCENT.text, background: 'transparent' }}
+                onClick={() => setShowEditForm(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Top row: Type & Payment Type */}
+            <div style={formGridStyle}>
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  Bill Type <span style={{ color: 'red' }}>*</span>
+                </span>
+                <select
+                  name="type"
+                  value={editForm.type}
+                  onChange={handleEditChange}
+                  required
+                  style={inputBaseStyle}
+                >
+                  <option value="GST">GST</option>
+                  <option value="TDS">TDS</option>
+                </select>
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  Payment Type <span style={{ color: 'red' }}>*</span>
+                </span>
+                <select
+                  name="paymentType"
+                  value={editForm.paymentType}
+                  onChange={handleEditChange}
+                  required
+                  style={inputBaseStyle}
+                >
+                  <option value="Yearly">Yearly</option>
+                  {editForm.type === 'GST' && <option value="Monthly">Monthly</option>}
+                  {editForm.type === 'TDS' && <option value="Quarterly">Quarterly</option>}
+                </select>
+              </label>
+            </div>
+
+            {/* Middle row: Identifier + Load + Name */}
+            <div style={formGridStyle}>
+              {/* ID field (GST or PAN) */}
+              {editForm.type === 'GST' ? (
+                <label style={fieldStyle}>
+                  <span style={labelStyle}>
+                    GST Number (to identify) <span style={{ color: 'red' }}>*</span>
+                  </span>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      name="gstNumber"
+                      value={editForm.gstNumber}
+                      onChange={handleEditChange}
+                      required
+                      maxLength={15}
+                      style={{ ...inputBaseStyle, flex: 1 }}
+                      placeholder="15-char GSTIN"
+                    />
+                    <button
+                      type="button"
+                      onClick={loadExistingIntoEdit}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: 6,
+                        border: `1px solid ${ACCENT.solid}`,
+                        background: 'transparent',
+                        color: ACCENT.dark,
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                    >
+                      Load
+                    </button>
+                  </div>
+                </label>
+              ) : (
+                <label style={fieldStyle}>
+                  <span style={labelStyle}>
+                    PAN (to identify) <span style={{ color: 'red' }}>*</span>
+                  </span>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      name="pan"
+                      value={editForm.pan}
+                      onChange={handleEditChange}
+                      required
+                      maxLength={10}
+                      style={{ ...inputBaseStyle, flex: 1 }}
+                      placeholder="10-char PAN"
+                    />
+                    <button
+                      type="button"
+                      onClick={loadExistingIntoEdit}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: 6,
+                        border: `1px solid ${ACCENT.solid}`,
+                        background: 'transparent',
+                        color: ACCENT.dark,
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                    >
+                      Load
+                    </button>
+                  </div>
+                </label>
+              )}
+
+              {/* Name */}
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  Name <span style={{ color: 'red' }}>*</span>
+                </span>
+                <input
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditChange}
+                  required
+                  style={inputBaseStyle}
+                  placeholder="e.g., ABC Pvt Ltd"
+                />
+              </label>
+            </div>
+
+            {/* Footer */}
+            <div style={{ ...footerStyle, display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditForm(false)
+                  resetEditForm()
+                }}
+                style={{
+                  ...secondaryBtnStyle,
+                  borderColor: ACCENT.solid,
+                  color: ACCENT.dark
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                style={{
+                  ...primaryBtnStyle,
+                  background: ACCENT.solid,
+                  color: ACCENT.text,
+                  border: `1px solid ${ACCENT.dark}`
+                }}
+                disabled={
+                  !editForm.type ||
+                  !editForm.paymentType ||
+                  !editForm.name.trim() ||
+                  (editForm.type === 'GST' ? !editForm.gstNumber?.trim() : !editForm.pan?.trim())
+                }
+              >
+                Update
+              </button>
+
+              <button
+                type="button"
+                onClick={deleteBillNow}
+                style={{
+                  ...secondaryBtnStyle,
+                  borderColor: '#ef4444',
+                  color: '#ef4444'
+                }}
+                disabled={
+                  !(editForm.type === 'GST' ? editForm.gstNumber?.trim() : editForm.pan?.trim())
+                }
+                title="Delete by Type + GST/PAN"
+              >
+                Delete
               </button>
             </div>
           </form>
