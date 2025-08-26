@@ -1,5 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Layout from './Layout'
+import {
+  inputBaseStyle,
+  dialogCardStyle,
+  dialogHeaderStyle,
+  dialogTitleStyle,
+  closeBtnStyle,
+  formGridStyle,
+  fieldStyle,
+  labelStyle,
+  footerStyle,
+  secondaryBtnStyle,
+  primaryBtnStyle
+} from './GstTds.styles'
 
 const initialFormState: Bill = {
   name: '',
@@ -9,16 +22,74 @@ const initialFormState: Bill = {
   paymentType: 'Yearly'
 }
 
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+] as const
+
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const
+
+// Selected year comes from localStorage
+const currentYear = localStorage.getItem('selectedYear')!
+
+// helpers for date <-> string(yyyy-MM-dd)
+const todayYMD = () => {
+  const d = new Date()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
+
+const isYMD = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s)
+
+// unique row key (prefer official IDs if you add them later)
+const getBillKey = (b: Bill) => b.gstNumber || b.pan
+
+// Type guards
+const isMonthlyArray = (a: any): a is MonthlyAmount[] =>
+  Array.isArray(a) && a.length > 0 && 'month' in a[0]
+
+const isQuarterlyArray = (a: any): a is QuarterlyAmount[] =>
+  Array.isArray(a) && a.length > 0 && 'quarter' in a[0]
+
+const isYearlyAmount = (a: unknown): a is YearlyAmount =>
+  !!a &&
+  typeof a === 'object' &&
+  'value' in (a as any) &&
+  'date' in (a as any) &&
+  !('month' in (a as any)) &&
+  !('quarter' in (a as any))
+// /Type guards
+
+// const isMonthlyAmounts = (a: any): a is MonthlyAmount[] =>
+//   Array.isArray(a) && a.length > 0 && 'month' in a[0]
+
+// const isQuarterlyAmounts = (a: any): a is QuarterlyAmount[] =>
+//   Array.isArray(a) && a.length > 0 && 'quarter' in a[0]
+
 const GstTds = () => {
+  const [bills, setBills] = useState<Bill[]>([])
+
   const [activeTab, setActiveTab] = useState<'GST' | 'TDS'>('GST')
   const [activeSubTab, setActiveSubTab] = useState<'Yearly' | 'Monthly' | 'Quarterly'>('Yearly')
-  const [bills, setBills] = useState<Bill[]>([])
+
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<'name' | 'pan' | 'paymentType' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [periodFilter, setPeriodFilter] = useState<string>('All')
 
-  const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(initialFormState)
+  const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -28,19 +99,44 @@ const GstTds = () => {
     fetchBills()
   }, [])
 
+  const tableHasEditors =
+    activeSubTab === 'Yearly' ||
+    (activeSubTab === 'Monthly' && periodFilter !== 'All') ||
+    (activeSubTab === 'Quarterly' && periodFilter !== 'All')
+
+  // Update the filtering to handle new amount types
   const filteredBills = useMemo(() => {
     const q = search.toLowerCase()
+
     return bills
       .filter((bill) => bill.type === activeTab)
       .filter((bill) => bill.paymentType === activeSubTab)
-      .filter(
-        (bill) =>
-          bill.name.toLowerCase().includes(q) ||
-          (bill.pan?.toLowerCase() ?? '').includes(q) ||
-          (bill.gstNumber?.toLowerCase() ?? '').includes(q) ||
-          bill.paymentType.toLowerCase().includes(q)
-      )
-  }, [activeTab, activeSubTab, bills, search])
+      .filter((bill) => {
+        const yearEntry = bill.bill?.find((b) => b.year === currentYear)
+
+        if (!yearEntry) return true // Allow empty rows
+
+        if (activeSubTab === 'Monthly' || activeSubTab === 'Quarterly') {
+          if (periodFilter === 'All') return true
+        }
+
+        return true // Yearly
+      })
+      .filter((bill) => {
+        const pool: string[] = [bill.name, bill.pan ?? '', bill.gstNumber ?? '']
+
+        const yearEntry = bill.bill?.find((b) => b.year === currentYear)
+        const amt = yearEntry?.amount
+        if (Array.isArray(amt)) {
+          for (const a of amt) {
+            if ('month' in a && a.month) pool.push(a.month)
+            if ('quarter' in a && a.quarter) pool.push(a.quarter)
+          }
+        }
+
+        return pool.some((s) => s.toLowerCase().includes(q))
+      })
+  }, [activeTab, activeSubTab, bills, periodFilter, search])
 
   const sortedBills = useMemo(() => {
     if (!sortKey) return filteredBills
@@ -61,8 +157,249 @@ const GstTds = () => {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    const updatedForm = { ...form, [name]: value }
+
+    setForm(updatedForm)
+
+    await handleSave(updatedForm)
+  }
+
+  const handleSave = async (updatedForm: typeof form) => {
+    if (!updatedForm.type || !updatedForm.paymentType) return
+
+    const payload: Bill = {
+      name: updatedForm.name,
+      paymentType: updatedForm.paymentType,
+      type: updatedForm.type,
+      ...(updatedForm.type === 'GST' ? { gstNumber: updatedForm.gstNumber } : {}),
+      ...(updatedForm.type === 'TDS' ? { pan: updatedForm.pan } : {})
+    }
+
+    try {
+      const updateBill = window.electronAPI.updateBill
+
+      const result = await updateBill(payload)
+
+      if (result.success) {
+        setBills((prev) =>
+          prev.map((bill) =>
+            bill.type === updatedForm.type &&
+            ((bill.gstNumber && bill.gstNumber === updatedForm.gstNumber) ||
+              (bill.pan && bill.pan === updatedForm.pan))
+              ? { ...bill, ...payload }
+              : bill
+          )
+        )
+      }
+    } catch (error) {
+      alert(`❌ Autosave error: ${error}`)
+    }
+  }
+
+  // Read values to show in inputs from DB (bills state) for the selectedYear
+  // READ helpers
+  const getShownAmount = (bill: Bill): string => {
+    const yearlyBill = bill.bill?.find((b) => b.year === currentYear)
+    if (!yearlyBill) return ''
+    const amt = yearlyBill.amount
+
+    if (activeSubTab === 'Yearly') {
+      return isYearlyAmount(amt) ? (amt.value ?? '') : ''
+    }
+
+    if (activeSubTab === 'Monthly' && periodFilter !== 'All' && isMonthlyArray(amt)) {
+      return amt.find((m) => m.month === periodFilter)?.value ?? ''
+    }
+
+    if (activeSubTab === 'Quarterly' && periodFilter !== 'All' && isQuarterlyArray(amt)) {
+      return amt.find((q) => q.quarter === periodFilter)?.value ?? ''
+    }
+
+    return ''
+  }
+
+  const getShownDate = (bill: Bill): string => {
+    const yearlyBill = bill.bill?.find((b) => b.year === currentYear)
+    if (!yearlyBill) return ''
+    const amt = yearlyBill.amount
+
+    if (activeSubTab === 'Yearly') {
+      return isYearlyAmount(amt) ? (amt.date ?? '') : ''
+    }
+
+    if (activeSubTab === 'Monthly' && periodFilter !== 'All' && isMonthlyArray(amt)) {
+      return amt.find((m) => m.month === periodFilter)?.date ?? ''
+    }
+
+    if (activeSubTab === 'Quarterly' && periodFilter !== 'All' && isQuarterlyArray(amt)) {
+      return amt.find((q) => q.quarter === periodFilter)?.date ?? ''
+    }
+
+    return ''
+  }
+
+  const getShownRemarks = (bill: Bill): string => {
+    const yearlyBill = bill.bill?.find((b) => b.year === currentYear)
+    return yearlyBill?.remarks ?? ''
+  }
+
+  // Upsert helpers that preserve other periods
+  // UPSERT helpers (unchanged from earlier except they’re used with currentYear via callers)
+  const upsertMonth = (
+    arr: MonthlyAmount[] | undefined,
+    month: string,
+    value: string,
+    prevDate?: string
+  ) => {
+    const list = [...(arr ?? [])]
+    const i = list.findIndex((m) => m.month === month)
+    const dateToUse = prevDate || (value.trim() ? todayYMD() : '')
+    if (i >= 0) list[i] = { month, value, date: dateToUse }
+    else list.push({ month, value, date: dateToUse })
+    return list
+  }
+
+  const upsertQuarter = (
+    arr: QuarterlyAmount[] | undefined,
+    quarter: string,
+    value: string,
+    prevDate?: string
+  ) => {
+    const list = [...(arr ?? [])]
+    const i = list.findIndex((q) => q.quarter === quarter)
+    const dateToUse = prevDate || (value.trim() ? todayYMD() : '')
+    if (i >= 0) list[i] = { quarter, value, date: dateToUse }
+    else list.push({ quarter, value, date: dateToUse })
+    return list
+  }
+
+  // Build a new Bill with an updated amount (and first-time date auto-fill)
+  // WRITE helpers
+  const applyAmount = (orig: Bill, newAmount: string): Bill => {
+    const prevBills = Array.isArray(orig.bill) ? [...orig.bill] : []
+    const index = prevBills.findIndex((b) => b.year === currentYear)
+    const yearlyBill = prevBills[index]
+    const prevAmt = yearlyBill?.amount
+    const prevRemarks = yearlyBill?.remarks
+
+    let nextAmount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+
+    if (activeSubTab === 'Yearly') {
+      const existing = isYearlyAmount(prevAmt) ? prevAmt : { value: '', date: '' }
+      nextAmount = {
+        value: newAmount,
+        date: existing.date || (newAmount.trim() ? todayYMD() : '')
+      }
+    } else if (activeSubTab === 'Monthly' && periodFilter !== 'All') {
+      const prev = isMonthlyArray(prevAmt) ? prevAmt : undefined
+      const prevDateForThis = prev?.find((m) => m.month === periodFilter)?.date
+      nextAmount = upsertMonth(prev, periodFilter, newAmount, prevDateForThis)
+    } else if (activeSubTab === 'Quarterly' && periodFilter !== 'All') {
+      const prev = isQuarterlyArray(prevAmt) ? prevAmt : undefined
+      const prevDateForThis = prev?.find((q) => q.quarter === periodFilter)?.date
+      nextAmount = upsertQuarter(prev, periodFilter, newAmount, prevDateForThis)
+    } else {
+      return orig
+    }
+
+    const nextBillBlock: BillBill = {
+      year: currentYear,
+      amount: nextAmount,
+      remarks: prevRemarks
+    }
+
+    if (index >= 0) prevBills[index] = nextBillBlock
+    else prevBills.push(nextBillBlock)
+
+    return { ...orig, bill: prevBills }
+  }
+
+  const applyDate = (orig: Bill, newDate: string): Bill => {
+    const list = Array.isArray(orig.bill) ? [...orig.bill] : []
+    const idx = list.findIndex((b) => b.year === currentYear)
+
+    const prevYear = idx >= 0 ? list[idx] : undefined
+    const prevRemarks = prevYear?.remarks
+    const amt = prevYear?.amount
+
+    let nextAmount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+
+    if (activeSubTab === 'Yearly') {
+      const prev = isYearlyAmount(amt) ? amt : { value: '', date: '' }
+      nextAmount = { value: prev.value, date: newDate }
+    } else if (activeSubTab === 'Monthly' && periodFilter !== 'All') {
+      const prev = isMonthlyArray(amt) ? [...amt] : []
+      const i = prev.findIndex((m) => m.month === periodFilter)
+      if (i >= 0) prev[i] = { ...prev[i], date: newDate }
+      else prev.push({ month: periodFilter, value: '', date: newDate })
+      nextAmount = prev
+    } else if (activeSubTab === 'Quarterly' && periodFilter !== 'All') {
+      const prev = isQuarterlyArray(amt) ? [...amt] : []
+      const i = prev.findIndex((q) => q.quarter === periodFilter)
+      if (i >= 0) prev[i] = { ...prev[i], date: newDate }
+      else prev.push({ quarter: periodFilter, value: '', date: newDate })
+      nextAmount = prev
+    } else {
+      return orig
+    }
+
+    const updatedYearEntry: BillBill = {
+      year: currentYear,
+      amount: nextAmount,
+      remarks: prevRemarks
+    }
+
+    if (idx >= 0) list[idx] = updatedYearEntry
+    else list.push(updatedYearEntry)
+
+    return { ...orig, bill: list }
+  }
+
+  const applyRemarks = (orig: Bill, newRemarks: string): Bill => {
+    const list = Array.isArray(orig.bill) ? [...orig.bill] : []
+    const idx = list.findIndex((b) => b.year === currentYear)
+    const prev = idx >= 0 ? list[idx] : undefined
+    const amt = prev?.amount
+
+    let amount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+    if (activeSubTab === 'Yearly') {
+      amount = isYearlyAmount(amt) ? amt : { value: '', date: '' }
+    } else if (activeSubTab === 'Monthly') {
+      amount = isMonthlyArray(amt) ? amt : ([] as MonthlyAmount[])
+    } else {
+      amount = isQuarterlyArray(amt) ? amt : ([] as QuarterlyAmount[])
+    }
+
+    const updatedYearEntry: BillBill = {
+      year: currentYear,
+      amount,
+      remarks: newRemarks || undefined
+    }
+
+    if (idx >= 0) list[idx] = updatedYearEntry
+    else list.push(updatedYearEntry)
+
+    return { ...orig, bill: list }
+  }
+
+  // Persist updated bill (optimistic UI)
+  const saveBillNow = async (updated: Bill) => {
+    try {
+      const result = await window.electronAPI.updateBill?.(updated)
+      if (!result?.success && result?.error) {
+        console.error('Autosave error:', result.error)
+      }
+    } catch (e) {
+      console.error('Autosave error:', e)
+    }
+  }
+
+  // Replace a bill in state by its key
+  const replaceBillInState = (next: Bill) => {
+    const key = getBillKey(next)
+    setBills((prev) => prev.map((b) => (getBillKey(b) === key ? next : b)))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +408,7 @@ const GstTds = () => {
 
     const payload: Bill = {
       name: form.name,
-      paymentType: form.paymentType as PaymentType,
+      paymentType: form.paymentType,
       type: form.type,
       ...(form.type === 'GST' ? { gstNumber: form.gstNumber } : {}),
       ...(form.type === 'TDS' ? { pan: form.pan } : {})
@@ -116,8 +453,10 @@ const GstTds = () => {
         style={{
           display: 'flex',
           gap: '20px',
-          borderBottom: '2px solid #e5e7eb',
-          marginBottom: '20px'
+          borderBottom:
+            activeSubTab === 'Monthly' || activeSubTab === 'Quarterly'
+              ? '2px solid #e5e7eb'
+              : 'none'
         }}
       >
         {/* Tabs */}
@@ -136,6 +475,7 @@ const GstTds = () => {
             onClick={() => {
               setActiveTab('GST')
               setActiveSubTab('Yearly')
+              setPeriodFilter('All')
             }}
             style={{
               padding: '10px 20px',
@@ -152,6 +492,7 @@ const GstTds = () => {
             onClick={() => {
               setActiveTab('TDS')
               setActiveSubTab('Yearly')
+              setPeriodFilter('All')
             }}
             style={{
               padding: '10px 20px',
@@ -177,7 +518,10 @@ const GstTds = () => {
           }}
         >
           <button
-            onClick={() => setActiveSubTab('Yearly')}
+            onClick={() => {
+              setActiveSubTab('Yearly')
+              setPeriodFilter('All')
+            }}
             style={{
               padding: '10px 20px',
               borderRadius: '6px',
@@ -191,7 +535,10 @@ const GstTds = () => {
           </button>
           {activeTab === 'GST' && (
             <button
-              onClick={() => setActiveSubTab('Monthly')}
+              onClick={() => {
+                setActiveSubTab('Monthly')
+                setPeriodFilter('All')
+              }}
               style={{
                 padding: '10px 20px',
                 borderRadius: '6px',
@@ -206,7 +553,10 @@ const GstTds = () => {
           )}
           {activeTab === 'TDS' && (
             <button
-              onClick={() => setActiveSubTab('Quarterly')}
+              onClick={() => {
+                setActiveSubTab('Quarterly')
+                setPeriodFilter('All')
+              }}
               style={{
                 padding: '10px 20px',
                 borderRadius: '6px',
@@ -221,6 +571,50 @@ const GstTds = () => {
           )}
         </div>
       </div>
+
+      {/* Period Tabs Row (only for Monthly / Quarterly) */}
+      {(activeSubTab === 'Monthly' || activeSubTab === 'Quarterly') && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '10px',
+            padding: '10px 0'
+          }}
+        >
+          {/* All period */}
+          <button
+            onClick={() => setPeriodFilter('All')}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '6px',
+              border: 'none',
+              background: periodFilter === 'All' ? '#6366f1' : 'transparent',
+              color: periodFilter === 'All' ? '#fff' : '#333',
+              cursor: 'pointer'
+            }}
+          >
+            All
+          </button>
+
+          {/* Months or Quarters */}
+          {(activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriodFilter(p)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '6px',
+                border: 'none',
+                background: periodFilter === p ? '#6366f1' : 'transparent',
+                color: periodFilter === p ? '#fff' : '#333',
+                cursor: 'pointer'
+              }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Search */}
       <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
@@ -249,15 +643,14 @@ const GstTds = () => {
             cursor: 'pointer',
             fontWeight: 'bold'
           }}
-          onClick={() => {
-            return (
-              setShowForm(true),
-              setForm({
-                ...initialFormState,
-                ...(activeTab === 'GST' ? { type: 'GST' } : { type: 'TDS' })
-              })
-            )
-          }}
+          onClick={() => (
+            setShowForm(true),
+            setForm({
+              ...initialFormState,
+              ...(activeTab === 'GST' ? { type: 'GST' } : { type: 'TDS' })
+            }),
+            setPeriodFilter('All')
+          )}
         >
           Create Bill
         </button>
@@ -273,7 +666,7 @@ const GstTds = () => {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 200px',
+                gridTemplateColumns: `250px 200px ${tableHasEditors ? '120px 180px 1fr' : ''}`,
                 backgroundColor: '#4f46e5',
                 color: 'white',
                 fontWeight: 'bold',
@@ -283,26 +676,85 @@ const GstTds = () => {
               <div style={{ cursor: 'pointer' }} onClick={() => handleSort('name')}>
                 Name {sortKey === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
               </div>
-              {/* Unified ID column */}
               <div>{activeTab === 'GST' ? 'GST No.' : 'PAN'}</div>
+
+              {tableHasEditors && (
+                <>
+                  <div>Amount</div>
+                  <div>Date</div>
+                  <div>Remarks</div>
+                </>
+              )}
             </div>
 
-            {/* Rows */}
-            {sortedBills.map((bill, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 200px ',
-                  alignItems: 'center',
-                  borderBottom: '1px solid #eee',
-                  padding: '10px 16px'
-                }}
-              >
-                <div>{bill.name}</div>
-                <div>{bill.pan || bill.gstNumber}</div>
-              </div>
-            ))}
+            {sortedBills.map((bill, index) => {
+              const shownAmount = getShownAmount(bill)
+              const shownDate = getShownDate(bill)
+              const shownRemarks = getShownRemarks(bill)
+
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `250px 200px ${tableHasEditors ? '120px 180px 1fr' : ''}`,
+                    alignItems: 'center',
+                    borderBottom: '1px solid #eee',
+                    padding: '10px 16px'
+                  }}
+                >
+                  <div>{bill.name}</div>
+                  <div>{bill.pan || bill.gstNumber}</div>
+
+                  {tableHasEditors && (
+                    <>
+                      {/* Amount (autosave, first-time date fill if needed) */}
+                      <div style={{ paddingRight: '20px' }}>
+                        <input
+                          value={shownAmount}
+                          onChange={(e) => {
+                            const next = applyAmount(bill, e.target.value)
+                            replaceBillInState(next) // optimistic
+                            saveBillNow(next) // persist
+                          }}
+                          style={{ ...inputBaseStyle, padding: '6px 8px' }}
+                          placeholder="Amount"
+                        />
+                      </div>
+
+                      {/* Date (only user edits change date) */}
+                      <div style={{ paddingRight: '20px' }}>
+                        <input
+                          type="date"
+                          value={shownDate}
+                          onChange={(e) => {
+                            const v = isYMD(e.target.value) ? e.target.value : ''
+                            const next = applyDate(bill, v)
+                            replaceBillInState(next)
+                            saveBillNow(next)
+                          }}
+                          style={{ ...inputBaseStyle, padding: '6px 8px' }}
+                        />
+                      </div>
+
+                      {/* Remarks (never touches date) */}
+                      <div style={{ paddingRight: '20px' }}>
+                        <input
+                          value={shownRemarks}
+                          onChange={(e) => {
+                            const next = applyRemarks(bill, e.target.value)
+                            replaceBillInState(next)
+                            saveBillNow(next)
+                          }}
+                          style={{ ...inputBaseStyle, padding: '6px 8px' }}
+                          placeholder="Optional"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            })}
           </>
         )}
       </div>
@@ -469,95 +921,3 @@ const GstTds = () => {
 }
 
 export default GstTds
-
-// UI helpers (above return)
-const dialogCardStyle: React.CSSProperties = {
-  background: '#fff',
-  padding: 20,
-  borderRadius: 12,
-  width: 'min(560px, 92vw)',
-  boxShadow: '0 12px 40px rgba(0,0,0,0.16)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 16,
-  position: 'relative',
-  zoom: 1.3
-}
-
-const dialogHeaderStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 4
-}
-
-const dialogTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: 18,
-  fontWeight: 700,
-  color: '#111827'
-}
-
-const closeBtnStyle: React.CSSProperties = {
-  border: 'none',
-  background: 'transparent',
-  fontSize: 22,
-  lineHeight: 1,
-  cursor: 'pointer',
-  color: '#6b7280',
-  padding: 4,
-  margin: -4,
-  borderRadius: 6
-}
-
-const formGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: 12
-}
-
-const fieldStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 6
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 600,
-  color: '#374151'
-}
-
-const inputBaseStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #e5e7eb',
-  fontSize: 14
-}
-
-const footerStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: 10,
-  justifyContent: 'flex-end',
-  marginTop: 4
-}
-
-const secondaryBtnStyle: React.CSSProperties = {
-  ...inputBaseStyle,
-  padding: '8px 14px',
-  borderRadius: 8,
-  background: '#f3f4f6',
-  border: '1px solid #e5e7eb',
-  cursor: 'pointer'
-}
-
-const primaryBtnStyle: React.CSSProperties = {
-  ...inputBaseStyle,
-  padding: '8px 14px',
-  borderRadius: 8,
-  background: '#6366f1',
-  color: '#fff',
-  border: '1px solid #6366f1',
-  cursor: 'pointer'
-}

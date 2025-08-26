@@ -35,28 +35,32 @@ declare global {
     name: string
     gstNumber?: string
     pan?: string
-    paymentType: PaymentType
-    bill?: {
-      year: number
-      amount: number | MonthlyAmount[] | QuarterlyAmount[]
-      date: string
-      remarks?: string
-    }
+    paymentType: 'Yearly' | 'Monthly' | 'Quarterly'
+    bill?: BillBill[]
     type: 'GST' | 'TDS'
   }
 
-  const paymentType = ['Yearly', 'Monthly', 'Quarterly'] as const
+  type BillBill = {
+    year: string
+    amount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+    remarks?: string
+  }
 
-  type PaymentType = (typeof paymentType)[number]
+  interface YearlyAmount {
+    value: string
+    date: string
+  }
 
   interface MonthlyAmount {
     month: string
-    value: number
+    value: string
+    date: string
   }
 
   interface QuarterlyAmount {
     quarter: string
-    value: number
+    value: string
+    date: string
   }
 
   interface Window {
@@ -122,6 +126,7 @@ declare global {
       saveGstBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
       saveTdsBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
       loadBills: () => Promise<Bill[]>
+      updateBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
     }
 
     api: {

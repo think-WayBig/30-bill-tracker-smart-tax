@@ -691,16 +691,24 @@ interface Bill {
   name: string
   gstNumber?: string
   pan?: string
-  paymentType: string
-  month?: string
-  quarter?: string
+  paymentType: 'Yearly' | 'Monthly' | 'Quarterly'
   bill?: {
-    year: number
-    amount: number
+    year: string
+    amount: string | MonthlyAmount[] | QuarterlyAmount[]
     date: string
     remarks?: string
   }
   type: 'GST' | 'TDS'
+}
+
+interface MonthlyAmount {
+  month: string
+  value: string
+}
+
+interface QuarterlyAmount {
+  quarter: string
+  value: string
 }
 
 // Save GST Bill
@@ -755,5 +763,41 @@ ipcMain.handle('load-bills', async () => {
   } catch (error) {
     console.error('Failed to load bills:', error)
     return []
+  }
+})
+
+ipcMain.handle('update-bill', async (_event, updatedBill: Bill) => {
+  try {
+    const filePath = getBillsPath()
+
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Bills file not found.' }
+    }
+
+    const existing: Bill[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    // Find the index of the bill to update
+    const index = existing.findIndex((bill) => {
+      if (updatedBill.type === 'GST') {
+        return bill.gstNumber === updatedBill.gstNumber
+      } else if (updatedBill.type === 'TDS') {
+        return bill.pan === updatedBill.pan
+      }
+      return false
+    })
+
+    if (index === -1) {
+      return { success: false, error: 'Bill not found.' }
+    }
+
+    // Update the bill
+    existing[index] = { ...existing[index], ...updatedBill }
+
+    // Save the updated bills back to the file
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
   }
 })

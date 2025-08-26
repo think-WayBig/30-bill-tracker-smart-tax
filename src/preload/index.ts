@@ -45,6 +45,30 @@ type Notice = {
   done?: boolean
 }
 
+interface Bill {
+  name: string
+  gstNumber?: string
+  pan?: string
+  paymentType: 'Yearly' | 'Monthly' | 'Quarterly'
+  bill?: {
+    year: string
+    amount: string | MonthlyAmount[] | QuarterlyAmount[]
+    date: string
+    remarks?: string
+  }
+  type: 'GST' | 'TDS'
+}
+
+interface MonthlyAmount {
+  month: string
+  value: string
+}
+
+interface QuarterlyAmount {
+  quarter: string
+  value: string
+}
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
@@ -103,23 +127,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteNotice: (notice: Notice) => ipcRenderer.invoke('deleteNotice', notice),
 
   /** Bills Code */
-  saveGstBill: (bill: {
-    name: string
-    pan: string
-    paymentType: string
-    year?: string
-    month?: string
-  }) => ipcRenderer.invoke('save-gst-bill', bill),
+  saveGstBill: (bill: Bill) => ipcRenderer.invoke('save-gst-bill', bill),
 
-  saveTdsBill: (bill: {
-    name: string
-    pan: string
-    paymentType: string
-    year?: string
-    quarter?: string
-  }) => ipcRenderer.invoke('save-tds-bill', bill),
+  saveTdsBill: (bill: Bill) => ipcRenderer.invoke('save-tds-bill', bill),
 
-  loadBills: () => ipcRenderer.invoke('load-bills')
+  loadBills: () => ipcRenderer.invoke('load-bills'),
+
+  updateBill: (bill: Bill) => ipcRenderer.invoke('update-bill', bill)
 })
 
 if (process.contextIsolated) {
