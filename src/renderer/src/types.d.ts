@@ -43,24 +43,26 @@ declare global {
   type BillBill = {
     year: string
     amount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
-    remarks?: string
   }
 
   interface YearlyAmount {
     value: string
     date: string
+    remarks?: string
   }
 
   interface MonthlyAmount {
     month: string
     value: string
     date: string
+    remarks?: string
   }
 
   interface QuarterlyAmount {
     quarter: string
     value: string
     date: string
+    remarks?: string
   }
 
   interface Window {

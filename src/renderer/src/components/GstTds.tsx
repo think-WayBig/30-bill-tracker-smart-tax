@@ -77,6 +77,17 @@ const isYearlyAmount = (a: unknown): a is YearlyAmount =>
 // const isQuarterlyAmounts = (a: any): a is QuarterlyAmount[] =>
 //   Array.isArray(a) && a.length > 0 && 'quarter' in a[0]
 
+const STICKY_TOP = 69 // match your Layout’s top bar height
+const stickyWrapStyle: React.CSSProperties = {
+  position: 'sticky',
+  top: STICKY_TOP,
+  zIndex: 40, // above table header
+  background: 'white',
+  padding: '8px 10px',
+  borderBottom: '1px solid #e5e7eb',
+  boxShadow: '0 8px 8px -8px rgba(0,0,0,0.12)'
+}
+
 const GstTds = () => {
   const [bills, setBills] = useState<Bill[]>([])
 
@@ -104,39 +115,65 @@ const GstTds = () => {
     (activeSubTab === 'Monthly' && periodFilter !== 'All') ||
     (activeSubTab === 'Quarterly' && periodFilter !== 'All')
 
+  // =========================
+  // paging for All view
+  const PAGE_SIZE = 150
+  const [page, setPage] = useState(1)
+  const isAllView = activeSubTab !== 'Yearly' && periodFilter === 'All'
+
+  // debounced search so we don't filter on every keystroke
+  const [searchDebounced, setSearchDebounced] = useState(search)
+  useEffect(() => {
+    const t = setTimeout(() => setSearchDebounced(search), 180)
+    return () => clearTimeout(t)
+  }, [search])
+
+  // reset paging when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [activeTab, activeSubTab, periodFilter, searchDebounced])
+
+  // build a quick lookup for months/quarters to avoid many Array.find calls
+  const buildPeriodLookup = (bill: Bill) => {
+    const yearEntry = bill.bill?.find((b) => b.year === currentYear)
+    const amt = yearEntry?.amount
+    if (activeSubTab === 'Monthly' && isMonthlyArray(amt)) {
+      const byMonth = new Map<string, MonthlyAmount>()
+      for (const m of amt) byMonth.set(m.month, m)
+      return { byMonth }
+    }
+    if (activeSubTab === 'Quarterly' && isQuarterlyArray(amt)) {
+      const byQuarter = new Map<string, QuarterlyAmount>()
+      for (const q of amt) byQuarter.set(q.quarter, q)
+      return { byQuarter }
+    }
+    return {}
+  }
+  // =========================
+
   // Update the filtering to handle new amount types
   const filteredBills = useMemo(() => {
-    const q = search.toLowerCase()
+    const q = searchDebounced.toLowerCase()
 
     return bills
       .filter((bill) => bill.type === activeTab)
       .filter((bill) => bill.paymentType === activeSubTab)
       .filter((bill) => {
-        const yearEntry = bill.bill?.find((b) => b.year === currentYear)
-
-        if (!yearEntry) return true // Allow empty rows
-
-        if (activeSubTab === 'Monthly' || activeSubTab === 'Quarterly') {
-          if (periodFilter === 'All') return true
-        }
-
-        return true // Yearly
-      })
-      .filter((bill) => {
         const pool: string[] = [bill.name, bill.pan ?? '', bill.gstNumber ?? '']
-
         const yearEntry = bill.bill?.find((b) => b.year === currentYear)
         const amt = yearEntry?.amount
         if (Array.isArray(amt)) {
           for (const a of amt) {
             if ('month' in a && a.month) pool.push(a.month)
             if ('quarter' in a && a.quarter) pool.push(a.quarter)
+            if ('remarks' in a && a.remarks) pool.push(String(a.remarks))
           }
+        } else if (isYearlyAmount(amt) && amt.remarks) {
+          pool.push(String(amt.remarks))
         }
-
         return pool.some((s) => s.toLowerCase().includes(q))
       })
-  }, [activeTab, activeSubTab, bills, periodFilter, search])
+  }, [bills, activeTab, activeSubTab, searchDebounced])
 
   const sortedBills = useMemo(() => {
     if (!sortKey) return filteredBills
@@ -148,6 +185,14 @@ const GstTds = () => {
         : String(bVal).localeCompare(String(aVal), undefined, { numeric: true })
     })
   }, [filteredBills, sortKey, sortOrder])
+
+  const visibleSortedBills = useMemo(() => {
+    if (!isAllView) return sortedBills
+    return sortedBills.slice(0, page * PAGE_SIZE)
+  }, [sortedBills, isAllView, page])
+
+  const totalCount = sortedBills.length
+  const visibleCount = visibleSortedBills.length
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
@@ -241,8 +286,17 @@ const GstTds = () => {
   }
 
   const getShownRemarks = (bill: Bill): string => {
-    const yearlyBill = bill.bill?.find((b) => b.year === currentYear)
-    return yearlyBill?.remarks ?? ''
+    const amt = bill.bill?.find((b) => b.year === currentYear)?.amount
+    if (activeSubTab === 'Yearly') {
+      return isYearlyAmount(amt) ? (amt.remarks ?? '') : ''
+    }
+    if (activeSubTab === 'Monthly' && periodFilter !== 'All' && isMonthlyArray(amt)) {
+      return amt.find((m) => m.month === periodFilter)?.remarks ?? ''
+    }
+    if (activeSubTab === 'Quarterly' && periodFilter !== 'All' && isQuarterlyArray(amt)) {
+      return amt.find((q) => q.quarter === periodFilter)?.remarks ?? ''
+    }
+    return ''
   }
 
   // Upsert helpers that preserve other periods
@@ -251,13 +305,15 @@ const GstTds = () => {
     arr: MonthlyAmount[] | undefined,
     month: string,
     value: string,
-    prevDate?: string
+    prevDate?: string,
+    prevRemarks?: string
   ) => {
     const list = [...(arr ?? [])]
     const i = list.findIndex((m) => m.month === month)
     const dateToUse = prevDate || (value.trim() ? todayYMD() : '')
-    if (i >= 0) list[i] = { month, value, date: dateToUse }
-    else list.push({ month, value, date: dateToUse })
+    const remarksToUse = prevRemarks
+    if (i >= 0) list[i] = { month, value, date: dateToUse, remarks: remarksToUse }
+    else list.push({ month, value, date: dateToUse, remarks: remarksToUse })
     return list
   }
 
@@ -265,13 +321,15 @@ const GstTds = () => {
     arr: QuarterlyAmount[] | undefined,
     quarter: string,
     value: string,
-    prevDate?: string
+    prevDate?: string,
+    prevRemarks?: string
   ) => {
     const list = [...(arr ?? [])]
     const i = list.findIndex((q) => q.quarter === quarter)
     const dateToUse = prevDate || (value.trim() ? todayYMD() : '')
-    if (i >= 0) list[i] = { quarter, value, date: dateToUse }
-    else list.push({ quarter, value, date: dateToUse })
+    const remarksToUse = prevRemarks
+    if (i >= 0) list[i] = { quarter, value, date: dateToUse, remarks: remarksToUse }
+    else list.push({ quarter, value, date: dateToUse, remarks: remarksToUse })
     return list
   }
 
@@ -282,32 +340,31 @@ const GstTds = () => {
     const index = prevBills.findIndex((b) => b.year === currentYear)
     const yearlyBill = prevBills[index]
     const prevAmt = yearlyBill?.amount
-    const prevRemarks = yearlyBill?.remarks
 
     let nextAmount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
 
     if (activeSubTab === 'Yearly') {
-      const existing = isYearlyAmount(prevAmt) ? prevAmt : { value: '', date: '' }
+      const existing = isYearlyAmount(prevAmt) ? prevAmt : { value: '', date: '', remarks: '' }
       nextAmount = {
         value: newAmount,
-        date: existing.date || (newAmount.trim() ? todayYMD() : '')
+        date: existing.date || (newAmount.trim() ? todayYMD() : ''),
+        remarks: existing.remarks
       }
     } else if (activeSubTab === 'Monthly' && periodFilter !== 'All') {
       const prev = isMonthlyArray(prevAmt) ? prevAmt : undefined
-      const prevDateForThis = prev?.find((m) => m.month === periodFilter)?.date
-      nextAmount = upsertMonth(prev, periodFilter, newAmount, prevDateForThis)
+      const prevItem = prev?.find((m) => m.month === periodFilter)
+      nextAmount = upsertMonth(prev, periodFilter, newAmount, prevItem?.date, prevItem?.remarks)
     } else if (activeSubTab === 'Quarterly' && periodFilter !== 'All') {
       const prev = isQuarterlyArray(prevAmt) ? prevAmt : undefined
-      const prevDateForThis = prev?.find((q) => q.quarter === periodFilter)?.date
-      nextAmount = upsertQuarter(prev, periodFilter, newAmount, prevDateForThis)
+      const prevItem = prev?.find((q) => q.quarter === periodFilter)
+      nextAmount = upsertQuarter(prev, periodFilter, newAmount, prevItem?.date, prevItem?.remarks)
     } else {
       return orig
     }
 
     const nextBillBlock: BillBill = {
       year: currentYear,
-      amount: nextAmount,
-      remarks: prevRemarks
+      amount: nextAmount
     }
 
     if (index >= 0) prevBills[index] = nextBillBlock
@@ -321,25 +378,24 @@ const GstTds = () => {
     const idx = list.findIndex((b) => b.year === currentYear)
 
     const prevYear = idx >= 0 ? list[idx] : undefined
-    const prevRemarks = prevYear?.remarks
     const amt = prevYear?.amount
 
     let nextAmount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
 
     if (activeSubTab === 'Yearly') {
-      const prev = isYearlyAmount(amt) ? amt : { value: '', date: '' }
-      nextAmount = { value: prev.value, date: newDate }
+      const prev = isYearlyAmount(amt) ? amt : { value: '', date: '', remarks: '' }
+      nextAmount = { value: prev.value, date: newDate, remarks: prev.remarks }
     } else if (activeSubTab === 'Monthly' && periodFilter !== 'All') {
       const prev = isMonthlyArray(amt) ? [...amt] : []
       const i = prev.findIndex((m) => m.month === periodFilter)
       if (i >= 0) prev[i] = { ...prev[i], date: newDate }
-      else prev.push({ month: periodFilter, value: '', date: newDate })
+      else prev.push({ month: periodFilter, value: '', date: newDate, remarks: '' })
       nextAmount = prev
     } else if (activeSubTab === 'Quarterly' && periodFilter !== 'All') {
       const prev = isQuarterlyArray(amt) ? [...amt] : []
       const i = prev.findIndex((q) => q.quarter === periodFilter)
       if (i >= 0) prev[i] = { ...prev[i], date: newDate }
-      else prev.push({ quarter: periodFilter, value: '', date: newDate })
+      else prev.push({ quarter: periodFilter, value: '', date: newDate, remarks: '' })
       nextAmount = prev
     } else {
       return orig
@@ -347,8 +403,7 @@ const GstTds = () => {
 
     const updatedYearEntry: BillBill = {
       year: currentYear,
-      amount: nextAmount,
-      remarks: prevRemarks
+      amount: nextAmount
     }
 
     if (idx >= 0) list[idx] = updatedYearEntry
@@ -363,19 +418,37 @@ const GstTds = () => {
     const prev = idx >= 0 ? list[idx] : undefined
     const amt = prev?.amount
 
-    let amount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+    let nextAmount: YearlyAmount | MonthlyAmount[] | QuarterlyAmount[]
+
     if (activeSubTab === 'Yearly') {
-      amount = isYearlyAmount(amt) ? amt : { value: '', date: '' }
-    } else if (activeSubTab === 'Monthly') {
-      amount = isMonthlyArray(amt) ? amt : ([] as MonthlyAmount[])
+      const prevYearly = isYearlyAmount(amt) ? amt : { value: '', date: '', remarks: '' }
+      nextAmount = { ...prevYearly, remarks: newRemarks || undefined }
+    } else if (activeSubTab === 'Monthly' && periodFilter !== 'All') {
+      const prevArr = isMonthlyArray(amt) ? [...amt] : []
+      const i = prevArr.findIndex((m) => m.month === periodFilter)
+      if (i >= 0) prevArr[i] = { ...prevArr[i], remarks: newRemarks || undefined }
+      else
+        prevArr.push({ month: periodFilter, value: '', date: '', remarks: newRemarks || undefined })
+      nextAmount = prevArr
+    } else if (activeSubTab === 'Quarterly' && periodFilter !== 'All') {
+      const prevArr = isQuarterlyArray(amt) ? [...amt] : []
+      const i = prevArr.findIndex((q) => q.quarter === periodFilter)
+      if (i >= 0) prevArr[i] = { ...prevArr[i], remarks: newRemarks || undefined }
+      else
+        prevArr.push({
+          quarter: periodFilter,
+          value: '',
+          date: '',
+          remarks: newRemarks || undefined
+        })
+      nextAmount = prevArr
     } else {
-      amount = isQuarterlyArray(amt) ? amt : ([] as QuarterlyAmount[])
+      return orig
     }
 
     const updatedYearEntry: BillBill = {
       year: currentYear,
-      amount,
-      remarks: newRemarks || undefined
+      amount: nextAmount
     }
 
     if (idx >= 0) list[idx] = updatedYearEntry
@@ -437,230 +510,420 @@ const GstTds = () => {
 
   return (
     <Layout title="📝 Track GST/TDS Bills" financialYear>
-      {/* Heading */}
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#4f46e5' }}>
-          {activeTab === 'GST' ? 'GST Bills' : 'TDS Bills'}
-        </h1>
-        <p style={{ fontSize: '16px', color: '#6b7280' }}>
-          {activeTab === 'GST'
-            ? 'Manage and track your GST bills here.'
-            : 'Manage and track your TDS bills here.'}
-        </p>
-      </div>
+      {/* Sticky top section */}
+      <div style={stickyWrapStyle}>
+        {/* Heading */}
+        <div style={{ marginBottom: 12 }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#4f46e5', margin: 0 }}>
+            {activeTab === 'GST' ? 'GST Bills' : 'TDS Bills'}
+          </h1>
+          <p style={{ fontSize: '16px', color: '#6b7280', margin: '6px 0 0' }}>
+            {activeTab === 'GST'
+              ? 'Manage and track your GST bills here.'
+              : 'Manage and track your TDS bills here.'}
+          </p>
+        </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: '20px',
-          borderBottom:
-            activeSubTab === 'Monthly' || activeSubTab === 'Quarterly'
-              ? '2px solid #e5e7eb'
-              : 'none'
-        }}
-      >
-        {/* Tabs */}
+        {/* Tabs row (GST/TDS + sub-tabs) */}
         <div
           style={{
             display: 'flex',
-            gap: '16px',
-            paddingBottom: '10px',
-            paddingRight: '20px',
-            alignItems: 'center',
-            borderRight: '1px solid #e5e7eb'
+            gap: 20,
+            paddingBottom: 10,
+            borderBottom:
+              activeSubTab === 'Monthly' || activeSubTab === 'Quarterly'
+                ? '2px solid #e5e7eb'
+                : 'none'
           }}
         >
           {/* Main Tabs */}
-          <button
-            onClick={() => {
-              setActiveTab('GST')
-              setActiveSubTab('Yearly')
-              setPeriodFilter('All')
-            }}
+          <div
             style={{
-              padding: '10px 20px',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeTab === 'GST' ? '#6366f1' : 'transparent',
-              color: activeTab === 'GST' ? '#fff' : '#333',
-              cursor: 'pointer'
+              display: 'flex',
+              gap: 16,
+              paddingRight: 20,
+              alignItems: 'center',
+              borderRight: '1px solid #e5e7eb'
             }}
           >
-            GST
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('TDS')
-              setActiveSubTab('Yearly')
-              setPeriodFilter('All')
-            }}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeTab === 'TDS' ? '#6366f1' : 'transparent',
-              color: activeTab === 'TDS' ? '#fff' : '#333',
-              cursor: 'pointer'
-            }}
-          >
-            TDS
-          </button>
-        </div>
-
-        {/* Sub-Tabs */}
-
-        <div
-          style={{
-            display: 'flex',
-            gap: '16px',
-            paddingBottom: '10px',
-            alignItems: 'center'
-          }}
-        >
-          <button
-            onClick={() => {
-              setActiveSubTab('Yearly')
-              setPeriodFilter('All')
-            }}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '6px',
-              border: 'none',
-              background: activeSubTab === 'Yearly' ? '#6366f1' : 'transparent',
-              color: activeSubTab === 'Yearly' ? '#fff' : '#333',
-              cursor: 'pointer'
-            }}
-          >
-            Yearly
-          </button>
-          {activeTab === 'GST' && (
             <button
               onClick={() => {
-                setActiveSubTab('Monthly')
+                setActiveTab('GST')
+                setActiveSubTab('Yearly')
                 setPeriodFilter('All')
               }}
               style={{
                 padding: '10px 20px',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: 'none',
-                background: activeSubTab === 'Monthly' ? '#6366f1' : 'transparent',
-                color: activeSubTab === 'Monthly' ? '#fff' : '#333',
+                background: activeTab === 'GST' ? '#6366f1' : 'transparent',
+                color: activeTab === 'GST' ? '#fff' : '#333',
                 cursor: 'pointer'
               }}
             >
-              Monthly
+              GST
             </button>
-          )}
-          {activeTab === 'TDS' && (
             <button
               onClick={() => {
-                setActiveSubTab('Quarterly')
+                setActiveTab('TDS')
+                setActiveSubTab('Yearly')
                 setPeriodFilter('All')
               }}
               style={{
                 padding: '10px 20px',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: 'none',
-                background: activeSubTab === 'Quarterly' ? '#6366f1' : 'transparent',
-                color: activeSubTab === 'Quarterly' ? '#fff' : '#333',
+                background: activeTab === 'TDS' ? '#6366f1' : 'transparent',
+                color: activeTab === 'TDS' ? '#fff' : '#333',
                 cursor: 'pointer'
               }}
             >
-              Quarterly
+              TDS
             </button>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Period Tabs Row (only for Monthly / Quarterly) */}
-      {(activeSubTab === 'Monthly' || activeSubTab === 'Quarterly') && (
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            padding: '10px 0'
-          }}
-        >
-          {/* All period */}
-          <button
-            onClick={() => setPeriodFilter('All')}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '6px',
-              border: 'none',
-              background: periodFilter === 'All' ? '#6366f1' : 'transparent',
-              color: periodFilter === 'All' ? '#fff' : '#333',
-              cursor: 'pointer'
-            }}
-          >
-            All
-          </button>
-
-          {/* Months or Quarters */}
-          {(activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => (
+          {/* Sub-Tabs */}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             <button
-              key={p}
-              onClick={() => setPeriodFilter(p)}
+              onClick={() => {
+                setActiveSubTab('Yearly')
+                setPeriodFilter('All')
+              }}
+              style={{
+                padding: '10px 20px',
+                borderRadius: 6,
+                border: 'none',
+                background: activeSubTab === 'Yearly' ? '#6366f1' : 'transparent',
+                color: activeSubTab === 'Yearly' ? '#fff' : '#333',
+                cursor: 'pointer'
+              }}
+            >
+              Yearly
+            </button>
+            {activeTab === 'GST' && (
+              <button
+                onClick={() => {
+                  setActiveSubTab('Monthly')
+                  setPeriodFilter('All')
+                }}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: activeSubTab === 'Monthly' ? '#6366f1' : 'transparent',
+                  color: activeSubTab === 'Monthly' ? '#fff' : '#333',
+                  cursor: 'pointer'
+                }}
+              >
+                Monthly
+              </button>
+            )}
+            {activeTab === 'TDS' && (
+              <button
+                onClick={() => {
+                  setActiveSubTab('Quarterly')
+                  setPeriodFilter('All')
+                }}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: activeSubTab === 'Quarterly' ? '#6366f1' : 'transparent',
+                  color: activeSubTab === 'Quarterly' ? '#fff' : '#333',
+                  cursor: 'pointer'
+                }}
+              >
+                Quarterly
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Period chips (only for Monthly / Quarterly) */}
+        {(activeSubTab === 'Monthly' || activeSubTab === 'Quarterly') && (
+          <div style={{ display: 'flex', gap: 10, padding: '10px 0' }}>
+            <button
+              onClick={() => setPeriodFilter('All')}
               style={{
                 padding: '8px 14px',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: 'none',
-                background: periodFilter === p ? '#6366f1' : 'transparent',
-                color: periodFilter === p ? '#fff' : '#333',
+                background: periodFilter === 'All' ? '#6366f1' : 'transparent',
+                color: periodFilter === 'All' ? '#fff' : '#333',
                 cursor: 'pointer'
               }}
             >
-              {p}
+              All
             </button>
-          ))}
-        </div>
-      )}
+            {(activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriodFilter(p)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: periodFilter === p ? '#6366f1' : 'transparent',
+                  color: periodFilter === p ? '#fff' : '#333',
+                  cursor: 'pointer'
+                }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* Search */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-        <input
-          type="text"
-          placeholder="Search bills..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            flex: 1,
-            padding: '10px',
-            fontSize: '16px',
-            borderRadius: '6px',
-            border: '1px solid #ccc'
-          }}
-        />
-
-        {/* Create */}
-        <button
-          style={{
-            padding: '10px 40px',
-            borderRadius: '6px',
-            background: '#6366f1',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-          onClick={() => (
-            setShowForm(true),
-            setForm({
-              ...initialFormState,
-              ...(activeTab === 'GST' ? { type: 'GST' } : { type: 'TDS' })
-            }),
-            setPeriodFilter('All')
+        {/* Search & actions */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', paddingBottom: 8 }}>
+          <input
+            type="text"
+            placeholder="Search bills..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              fontSize: 16,
+              borderRadius: 6,
+              border: '1px solid #ccc'
+            }}
+          />
+          {isAllView && (
+            <div style={{ fontSize: 13, color: '#6b7280', minWidth: 140, textAlign: 'right' }}>
+              Showing {visibleCount}/{totalCount}
+            </div>
           )}
-        >
-          Create Bill
-        </button>
+          <button
+            style={{
+              padding: '10px 40px',
+              borderRadius: 6,
+              background: '#6366f1',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+            onClick={() => (
+              setShowForm(true),
+              setForm({
+                ...initialFormState,
+                ...(activeTab === 'GST' ? { type: 'GST' } : { type: 'TDS' })
+              }),
+              setPeriodFilter('All')
+            )}
+          >
+            Create Bill
+          </button>
+        </div>
       </div>
 
       {/* Table */}
+      <style>
+        {`
+        /* smooth hover */
+        .hoverable-row { transition: background-color 120ms ease-in-out; }
+        .hoverable-row:hover td { background: #eef2ff; }
+
+        /* make the sticky name cell also adopt the hover color */
+        .hoverable-row:hover td.sticky-cell { background: #e0e7ff !important; }
+      `}
+      </style>
+
       <div style={{ width: '100%', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         {sortedBills.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 20, color: '#666' }}>No data</div>
+        ) : activeSubTab !== 'Yearly' && periodFilter === 'All' ? (
+          //
+          //
+          /* ===================== READ-ONLY: Monthly/Quarterly → All ===================== */
+          //
+          //
+
+          <div style={{ overflowX: 'auto' }}>
+            {(() => {
+              const periodLabel = activeSubTab === 'Monthly' ? 'Month' : 'Quarter'
+
+              // borders
+              const THIN = '1px solid #e5e7eb' // slate-200
+              const GROUP = '2px solid #94a3b8' // slate-400 (darker outline)
+
+              const tableStyle: React.CSSProperties = {
+                width: '100%',
+                minWidth: 900,
+                borderCollapse: 'separate',
+                borderSpacing: 0,
+                background: 'white'
+              }
+              const theadTh: React.CSSProperties = {
+                position: 'sticky',
+                top: 0,
+                zIndex: 3,
+                background: '#4f46e5',
+                color: 'white',
+                textAlign: 'left',
+                padding: '10px 16px',
+                fontWeight: 700,
+                fontSize: 14
+              }
+              const tdBase: React.CSSProperties = {
+                padding: '10px 16px',
+                borderBottom: THIN,
+                verticalAlign: 'middle',
+                whiteSpace: 'nowrap'
+              }
+              // NOTE: row-spanned sticky cell draws the group separator at the bottom of the whole block
+              const stickyNameCellBase: React.CSSProperties = {
+                ...tdBase,
+                position: 'sticky',
+                left: 0,
+                zIndex: 2,
+                boxShadow: '2px 0 0 rgba(0,0,0,0.06)', // left separator
+                minWidth: 240,
+                maxWidth: 360
+              }
+              const idCellBase: React.CSSProperties = { ...tdBase, minWidth: 180 }
+              const periodCellBase: React.CSSProperties = { ...tdBase, minWidth: 120 }
+              const amountCellBase: React.CSSProperties = { ...tdBase, minWidth: 120 }
+              const dateCellBase: React.CSSProperties = {
+                ...tdBase,
+                minWidth: 140,
+                fontVariantNumeric: 'tabular-nums'
+              }
+              const remarksCellBase: React.CSSProperties = {
+                ...tdBase,
+                minWidth: 260,
+                whiteSpace: 'normal'
+              }
+
+              return (
+                <>
+                  <table style={tableStyle}>
+                    <thead>
+                      <tr>
+                        <th style={{ ...theadTh, left: 0, zIndex: 4, position: 'sticky' }}>Name</th>
+                        <th style={theadTh}>{activeTab === 'GST' ? 'GST No.' : 'PAN'}</th>
+                        <th style={theadTh}>{periodLabel}</th>
+                        <th style={theadTh}>Amount</th>
+                        <th style={theadTh}>Date</th>
+                        <th style={theadTh}>Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleSortedBills.map((bill) => {
+                        const key = bill.pan || bill.gstNumber || bill.name // stable key
+                        const { byMonth, byQuarter } = buildPeriodLookup(bill)
+
+                        const rows = (activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => {
+                          let v = '',
+                            d = '',
+                            r = ''
+                          if (byMonth) {
+                            const item = byMonth.get(p as any)
+                            v = item?.value ?? ''
+                            d = item?.date ?? ''
+                            r = item?.remarks ?? ''
+                          } else if (byQuarter) {
+                            const item = byQuarter.get(p as any)
+                            v = item?.value ?? ''
+                            d = item?.date ?? ''
+                            r = item?.remarks ?? ''
+                          }
+                          return { period: p, amount: v, date: d, remarks: r }
+                        })
+
+                        return rows.map((r, i) => {
+                          const isLast = i === rows.length - 1
+                          // ...keep your existing cell styles computed above...
+                          const stickyNameCell: React.CSSProperties = {
+                            ...stickyNameCellBase,
+                            // row-spanned cell gets thick bottom across the whole group
+                            borderBottom: GROUP,
+                            // reinforce the line on sticky cell (helps with some browsers)
+                            boxShadow: `${stickyNameCellBase.boxShadow}`,
+                            background: 'white'
+                          }
+                          const idCell: React.CSSProperties = {
+                            ...idCellBase,
+                            borderBottom: GROUP
+                          }
+                          const periodCell: React.CSSProperties = {
+                            ...periodCellBase,
+                            borderBottom: isLast ? GROUP : THIN
+                          }
+                          const amountCell: React.CSSProperties = {
+                            ...amountCellBase,
+                            borderBottom: isLast ? GROUP : THIN
+                          }
+                          const dateCell: React.CSSProperties = {
+                            ...dateCellBase,
+                            borderBottom: isLast ? GROUP : THIN
+                          }
+                          const remarksCell: React.CSSProperties = {
+                            ...remarksCellBase,
+                            borderBottom: isLast ? GROUP : THIN
+                          }
+                          return (
+                            <tr key={`${key}-${r.period}`} className="hoverable-row">
+                              {i === 0 && (
+                                <>
+                                  <td
+                                    className="sticky-cell"
+                                    style={stickyNameCell}
+                                    rowSpan={rows.length}
+                                  >
+                                    {bill.name}
+                                  </td>
+                                  <td style={idCell} rowSpan={rows.length}>
+                                    {bill.pan || bill.gstNumber}
+                                  </td>
+                                </>
+                              )}
+                              <td style={{ ...periodCell, borderBottom: isLast ? GROUP : THIN }}>
+                                {r.period}
+                              </td>
+                              <td style={{ ...amountCell, borderBottom: isLast ? GROUP : THIN }}>
+                                {r.amount || '-'}
+                              </td>
+                              <td style={{ ...dateCell, borderBottom: isLast ? GROUP : THIN }}>
+                                {r.date || '-'}
+                              </td>
+                              <td style={{ ...remarksCell, borderBottom: isLast ? GROUP : THIN }}>
+                                {r.remarks || '-'}
+                              </td>
+                            </tr>
+                          )
+                        })
+                      })}
+                    </tbody>
+                  </table>
+                  {isAllView && visibleCount < totalCount && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '12px' }}>
+                      <button
+                        onClick={() => setPage((p) => p + 1)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 6,
+                          border: '1px solid #c7d2fe',
+                          background: '#eef2ff',
+                          color: '#4338ca',
+                          cursor: 'pointer',
+                          fontWeight: 600
+                        }}
+                      >
+                        Load more ({Math.min(PAGE_SIZE, totalCount - visibleCount)} more)
+                      </button>
+                    </div>
+                  )}
+                </>
+              )
+            })()}
+          </div>
         ) : (
+          //
+          //
+          //
+          /* ===================== EXISTING EDITABLE VIEW (unchanged) ===================== */
           <>
             {/* Header */}
             <div
@@ -677,7 +940,6 @@ const GstTds = () => {
                 Name {sortKey === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
               </div>
               <div>{activeTab === 'GST' ? 'GST No.' : 'PAN'}</div>
-
               {tableHasEditors && (
                 <>
                   <div>Amount</div>
@@ -687,6 +949,7 @@ const GstTds = () => {
               )}
             </div>
 
+            {/* Rows */}
             {sortedBills.map((bill, index) => {
               const shownAmount = getShownAmount(bill)
               const shownDate = getShownDate(bill)
@@ -708,21 +971,21 @@ const GstTds = () => {
 
                   {tableHasEditors && (
                     <>
-                      {/* Amount (autosave, first-time date fill if needed) */}
+                      {/* Amount (editable) */}
                       <div style={{ paddingRight: '20px' }}>
                         <input
                           value={shownAmount}
                           onChange={(e) => {
                             const next = applyAmount(bill, e.target.value)
-                            replaceBillInState(next) // optimistic
-                            saveBillNow(next) // persist
+                            replaceBillInState(next)
+                            saveBillNow(next)
                           }}
                           style={{ ...inputBaseStyle, padding: '6px 8px' }}
                           placeholder="Amount"
                         />
                       </div>
 
-                      {/* Date (only user edits change date) */}
+                      {/* Date (editable) */}
                       <div style={{ paddingRight: '20px' }}>
                         <input
                           type="date"
@@ -737,7 +1000,7 @@ const GstTds = () => {
                         />
                       </div>
 
-                      {/* Remarks (never touches date) */}
+                      {/* Remarks (editable) */}
                       <div style={{ paddingRight: '20px' }}>
                         <input
                           value={shownRemarks}

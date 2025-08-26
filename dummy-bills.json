@@ -1,0 +1,4279 @@
+[
+  {
+    "name": "Vertex Services GST-M 1",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3952",
+            "date": "2025-07-09",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "February",
+            "value": "2954",
+            "date": "2025-04-23"
+          },
+          {
+            "month": "March",
+            "value": "3101",
+            "date": "2025-08-07",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "April",
+            "value": "4967",
+            "date": "2025-06-23"
+          },
+          {
+            "month": "May",
+            "value": "275",
+            "date": "2025-05-27",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "June",
+            "value": "800",
+            "date": "2025-02-06"
+          },
+          {
+            "month": "August",
+            "value": "302",
+            "date": "2025-02-13"
+          },
+          {
+            "month": "October",
+            "value": "2912",
+            "date": "2025-04-24"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "3372",
+            "date": "2026-04-16",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "April",
+            "value": "1263",
+            "date": "2026-05-09"
+          },
+          {
+            "month": "May",
+            "value": "269",
+            "date": "2026-03-07",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "June",
+            "value": "3382",
+            "date": "2026-06-07"
+          },
+          {
+            "month": "July",
+            "value": "2085",
+            "date": "2026-01-10"
+          },
+          {
+            "month": "October",
+            "value": "881",
+            "date": "2026-11-21",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "November",
+            "value": "774",
+            "date": "2026-03-01"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "01QSVEW6706N5ZM"
+  },
+  {
+    "name": "Nimbus Solutions 2",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2071",
+          "date": "2025-04-18"
+        }
+      }
+    ],
+    "pan": "BYMYS9017Y"
+  },
+  {
+    "name": "GreenLeaf Solutions TDS-Q 3",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "1354",
+            "date": "2025-02-06",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "quarter": "Q2",
+            "value": "4238",
+            "date": "2025-09-15"
+          },
+          {
+            "quarter": "Q4",
+            "value": "4916",
+            "date": "2025-11-13",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3688",
+            "date": "2025-04-20"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "2763",
+            "date": "2026-03-27",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "quarter": "Q4",
+            "value": "2899",
+            "date": "2026-12-27"
+          },
+          {
+            "quarter": "Q2",
+            "value": "559",
+            "date": "2026-12-20",
+            "remarks": "Partially offset via ITC"
+          }
+        ]
+      }
+    ],
+    "pan": "EPCUR4390N"
+  },
+  {
+    "name": "Skyline Retail 4",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4849",
+          "date": "2025-11-19",
+          "remarks": "Late fee waived"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4752",
+          "date": "2026-05-23"
+        }
+      }
+    ],
+    "pan": "IBLNN2431J"
+  },
+  {
+    "name": "GreenLeaf Tech TDS-Q 5",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "3369",
+            "date": "2025-11-10",
+            "remarks": "Pending challan"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3962",
+            "date": "2025-06-11"
+          }
+        ]
+      }
+    ],
+    "pan": "UQXYQ3269X"
+  },
+  {
+    "name": "GreenLeaf Finance GST-M 6",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1726",
+            "date": "2025-05-11"
+          },
+          {
+            "month": "April",
+            "value": "4195",
+            "date": "2025-09-14"
+          },
+          {
+            "month": "June",
+            "value": "340",
+            "date": "2025-07-19",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "July",
+            "value": "1531",
+            "date": "2025-07-17"
+          },
+          {
+            "month": "August",
+            "value": "1223",
+            "date": "2025-10-21",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "September",
+            "value": "4157",
+            "date": "2025-02-08",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "October",
+            "value": "2541",
+            "date": "2025-08-13"
+          },
+          {
+            "month": "November",
+            "value": "1827",
+            "date": "2025-11-21"
+          },
+          {
+            "month": "December",
+            "value": "1351",
+            "date": "2025-09-12"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "2881",
+            "date": "2026-02-02",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "May",
+            "value": "1649",
+            "date": "2026-08-26",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "June",
+            "value": "1125",
+            "date": "2026-09-04",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "September",
+            "value": "3971",
+            "date": "2026-03-12",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "November",
+            "value": "624",
+            "date": "2026-02-05",
+            "remarks": "Late fee waived"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "05MZUUT6467T6ZS"
+  },
+  {
+    "name": "Acme Tech 7",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2918",
+          "date": "2025-09-10",
+          "remarks": "Paid via NEFT"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3860",
+          "date": "2026-08-02",
+          "remarks": "Interest included"
+        }
+      }
+    ],
+    "pan": "DUOBC7466I"
+  },
+  {
+    "name": "Northstar Foods 8",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "362",
+          "date": "2025-02-10"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2297",
+          "date": "2026-06-04"
+        }
+      }
+    ],
+    "gstNumber": "19MVCPH6864Z8ZT"
+  },
+  {
+    "name": "Zenith Retail 9",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1537",
+          "date": "2025-01-05",
+          "remarks": "Advance received"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2175",
+          "date": "2026-01-12",
+          "remarks": "Docs awaited"
+        }
+      }
+    ],
+    "gstNumber": "27DOFJG3451A5ZP"
+  },
+  {
+    "name": "Skyline Finance TDS-Q 10",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "822",
+            "date": "2025-11-24",
+            "remarks": "Docs awaited"
+          },
+          {
+            "quarter": "Q1",
+            "value": "4282",
+            "date": "2025-07-08"
+          },
+          {
+            "quarter": "Q2",
+            "value": "298",
+            "date": "2025-05-03"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "1707",
+            "date": "2026-02-21"
+          },
+          {
+            "quarter": "Q1",
+            "value": "2943",
+            "date": "2026-01-07"
+          }
+        ]
+      }
+    ],
+    "pan": "GAIOD4582C"
+  },
+  {
+    "name": "Quantum Foods GST-M 11",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "1316",
+            "date": "2025-02-19"
+          },
+          {
+            "month": "April",
+            "value": "4604",
+            "date": "2025-12-09"
+          },
+          {
+            "month": "July",
+            "value": "4677",
+            "date": "2025-02-14"
+          },
+          {
+            "month": "September",
+            "value": "2110",
+            "date": "2025-07-10",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "November",
+            "value": "3165",
+            "date": "2025-12-03",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "December",
+            "value": "752",
+            "date": "2025-03-23",
+            "remarks": "Interest included"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "20ELHIN9033X2ZP"
+  },
+  {
+    "name": "Bluewave Solutions GST-M 12",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3342",
+            "date": "2025-09-28",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "February",
+            "value": "1439",
+            "date": "2025-03-19"
+          },
+          {
+            "month": "April",
+            "value": "3325",
+            "date": "2025-03-08"
+          },
+          {
+            "month": "June",
+            "value": "621",
+            "date": "2025-08-24",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "July",
+            "value": "3916",
+            "date": "2025-09-05"
+          },
+          {
+            "month": "August",
+            "value": "1090",
+            "date": "2025-04-26"
+          },
+          {
+            "month": "November",
+            "value": "3183",
+            "date": "2025-05-20"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "29HQRDP7411Y1ZC"
+  },
+  {
+    "name": "Zenith Foods GST-M 13",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1859",
+            "date": "2026-09-08"
+          },
+          {
+            "month": "February",
+            "value": "2570",
+            "date": "2026-06-23"
+          },
+          {
+            "month": "July",
+            "value": "4010",
+            "date": "2026-03-13"
+          },
+          {
+            "month": "August",
+            "value": "1744",
+            "date": "2026-05-12"
+          },
+          {
+            "month": "December",
+            "value": "2686",
+            "date": "2026-06-01",
+            "remarks": "Late fee waived"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "25UDFKI4592Q8ZN"
+  },
+  {
+    "name": "Skyline Retail 14",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2551",
+          "date": "2025-07-25",
+          "remarks": "Short payment, to rectify"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "527",
+          "date": "2026-04-15"
+        }
+      }
+    ],
+    "pan": "FNDOI9026V"
+  },
+  {
+    "name": "Orbit Solutions GST-M 15",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4047",
+            "date": "2025-09-25",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "April",
+            "value": "2495",
+            "date": "2025-03-11",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "May",
+            "value": "2140",
+            "date": "2025-12-21"
+          },
+          {
+            "month": "October",
+            "value": "1078",
+            "date": "2025-01-21"
+          },
+          {
+            "month": "December",
+            "value": "3215",
+            "date": "2025-12-14"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "2614",
+            "date": "2026-05-01",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "April",
+            "value": "4420",
+            "date": "2026-04-23"
+          },
+          {
+            "month": "June",
+            "value": "2269",
+            "date": "2026-08-03"
+          },
+          {
+            "month": "August",
+            "value": "3282",
+            "date": "2026-11-11"
+          },
+          {
+            "month": "September",
+            "value": "4654",
+            "date": "2026-07-14"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "18BCDGL9200A9ZF"
+  },
+  {
+    "name": "Nova Finance TDS-Q 16",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "4849",
+            "date": "2025-03-02"
+          },
+          {
+            "quarter": "Q3",
+            "value": "426",
+            "date": "2025-08-09",
+            "remarks": "Docs awaited"
+          },
+          {
+            "quarter": "Q2",
+            "value": "3885",
+            "date": "2025-02-01",
+            "remarks": "Credit note adjusted"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "1198",
+            "date": "2026-03-27"
+          },
+          {
+            "quarter": "Q2",
+            "value": "1198",
+            "date": "2026-11-02"
+          },
+          {
+            "quarter": "Q4",
+            "value": "3242",
+            "date": "2026-06-27"
+          }
+        ]
+      }
+    ],
+    "pan": "KVJPV4331F"
+  },
+  {
+    "name": "Quantum Foods TDS-Q 17",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "3152",
+            "date": "2025-06-13",
+            "remarks": "Provisional"
+          },
+          {
+            "quarter": "Q2",
+            "value": "999",
+            "date": "2025-04-15"
+          },
+          {
+            "quarter": "Q4",
+            "value": "2743",
+            "date": "2025-04-26",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "1079",
+            "date": "2026-05-17"
+          },
+          {
+            "quarter": "Q3",
+            "value": "751",
+            "date": "2026-02-16",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "quarter": "Q2",
+            "value": "4349",
+            "date": "2026-02-28"
+          },
+          {
+            "quarter": "Q1",
+            "value": "608",
+            "date": "2026-07-23"
+          }
+        ]
+      }
+    ],
+    "pan": "YSQOJ6510B"
+  },
+  {
+    "name": "Skyline Services TDS-Q 18",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "2819",
+            "date": "2025-02-11"
+          },
+          {
+            "quarter": "Q1",
+            "value": "2649",
+            "date": "2025-12-28"
+          },
+          {
+            "quarter": "Q2",
+            "value": "1222",
+            "date": "2025-05-09",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "quarter": "Q3",
+            "value": "4066",
+            "date": "2025-05-27"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "324",
+            "date": "2026-11-01",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "quarter": "Q2",
+            "value": "3178",
+            "date": "2026-12-01"
+          },
+          {
+            "quarter": "Q3",
+            "value": "439",
+            "date": "2026-08-04"
+          },
+          {
+            "quarter": "Q4",
+            "value": "1830",
+            "date": "2026-04-04",
+            "remarks": "Pending challan"
+          }
+        ]
+      }
+    ],
+    "pan": "LCKFH1557A"
+  },
+  {
+    "name": "Nimbus Retail 19",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1720",
+          "date": "2026-07-18",
+          "remarks": "Paid via NEFT"
+        }
+      }
+    ],
+    "pan": "IXNTX3993B"
+  },
+  {
+    "name": "Pioneer Retail 20",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4963",
+          "date": "2025-08-12"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3957",
+          "date": "2026-11-25"
+        }
+      }
+    ],
+    "gstNumber": "06IVLQL8447N3ZY"
+  },
+  {
+    "name": "Quantum Foods GST-M 21",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1651",
+            "date": "2025-08-23"
+          },
+          {
+            "month": "February",
+            "value": "2548",
+            "date": "2025-10-18",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "May",
+            "value": "3646",
+            "date": "2025-06-23",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "June",
+            "value": "4637",
+            "date": "2025-12-13",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "August",
+            "value": "702",
+            "date": "2025-03-23",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "September",
+            "value": "1067",
+            "date": "2025-09-21"
+          },
+          {
+            "month": "October",
+            "value": "2687",
+            "date": "2025-05-05"
+          },
+          {
+            "month": "November",
+            "value": "4572",
+            "date": "2025-04-20",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "December",
+            "value": "1644",
+            "date": "2025-05-27"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "2131",
+            "date": "2026-08-14",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "March",
+            "value": "2722",
+            "date": "2026-11-20",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "April",
+            "value": "4312",
+            "date": "2026-02-18"
+          },
+          {
+            "month": "June",
+            "value": "1640",
+            "date": "2026-09-21"
+          },
+          {
+            "month": "July",
+            "value": "2622",
+            "date": "2026-09-01"
+          },
+          {
+            "month": "September",
+            "value": "298",
+            "date": "2026-06-09"
+          },
+          {
+            "month": "October",
+            "value": "3035",
+            "date": "2026-05-22"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "32HOZNZ4037M9ZQ"
+  },
+  {
+    "name": "Orbit Build GST-M 22",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1244",
+            "date": "2025-01-11"
+          },
+          {
+            "month": "February",
+            "value": "2000",
+            "date": "2025-07-09"
+          },
+          {
+            "month": "March",
+            "value": "2610",
+            "date": "2025-10-20"
+          },
+          {
+            "month": "April",
+            "value": "2008",
+            "date": "2025-05-21",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "May",
+            "value": "2079",
+            "date": "2025-07-18",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "June",
+            "value": "2658",
+            "date": "2025-09-03",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "August",
+            "value": "4907",
+            "date": "2025-10-15",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "November",
+            "value": "4326",
+            "date": "2025-06-02"
+          },
+          {
+            "month": "December",
+            "value": "614",
+            "date": "2025-08-27"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1712",
+            "date": "2026-09-20",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "March",
+            "value": "977",
+            "date": "2026-11-27"
+          },
+          {
+            "month": "May",
+            "value": "1268",
+            "date": "2026-08-18"
+          },
+          {
+            "month": "June",
+            "value": "2392",
+            "date": "2026-03-14"
+          },
+          {
+            "month": "July",
+            "value": "4527",
+            "date": "2026-08-14"
+          },
+          {
+            "month": "August",
+            "value": "3766",
+            "date": "2026-05-01",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "October",
+            "value": "3518",
+            "date": "2026-11-18"
+          },
+          {
+            "month": "November",
+            "value": "4459",
+            "date": "2026-05-27",
+            "remarks": "RCM adjusted"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "24WDARS9099G2ZD"
+  },
+  {
+    "name": "Zenith Services GST-M 23",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "1128",
+            "date": "2025-05-07",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "March",
+            "value": "1278",
+            "date": "2025-09-20",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "April",
+            "value": "736",
+            "date": "2025-07-04",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "May",
+            "value": "948",
+            "date": "2025-10-18"
+          },
+          {
+            "month": "June",
+            "value": "726",
+            "date": "2025-06-24"
+          },
+          {
+            "month": "July",
+            "value": "3035",
+            "date": "2025-07-13"
+          },
+          {
+            "month": "August",
+            "value": "2931",
+            "date": "2025-02-26"
+          },
+          {
+            "month": "November",
+            "value": "3906",
+            "date": "2025-02-26",
+            "remarks": "Docs awaited"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3986",
+            "date": "2026-12-13",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "February",
+            "value": "611",
+            "date": "2026-01-08",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "March",
+            "value": "1333",
+            "date": "2026-01-27"
+          },
+          {
+            "month": "May",
+            "value": "3107",
+            "date": "2026-05-25"
+          },
+          {
+            "month": "June",
+            "value": "544",
+            "date": "2026-01-07",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "August",
+            "value": "4717",
+            "date": "2026-07-03"
+          },
+          {
+            "month": "September",
+            "value": "2476",
+            "date": "2026-09-24",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "November",
+            "value": "4949",
+            "date": "2026-09-24"
+          },
+          {
+            "month": "December",
+            "value": "2664",
+            "date": "2026-06-14"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "31UMUVV1855H6ZH"
+  },
+  {
+    "name": "Quantum Traders 24",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2878",
+          "date": "2025-02-16"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1929",
+          "date": "2026-10-01"
+        }
+      }
+    ],
+    "pan": "FVUPS3443Q"
+  },
+  {
+    "name": "Vertex Finance GST-M 25",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "2497",
+            "date": "2025-05-06",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "March",
+            "value": "2537",
+            "date": "2025-01-04",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "May",
+            "value": "659",
+            "date": "2025-05-08"
+          },
+          {
+            "month": "June",
+            "value": "1734",
+            "date": "2025-07-21"
+          },
+          {
+            "month": "August",
+            "value": "2669",
+            "date": "2025-11-08"
+          },
+          {
+            "month": "October",
+            "value": "410",
+            "date": "2025-01-14",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "November",
+            "value": "791",
+            "date": "2025-02-06",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "December",
+            "value": "1645",
+            "date": "2025-08-09"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "3834",
+            "date": "2026-05-02"
+          },
+          {
+            "month": "June",
+            "value": "1604",
+            "date": "2026-01-11"
+          },
+          {
+            "month": "July",
+            "value": "2693",
+            "date": "2026-09-25",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "August",
+            "value": "3193",
+            "date": "2026-10-01",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "November",
+            "value": "2981",
+            "date": "2026-02-07"
+          },
+          {
+            "month": "December",
+            "value": "1301",
+            "date": "2026-02-23"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "09BARBW2087C7ZO"
+  },
+  {
+    "name": "GreenLeaf Solutions 26",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3491",
+          "date": "2025-06-06"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4487",
+          "date": "2026-04-25",
+          "remarks": "Paid via NEFT"
+        }
+      }
+    ],
+    "pan": "NOSOI4957I"
+  },
+  {
+    "name": "Bright Solutions 27",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4424",
+          "date": "2025-08-24"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1527",
+          "date": "2026-09-09",
+          "remarks": "Credit note adjusted"
+        }
+      }
+    ],
+    "gstNumber": "11ZRDBY2063A9ZH"
+  },
+  {
+    "name": "Bluewave Build 28",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3815",
+          "date": "2026-11-26"
+        }
+      }
+    ],
+    "pan": "RWRDY8542B"
+  },
+  {
+    "name": "Nova Solutions GST-M 29",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "226",
+            "date": "2026-02-16"
+          },
+          {
+            "month": "April",
+            "value": "2487",
+            "date": "2026-10-06"
+          },
+          {
+            "month": "May",
+            "value": "925",
+            "date": "2026-09-16",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "July",
+            "value": "1798",
+            "date": "2026-11-27",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "November",
+            "value": "1430",
+            "date": "2026-02-06"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "09ESZEU7532J1ZM"
+  },
+  {
+    "name": "Nova Build 30",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1493",
+          "date": "2026-10-12"
+        }
+      }
+    ],
+    "gstNumber": "20LBCIB3754P7ZE"
+  },
+  {
+    "name": "Vertex Finance GST-M 31",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "756",
+            "date": "2025-05-05",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "April",
+            "value": "2758",
+            "date": "2025-12-05",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "May",
+            "value": "1984",
+            "date": "2025-03-13",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "June",
+            "value": "4517",
+            "date": "2025-10-23"
+          },
+          {
+            "month": "September",
+            "value": "3263",
+            "date": "2025-12-04",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "October",
+            "value": "884",
+            "date": "2025-08-19"
+          },
+          {
+            "month": "December",
+            "value": "2639",
+            "date": "2025-07-09",
+            "remarks": "Paid via NEFT"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "March",
+            "value": "4285",
+            "date": "2026-04-27"
+          },
+          {
+            "month": "April",
+            "value": "4835",
+            "date": "2026-03-09",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "June",
+            "value": "4006",
+            "date": "2026-07-09",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "August",
+            "value": "4400",
+            "date": "2026-02-10"
+          },
+          {
+            "month": "September",
+            "value": "2058",
+            "date": "2026-06-23",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "October",
+            "value": "1829",
+            "date": "2026-04-26",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "November",
+            "value": "1807",
+            "date": "2026-09-01",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "December",
+            "value": "3140",
+            "date": "2026-02-25"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "04ZDOFD9689U4ZX"
+  },
+  {
+    "name": "Quantum Solutions 32",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1297",
+          "date": "2026-06-04"
+        }
+      }
+    ],
+    "gstNumber": "06UPDRN3319M9ZM"
+  },
+  {
+    "name": "GreenLeaf Traders TDS-Q 33",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "2719",
+            "date": "2025-02-17"
+          },
+          {
+            "quarter": "Q2",
+            "value": "1713",
+            "date": "2025-07-14",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "quarter": "Q1",
+            "value": "2471",
+            "date": "2025-06-18"
+          }
+        ]
+      }
+    ],
+    "pan": "SKXUE7972M"
+  },
+  {
+    "name": "Atlas Services GST-M 34",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "4400",
+            "date": "2025-05-12",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "March",
+            "value": "476",
+            "date": "2025-11-28",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "April",
+            "value": "1898",
+            "date": "2025-04-06"
+          },
+          {
+            "month": "June",
+            "value": "929",
+            "date": "2025-07-18"
+          },
+          {
+            "month": "August",
+            "value": "2478",
+            "date": "2025-08-12"
+          },
+          {
+            "month": "September",
+            "value": "309",
+            "date": "2025-10-25",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "December",
+            "value": "3503",
+            "date": "2025-05-07"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "2626",
+            "date": "2026-04-06"
+          },
+          {
+            "month": "March",
+            "value": "3026",
+            "date": "2026-11-27"
+          },
+          {
+            "month": "June",
+            "value": "1202",
+            "date": "2026-03-13",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "July",
+            "value": "2994",
+            "date": "2026-04-23",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "September",
+            "value": "2989",
+            "date": "2026-04-13"
+          },
+          {
+            "month": "October",
+            "value": "4357",
+            "date": "2026-02-01"
+          },
+          {
+            "month": "November",
+            "value": "4907",
+            "date": "2026-04-02"
+          },
+          {
+            "month": "December",
+            "value": "3251",
+            "date": "2026-06-28",
+            "remarks": "Advance received"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "22UAGRE3016G9ZK"
+  },
+  {
+    "name": "Skyline Solutions 35",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1355",
+          "date": "2025-10-02"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3460",
+          "date": "2026-06-26",
+          "remarks": "Advance received"
+        }
+      }
+    ],
+    "pan": "JFOEN1665C"
+  },
+  {
+    "name": "Atlas Tech TDS-Q 36",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "653",
+            "date": "2025-08-12"
+          },
+          {
+            "quarter": "Q2",
+            "value": "4283",
+            "date": "2025-02-22",
+            "remarks": "Pending challan"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "1564",
+            "date": "2026-08-12"
+          },
+          {
+            "quarter": "Q2",
+            "value": "253",
+            "date": "2026-02-27"
+          }
+        ]
+      }
+    ],
+    "pan": "CFJZY6840C"
+  },
+  {
+    "name": "GreenLeaf Traders GST-M 37",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "March",
+            "value": "1095",
+            "date": "2025-06-19",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "April",
+            "value": "4233",
+            "date": "2025-01-09",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "May",
+            "value": "3346",
+            "date": "2025-05-08"
+          },
+          {
+            "month": "June",
+            "value": "4201",
+            "date": "2025-10-03"
+          },
+          {
+            "month": "August",
+            "value": "470",
+            "date": "2025-03-07",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "December",
+            "value": "3429",
+            "date": "2025-09-15"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "14BJIXT4819M2ZM"
+  },
+  {
+    "name": "Atlas Retail TDS-Q 38",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "3800",
+            "date": "2025-12-27",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "quarter": "Q2",
+            "value": "4378",
+            "date": "2025-05-25"
+          },
+          {
+            "quarter": "Q3",
+            "value": "4720",
+            "date": "2025-01-10"
+          },
+          {
+            "quarter": "Q4",
+            "value": "4321",
+            "date": "2025-01-23"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "389",
+            "date": "2026-10-06",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3751",
+            "date": "2026-04-22",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "quarter": "Q2",
+            "value": "4770",
+            "date": "2026-08-18"
+          },
+          {
+            "quarter": "Q1",
+            "value": "2235",
+            "date": "2026-10-10",
+            "remarks": "Partially offset via ITC"
+          }
+        ]
+      }
+    ],
+    "pan": "EYPUF5643I"
+  },
+  {
+    "name": "Zenith Finance GST-M 39",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "April",
+            "value": "973",
+            "date": "2026-02-21"
+          },
+          {
+            "month": "July",
+            "value": "4622",
+            "date": "2026-02-05"
+          },
+          {
+            "month": "August",
+            "value": "1221",
+            "date": "2026-06-04"
+          },
+          {
+            "month": "September",
+            "value": "4069",
+            "date": "2026-08-10"
+          },
+          {
+            "month": "October",
+            "value": "2719",
+            "date": "2026-06-27"
+          },
+          {
+            "month": "December",
+            "value": "3079",
+            "date": "2026-06-26",
+            "remarks": "Advance received"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "16XQGAS6378W9ZL"
+  },
+  {
+    "name": "Acme Finance GST-M 40",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "4233",
+            "date": "2025-10-02",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "March",
+            "value": "1021",
+            "date": "2025-01-05"
+          },
+          {
+            "month": "May",
+            "value": "1622",
+            "date": "2025-08-11"
+          },
+          {
+            "month": "August",
+            "value": "2271",
+            "date": "2025-12-09",
+            "remarks": "Paid via NEFT"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "13HWSZT5753B4ZU"
+  },
+  {
+    "name": "Pioneer Retail 41",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4634",
+          "date": "2025-11-09"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2729",
+          "date": "2026-03-04",
+          "remarks": "Credit note adjusted"
+        }
+      }
+    ],
+    "pan": "KCPCU5782X"
+  },
+  {
+    "name": "GreenLeaf Services 42",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "912",
+          "date": "2025-05-05"
+        }
+      }
+    ],
+    "pan": "EXPJH4066F"
+  },
+  {
+    "name": "Nova Finance TDS-Q 43",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "4163",
+            "date": "2026-03-02"
+          },
+          {
+            "quarter": "Q1",
+            "value": "1648",
+            "date": "2026-05-08"
+          }
+        ]
+      }
+    ],
+    "pan": "IGQUO1878I"
+  },
+  {
+    "name": "Vertex Retail 44",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3251",
+          "date": "2025-04-05",
+          "remarks": "Docs awaited"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2448",
+          "date": "2026-11-10"
+        }
+      }
+    ],
+    "pan": "IVMYP2865U"
+  },
+  {
+    "name": "Northstar Retail TDS-Q 45",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "3586",
+            "date": "2025-09-02",
+            "remarks": "Pending challan"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3768",
+            "date": "2025-03-21",
+            "remarks": "Credit note adjusted"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "4399",
+            "date": "2026-03-08"
+          },
+          {
+            "quarter": "Q2",
+            "value": "253",
+            "date": "2026-04-13"
+          },
+          {
+            "quarter": "Q3",
+            "value": "4662",
+            "date": "2026-06-06",
+            "remarks": "Pending challan"
+          },
+          {
+            "quarter": "Q1",
+            "value": "4759",
+            "date": "2026-10-03",
+            "remarks": "Interest included"
+          }
+        ]
+      }
+    ],
+    "pan": "MKTJK1938W"
+  },
+  {
+    "name": "Bluewave Tech 46",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4148",
+          "date": "2026-07-28",
+          "remarks": "Docs awaited"
+        }
+      }
+    ],
+    "gstNumber": "28WORDS9533G7ZF"
+  },
+  {
+    "name": "Skyline Services TDS-Q 47",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q2",
+            "value": "653",
+            "date": "2025-02-14",
+            "remarks": "Provisional"
+          },
+          {
+            "quarter": "Q1",
+            "value": "3730",
+            "date": "2025-11-25",
+            "remarks": "Paid via NEFT"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "361",
+            "date": "2026-05-08"
+          },
+          {
+            "quarter": "Q3",
+            "value": "2662",
+            "date": "2026-02-26",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      }
+    ],
+    "pan": "VEENZ3069A"
+  },
+  {
+    "name": "Bright Services 48",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2717",
+          "date": "2025-06-21"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2666",
+          "date": "2026-06-21",
+          "remarks": "Provisional"
+        }
+      }
+    ],
+    "pan": "GEROK7087U"
+  },
+  {
+    "name": "Skyline Traders 49",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1850",
+          "date": "2025-10-10"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3539",
+          "date": "2026-09-04"
+        }
+      }
+    ],
+    "gstNumber": "30VQPCP7489R4ZO"
+  },
+  {
+    "name": "Vertex Tech TDS-Q 50",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "2211",
+            "date": "2026-02-02"
+          },
+          {
+            "quarter": "Q4",
+            "value": "435",
+            "date": "2026-09-02"
+          },
+          {
+            "quarter": "Q2",
+            "value": "3126",
+            "date": "2026-09-09"
+          },
+          {
+            "quarter": "Q3",
+            "value": "4187",
+            "date": "2026-05-15",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      }
+    ],
+    "pan": "EQMSC1230S"
+  },
+  {
+    "name": "Innova Tech 51",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4076",
+          "date": "2025-12-27",
+          "remarks": "Late fee waived"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1953",
+          "date": "2026-11-24",
+          "remarks": "Credit note adjusted"
+        }
+      }
+    ],
+    "gstNumber": "02ZFPDP9464R3ZR"
+  },
+  {
+    "name": "Atlas Retail GST-M 52",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "823",
+            "date": "2025-11-15",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "February",
+            "value": "4186",
+            "date": "2025-03-04"
+          },
+          {
+            "month": "April",
+            "value": "3773",
+            "date": "2025-06-13"
+          },
+          {
+            "month": "May",
+            "value": "2453",
+            "date": "2025-06-27",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "July",
+            "value": "1041",
+            "date": "2025-08-14",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "August",
+            "value": "3957",
+            "date": "2025-10-19",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "September",
+            "value": "1592",
+            "date": "2025-06-08",
+            "remarks": "Advance received"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4540",
+            "date": "2026-08-19",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "February",
+            "value": "4767",
+            "date": "2026-02-13"
+          },
+          {
+            "month": "March",
+            "value": "3868",
+            "date": "2026-06-20"
+          },
+          {
+            "month": "May",
+            "value": "4810",
+            "date": "2026-11-11"
+          },
+          {
+            "month": "June",
+            "value": "4793",
+            "date": "2026-06-23",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "July",
+            "value": "1218",
+            "date": "2026-01-04"
+          },
+          {
+            "month": "August",
+            "value": "1287",
+            "date": "2026-08-12",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "October",
+            "value": "1444",
+            "date": "2026-07-01",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "November",
+            "value": "3916",
+            "date": "2026-08-06"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "11AWJIS7084T5ZP"
+  },
+  {
+    "name": "Innova Build GST-M 53",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "322",
+            "date": "2026-05-22"
+          },
+          {
+            "month": "February",
+            "value": "1129",
+            "date": "2026-05-15"
+          },
+          {
+            "month": "March",
+            "value": "2706",
+            "date": "2026-04-15"
+          },
+          {
+            "month": "April",
+            "value": "2005",
+            "date": "2026-06-08",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "June",
+            "value": "4479",
+            "date": "2026-04-16"
+          },
+          {
+            "month": "October",
+            "value": "1742",
+            "date": "2026-06-20",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "November",
+            "value": "2042",
+            "date": "2026-06-04"
+          },
+          {
+            "month": "December",
+            "value": "3869",
+            "date": "2026-05-17",
+            "remarks": "Interest included"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "33QGNZT6034Z6ZS"
+  },
+  {
+    "name": "Orbit Finance 54",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3114",
+          "date": "2025-02-01",
+          "remarks": "Pending challan"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1236",
+          "date": "2026-12-27",
+          "remarks": "Interest included"
+        }
+      }
+    ],
+    "gstNumber": "24JUQJJ5800B3ZD"
+  },
+  {
+    "name": "Atlas Retail 55",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4221",
+          "date": "2025-12-21"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1910",
+          "date": "2026-01-13",
+          "remarks": "Advance received"
+        }
+      }
+    ],
+    "pan": "XOGYI7322Q"
+  },
+  {
+    "name": "Innova Traders GST-M 56",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3377",
+            "date": "2026-02-18"
+          },
+          {
+            "month": "February",
+            "value": "416",
+            "date": "2026-10-08",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "March",
+            "value": "1602",
+            "date": "2026-10-23"
+          },
+          {
+            "month": "April",
+            "value": "4288",
+            "date": "2026-06-22",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "May",
+            "value": "2909",
+            "date": "2026-03-12",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "July",
+            "value": "1995",
+            "date": "2026-06-28"
+          },
+          {
+            "month": "November",
+            "value": "3662",
+            "date": "2026-03-10",
+            "remarks": "Late fee waived"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "29XOQAM7313T9ZG"
+  },
+  {
+    "name": "Quantum Solutions 57",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1077",
+          "date": "2025-07-18"
+        }
+      }
+    ],
+    "pan": "AZXLO8267E"
+  },
+  {
+    "name": "Vertex Finance 58",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1921",
+          "date": "2026-02-23",
+          "remarks": "RCM adjusted"
+        }
+      }
+    ],
+    "gstNumber": "34BAEFR1528G8ZQ"
+  },
+  {
+    "name": "Pioneer Build GST-M 59",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "March",
+            "value": "1549",
+            "date": "2025-08-10",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "April",
+            "value": "4115",
+            "date": "2025-06-28"
+          },
+          {
+            "month": "May",
+            "value": "4064",
+            "date": "2025-09-06"
+          },
+          {
+            "month": "June",
+            "value": "990",
+            "date": "2025-03-28",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "November",
+            "value": "3545",
+            "date": "2025-12-07"
+          },
+          {
+            "month": "December",
+            "value": "715",
+            "date": "2025-02-03",
+            "remarks": "Credit note adjusted"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "April",
+            "value": "450",
+            "date": "2026-12-27"
+          },
+          {
+            "month": "May",
+            "value": "2657",
+            "date": "2026-06-21",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "June",
+            "value": "3182",
+            "date": "2026-07-14",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "October",
+            "value": "1579",
+            "date": "2026-05-02"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "13VNWEN5183V7ZI"
+  },
+  {
+    "name": "Acme Solutions 60",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3034",
+          "date": "2025-07-19"
+        }
+      }
+    ],
+    "gstNumber": "20RBSYF8526L5ZU"
+  },
+  {
+    "name": "Vertex Finance TDS-Q 61",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "2385",
+            "date": "2025-09-17",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "quarter": "Q1",
+            "value": "3881",
+            "date": "2025-06-25"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3798",
+            "date": "2025-06-07",
+            "remarks": "Provisional"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "2039",
+            "date": "2026-04-26",
+            "remarks": "Docs awaited"
+          },
+          {
+            "quarter": "Q4",
+            "value": "2684",
+            "date": "2026-03-13"
+          }
+        ]
+      }
+    ],
+    "pan": "RNTCU6203U"
+  },
+  {
+    "name": "Orbit Foods GST-M 62",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4944",
+            "date": "2025-11-22"
+          },
+          {
+            "month": "April",
+            "value": "2380",
+            "date": "2025-01-05"
+          },
+          {
+            "month": "May",
+            "value": "4446",
+            "date": "2025-02-06",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "July",
+            "value": "2701",
+            "date": "2025-12-21"
+          },
+          {
+            "month": "September",
+            "value": "1527",
+            "date": "2025-03-08"
+          },
+          {
+            "month": "October",
+            "value": "3228",
+            "date": "2025-10-20",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "November",
+            "value": "2362",
+            "date": "2025-07-17"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3216",
+            "date": "2026-03-08",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "February",
+            "value": "2365",
+            "date": "2026-03-23",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "March",
+            "value": "1528",
+            "date": "2026-05-17",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "April",
+            "value": "714",
+            "date": "2026-07-18",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "May",
+            "value": "2216",
+            "date": "2026-07-23",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "June",
+            "value": "3773",
+            "date": "2026-05-15"
+          },
+          {
+            "month": "July",
+            "value": "2237",
+            "date": "2026-10-21"
+          },
+          {
+            "month": "September",
+            "value": "3511",
+            "date": "2026-03-07",
+            "remarks": "Paid via NEFT"
+          },
+          {
+            "month": "November",
+            "value": "4576",
+            "date": "2026-12-11",
+            "remarks": "Docs awaited"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "11VPQMN3770T1ZP"
+  },
+  {
+    "name": "Atlas Tech 63",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "883",
+          "date": "2025-07-12",
+          "remarks": "Credit note adjusted"
+        }
+      }
+    ],
+    "gstNumber": "25UHVDR7580A5ZG"
+  },
+  {
+    "name": "Atlas Build GST-M 64",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "1322",
+            "date": "2025-12-07",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "March",
+            "value": "535",
+            "date": "2025-11-11"
+          },
+          {
+            "month": "April",
+            "value": "2449",
+            "date": "2025-04-15"
+          },
+          {
+            "month": "May",
+            "value": "700",
+            "date": "2025-12-07"
+          },
+          {
+            "month": "June",
+            "value": "2332",
+            "date": "2025-12-03"
+          },
+          {
+            "month": "August",
+            "value": "2629",
+            "date": "2025-05-27"
+          },
+          {
+            "month": "November",
+            "value": "3126",
+            "date": "2025-01-18"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "March",
+            "value": "4816",
+            "date": "2026-08-23"
+          },
+          {
+            "month": "May",
+            "value": "1053",
+            "date": "2026-07-11"
+          },
+          {
+            "month": "July",
+            "value": "2103",
+            "date": "2026-12-01"
+          },
+          {
+            "month": "September",
+            "value": "2818",
+            "date": "2026-03-16"
+          },
+          {
+            "month": "October",
+            "value": "270",
+            "date": "2026-12-19"
+          },
+          {
+            "month": "November",
+            "value": "3175",
+            "date": "2026-03-18"
+          },
+          {
+            "month": "December",
+            "value": "3357",
+            "date": "2026-05-21",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "16SWPPO8066F5ZB"
+  },
+  {
+    "name": "Northstar Tech 65",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2754",
+          "date": "2025-01-10"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2792",
+          "date": "2026-01-11"
+        }
+      }
+    ],
+    "gstNumber": "35YMHHD1967Q7ZO"
+  },
+  {
+    "name": "Vertex Traders 66",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "545",
+          "date": "2025-11-01",
+          "remarks": "Partially offset via ITC"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2991",
+          "date": "2026-05-08"
+        }
+      }
+    ],
+    "pan": "SCHSC2240Y"
+  },
+  {
+    "name": "Quantum Build GST-M 67",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4463",
+            "date": "2025-09-13"
+          },
+          {
+            "month": "February",
+            "value": "3549",
+            "date": "2025-04-22"
+          },
+          {
+            "month": "June",
+            "value": "1098",
+            "date": "2025-03-23"
+          },
+          {
+            "month": "July",
+            "value": "1323",
+            "date": "2025-06-20"
+          },
+          {
+            "month": "August",
+            "value": "2541",
+            "date": "2025-10-10",
+            "remarks": "Interest included"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "2336",
+            "date": "2026-04-19",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "February",
+            "value": "3303",
+            "date": "2026-06-08",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "March",
+            "value": "686",
+            "date": "2026-10-07",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "April",
+            "value": "4367",
+            "date": "2026-06-11"
+          },
+          {
+            "month": "May",
+            "value": "578",
+            "date": "2026-03-16"
+          },
+          {
+            "month": "August",
+            "value": "825",
+            "date": "2026-12-16"
+          },
+          {
+            "month": "September",
+            "value": "1638",
+            "date": "2026-08-12"
+          },
+          {
+            "month": "December",
+            "value": "3039",
+            "date": "2026-07-24",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "24ZFMRJ3890S5ZU"
+  },
+  {
+    "name": "Vertex Traders GST-M 68",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4759",
+            "date": "2025-07-23"
+          },
+          {
+            "month": "February",
+            "value": "2699",
+            "date": "2025-06-28"
+          },
+          {
+            "month": "April",
+            "value": "1613",
+            "date": "2025-11-16"
+          },
+          {
+            "month": "June",
+            "value": "1467",
+            "date": "2025-09-05"
+          },
+          {
+            "month": "July",
+            "value": "630",
+            "date": "2025-10-03"
+          },
+          {
+            "month": "September",
+            "value": "3996",
+            "date": "2025-11-05"
+          },
+          {
+            "month": "October",
+            "value": "205",
+            "date": "2025-01-22"
+          },
+          {
+            "month": "December",
+            "value": "807",
+            "date": "2025-01-18"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "26VHLSY3792Z2ZU"
+  },
+  {
+    "name": "Orbit Finance GST-M 69",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1139",
+            "date": "2025-02-19"
+          },
+          {
+            "month": "February",
+            "value": "1788",
+            "date": "2025-11-25"
+          },
+          {
+            "month": "March",
+            "value": "3938",
+            "date": "2025-04-28"
+          },
+          {
+            "month": "May",
+            "value": "3236",
+            "date": "2025-07-05"
+          },
+          {
+            "month": "June",
+            "value": "519",
+            "date": "2025-11-13"
+          },
+          {
+            "month": "July",
+            "value": "1087",
+            "date": "2025-08-05"
+          },
+          {
+            "month": "September",
+            "value": "1299",
+            "date": "2025-07-07",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "November",
+            "value": "1406",
+            "date": "2025-11-14",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "December",
+            "value": "2717",
+            "date": "2025-06-20"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "3464",
+            "date": "2026-09-06"
+          },
+          {
+            "month": "March",
+            "value": "2964",
+            "date": "2026-01-23",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "April",
+            "value": "557",
+            "date": "2026-01-14"
+          },
+          {
+            "month": "May",
+            "value": "3318",
+            "date": "2026-04-12"
+          },
+          {
+            "month": "August",
+            "value": "520",
+            "date": "2026-12-20",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "September",
+            "value": "2558",
+            "date": "2026-07-15",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "October",
+            "value": "1699",
+            "date": "2026-03-27",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "November",
+            "value": "3095",
+            "date": "2026-01-12"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "23IXUSY1598K5ZX"
+  },
+  {
+    "name": "Innova Solutions GST-M 70",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "1589",
+            "date": "2025-09-14",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "March",
+            "value": "2059",
+            "date": "2025-04-12"
+          },
+          {
+            "month": "April",
+            "value": "399",
+            "date": "2025-12-17"
+          },
+          {
+            "month": "May",
+            "value": "2265",
+            "date": "2025-08-09"
+          },
+          {
+            "month": "July",
+            "value": "4893",
+            "date": "2025-07-24"
+          },
+          {
+            "month": "August",
+            "value": "4436",
+            "date": "2025-12-11",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "September",
+            "value": "3569",
+            "date": "2025-04-08"
+          },
+          {
+            "month": "October",
+            "value": "3360",
+            "date": "2025-03-14"
+          },
+          {
+            "month": "December",
+            "value": "4139",
+            "date": "2025-08-27",
+            "remarks": "Advance received"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1053",
+            "date": "2026-02-10"
+          },
+          {
+            "month": "February",
+            "value": "2911",
+            "date": "2026-01-19",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "March",
+            "value": "882",
+            "date": "2026-04-27",
+            "remarks": "Late fee waived"
+          },
+          {
+            "month": "April",
+            "value": "4367",
+            "date": "2026-02-03",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "June",
+            "value": "1599",
+            "date": "2026-12-10"
+          },
+          {
+            "month": "July",
+            "value": "3002",
+            "date": "2026-09-09"
+          },
+          {
+            "month": "November",
+            "value": "2936",
+            "date": "2026-04-15"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "25UCPEP3884E8ZQ"
+  },
+  {
+    "name": "Vertex Tech 71",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "683",
+          "date": "2025-08-08",
+          "remarks": "Provisional"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4332",
+          "date": "2026-02-28"
+        }
+      }
+    ],
+    "gstNumber": "34NIHSK6202F9ZQ"
+  },
+  {
+    "name": "Pioneer Traders GST-M 72",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "February",
+            "value": "4857",
+            "date": "2025-11-08"
+          },
+          {
+            "month": "March",
+            "value": "1002",
+            "date": "2025-06-25"
+          },
+          {
+            "month": "April",
+            "value": "1096",
+            "date": "2025-07-22"
+          },
+          {
+            "month": "November",
+            "value": "1439",
+            "date": "2025-02-23"
+          },
+          {
+            "month": "December",
+            "value": "1456",
+            "date": "2025-06-24"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "March",
+            "value": "653",
+            "date": "2026-11-24",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "April",
+            "value": "4799",
+            "date": "2026-09-26"
+          },
+          {
+            "month": "June",
+            "value": "3799",
+            "date": "2026-06-05",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "July",
+            "value": "3514",
+            "date": "2026-09-03"
+          },
+          {
+            "month": "August",
+            "value": "2979",
+            "date": "2026-08-19",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "September",
+            "value": "1802",
+            "date": "2026-10-05",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "October",
+            "value": "4313",
+            "date": "2026-02-12"
+          },
+          {
+            "month": "December",
+            "value": "3388",
+            "date": "2026-04-04",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "17ILYLL9085E7ZH"
+  },
+  {
+    "name": "GreenLeaf Foods GST-M 73",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "316",
+            "date": "2025-09-04",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "March",
+            "value": "1803",
+            "date": "2025-08-19",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "April",
+            "value": "4647",
+            "date": "2025-05-10",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "May",
+            "value": "2056",
+            "date": "2025-09-11"
+          },
+          {
+            "month": "July",
+            "value": "1228",
+            "date": "2025-08-12",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "August",
+            "value": "2334",
+            "date": "2025-11-14"
+          },
+          {
+            "month": "September",
+            "value": "279",
+            "date": "2025-11-04"
+          },
+          {
+            "month": "November",
+            "value": "463",
+            "date": "2025-08-28",
+            "remarks": "Provisional"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "474",
+            "date": "2026-01-11",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "February",
+            "value": "1091",
+            "date": "2026-07-23"
+          },
+          {
+            "month": "June",
+            "value": "4874",
+            "date": "2026-09-15",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "July",
+            "value": "3603",
+            "date": "2026-01-15",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "September",
+            "value": "538",
+            "date": "2026-01-22",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "October",
+            "value": "2401",
+            "date": "2026-06-07"
+          },
+          {
+            "month": "December",
+            "value": "2129",
+            "date": "2026-12-12"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "28WZRJH7732I1ZL"
+  },
+  {
+    "name": "Pioneer Tech 74",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3722",
+          "date": "2025-01-21"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3851",
+          "date": "2026-07-01"
+        }
+      }
+    ],
+    "gstNumber": "26TDCRK8834R8ZY"
+  },
+  {
+    "name": "Nova Tech 75",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3888",
+          "date": "2025-04-17"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2752",
+          "date": "2026-10-13"
+        }
+      }
+    ],
+    "gstNumber": "19RVQRT2654J1ZE"
+  },
+  {
+    "name": "Northstar Foods 76",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "2049",
+          "date": "2025-11-25",
+          "remarks": "Provisional"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "664",
+          "date": "2026-09-21"
+        }
+      }
+    ],
+    "pan": "XCAJK6252R"
+  },
+  {
+    "name": "Orbit Build 77",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "4337",
+          "date": "2025-10-28"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1378",
+          "date": "2026-07-19",
+          "remarks": "Paid via NEFT"
+        }
+      }
+    ],
+    "pan": "AACSI5120E"
+  },
+  {
+    "name": "Zenith Retail 78",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3288",
+          "date": "2025-05-22"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2152",
+          "date": "2026-01-15"
+        }
+      }
+    ],
+    "pan": "VZRLR2260R"
+  },
+  {
+    "name": "Nova Services TDS-Q 79",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "1001",
+            "date": "2025-08-18"
+          },
+          {
+            "quarter": "Q4",
+            "value": "4581",
+            "date": "2025-08-23",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "quarter": "Q1",
+            "value": "3637",
+            "date": "2025-11-11",
+            "remarks": "Advance received"
+          }
+        ]
+      }
+    ],
+    "pan": "VWJZW9830X"
+  },
+  {
+    "name": "GreenLeaf Solutions TDS-Q 80",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "2190",
+            "date": "2026-12-06",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "quarter": "Q3",
+            "value": "4638",
+            "date": "2026-08-01"
+          }
+        ]
+      }
+    ],
+    "pan": "WFNFF3275B"
+  },
+  {
+    "name": "Bluewave Tech 81",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3851",
+          "date": "2025-05-03"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "1697",
+          "date": "2026-10-18"
+        }
+      }
+    ],
+    "pan": "FJHXK5812A"
+  },
+  {
+    "name": "Skyline Build TDS-Q 82",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "3561",
+            "date": "2025-06-08"
+          },
+          {
+            "quarter": "Q4",
+            "value": "2440",
+            "date": "2025-11-10",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "quarter": "Q2",
+            "value": "2202",
+            "date": "2025-05-09",
+            "remarks": "Short payment, to rectify"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "1086",
+            "date": "2026-10-23"
+          },
+          {
+            "quarter": "Q1",
+            "value": "1979",
+            "date": "2026-11-21"
+          },
+          {
+            "quarter": "Q2",
+            "value": "3881",
+            "date": "2026-07-11",
+            "remarks": "RCM adjusted"
+          }
+        ]
+      }
+    ],
+    "pan": "YZARO9034M"
+  },
+  {
+    "name": "Innova Finance GST-M 83",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "2888",
+            "date": "2026-10-25",
+            "remarks": "Advance received"
+          },
+          {
+            "month": "March",
+            "value": "2822",
+            "date": "2026-06-14",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "April",
+            "value": "2968",
+            "date": "2026-03-12"
+          },
+          {
+            "month": "July",
+            "value": "1055",
+            "date": "2026-03-02",
+            "remarks": "Provisional"
+          },
+          {
+            "month": "September",
+            "value": "2504",
+            "date": "2026-02-07"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "02AIYSA8860D8ZS"
+  },
+  {
+    "name": "Nova Finance 84",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1083",
+          "date": "2025-02-14",
+          "remarks": "Late fee waived"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3802",
+          "date": "2026-08-25"
+        }
+      }
+    ],
+    "pan": "IYPXP2749A"
+  },
+  {
+    "name": "Acme Foods TDS-Q 85",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q4",
+            "value": "361",
+            "date": "2026-02-13",
+            "remarks": "Advance received"
+          },
+          {
+            "quarter": "Q3",
+            "value": "3231",
+            "date": "2026-06-01",
+            "remarks": "Interest included"
+          },
+          {
+            "quarter": "Q2",
+            "value": "913",
+            "date": "2026-12-08"
+          }
+        ]
+      }
+    ],
+    "pan": "AWVDI9101M"
+  },
+  {
+    "name": "Quantum Tech 86",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4794",
+          "date": "2026-07-05"
+        }
+      }
+    ],
+    "gstNumber": "32PGDJE7337C2ZZ"
+  },
+  {
+    "name": "Nova Build 87",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "4567",
+          "date": "2026-10-03",
+          "remarks": "Credit note adjusted"
+        }
+      }
+    ],
+    "gstNumber": "11KLKRW8151N6ZH"
+  },
+  {
+    "name": "Bright Finance 88",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3538",
+          "date": "2025-04-28"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2046",
+          "date": "2026-11-27",
+          "remarks": "Late fee waived"
+        }
+      }
+    ],
+    "pan": "ZFCHR2601H"
+  },
+  {
+    "name": "Bluewave Finance 89",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1291",
+          "date": "2025-10-27",
+          "remarks": "Partially offset via ITC"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3418",
+          "date": "2026-04-05"
+        }
+      }
+    ],
+    "gstNumber": "07DCWDV5046Y7ZX"
+  },
+  {
+    "name": "Quantum Build 90",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "3413",
+          "date": "2026-05-19"
+        }
+      }
+    ],
+    "gstNumber": "06HTVRG8239L9ZU"
+  },
+  {
+    "name": "Acme Retail 91",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3116",
+          "date": "2025-12-19",
+          "remarks": "Pending challan"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "570",
+          "date": "2026-02-24"
+        }
+      }
+    ],
+    "gstNumber": "34SSVOX8533O4ZZ"
+  },
+  {
+    "name": "Orbit Finance TDS-Q 92",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "quarter": "Q3",
+            "value": "3029",
+            "date": "2026-02-18"
+          },
+          {
+            "quarter": "Q2",
+            "value": "3883",
+            "date": "2026-04-03"
+          },
+          {
+            "quarter": "Q1",
+            "value": "913",
+            "date": "2026-02-18",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "quarter": "Q4",
+            "value": "2153",
+            "date": "2026-01-01"
+          }
+        ]
+      }
+    ],
+    "pan": "LDOYD1728O"
+  },
+  {
+    "name": "Orbit Services GST-M 93",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "January",
+            "value": "4064",
+            "date": "2025-12-28"
+          },
+          {
+            "month": "May",
+            "value": "3311",
+            "date": "2025-03-18"
+          },
+          {
+            "month": "June",
+            "value": "3710",
+            "date": "2025-09-23",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "July",
+            "value": "802",
+            "date": "2025-08-02"
+          },
+          {
+            "month": "August",
+            "value": "1078",
+            "date": "2025-10-01",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "October",
+            "value": "3080",
+            "date": "2025-12-12"
+          },
+          {
+            "month": "November",
+            "value": "1534",
+            "date": "2025-10-10",
+            "remarks": "Credit note adjusted"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "1734",
+            "date": "2026-02-06"
+          },
+          {
+            "month": "February",
+            "value": "1869",
+            "date": "2026-03-18",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "March",
+            "value": "3242",
+            "date": "2026-10-11"
+          },
+          {
+            "month": "May",
+            "value": "3022",
+            "date": "2026-04-27"
+          },
+          {
+            "month": "June",
+            "value": "708",
+            "date": "2026-03-13",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "August",
+            "value": "3000",
+            "date": "2026-05-20",
+            "remarks": "Docs awaited"
+          },
+          {
+            "month": "September",
+            "value": "2465",
+            "date": "2026-05-16"
+          },
+          {
+            "month": "October",
+            "value": "2043",
+            "date": "2026-08-26",
+            "remarks": "Credit note adjusted"
+          },
+          {
+            "month": "November",
+            "value": "4619",
+            "date": "2026-11-25"
+          },
+          {
+            "month": "December",
+            "value": "4268",
+            "date": "2026-03-10"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "30EYQUA2516P9ZI"
+  },
+  {
+    "name": "Northstar Services 94",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2965",
+          "date": "2026-03-25"
+        }
+      }
+    ],
+    "gstNumber": "33AIIRA9657Q6ZF"
+  },
+  {
+    "name": "Atlas Finance 95",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "1314",
+          "date": "2025-07-14",
+          "remarks": "Late fee waived"
+        }
+      },
+      {
+        "year": "2026",
+        "amount": {
+          "value": "2773",
+          "date": "2026-10-05"
+        }
+      }
+    ],
+    "pan": "FLNYJ3949R"
+  },
+  {
+    "name": "Nimbus Tech TDS-Q 96",
+    "paymentType": "Quarterly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "quarter": "Q1",
+            "value": "856",
+            "date": "2025-08-04",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "quarter": "Q2",
+            "value": "1684",
+            "date": "2025-10-03",
+            "remarks": "Credit note adjusted"
+          }
+        ]
+      }
+    ],
+    "pan": "RDTQQ9864K"
+  },
+  {
+    "name": "Acme Retail GST-M 97",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "January",
+            "value": "3669",
+            "date": "2026-10-03"
+          },
+          {
+            "month": "August",
+            "value": "4141",
+            "date": "2026-05-16",
+            "remarks": "Interest included"
+          },
+          {
+            "month": "September",
+            "value": "4671",
+            "date": "2026-11-28",
+            "remarks": "Pending challan"
+          },
+          {
+            "month": "October",
+            "value": "2945",
+            "date": "2026-11-04",
+            "remarks": "Partially offset via ITC"
+          },
+          {
+            "month": "November",
+            "value": "3646",
+            "date": "2026-12-04"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "32KBYMZ3246R6ZH"
+  },
+  {
+    "name": "Orbit Services 98",
+    "paymentType": "Yearly",
+    "type": "TDS",
+    "bill": [
+      {
+        "year": "2026",
+        "amount": {
+          "value": "974",
+          "date": "2026-09-13"
+        }
+      }
+    ],
+    "pan": "RTHIP8538T"
+  },
+  {
+    "name": "Nimbus Foods 99",
+    "paymentType": "Yearly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": {
+          "value": "3977",
+          "date": "2025-01-19",
+          "remarks": "Advance received"
+        }
+      }
+    ],
+    "gstNumber": "11BBGDE1826A2ZV"
+  },
+  {
+    "name": "Skyline Solutions GST-M 100",
+    "paymentType": "Monthly",
+    "type": "GST",
+    "bill": [
+      {
+        "year": "2025",
+        "amount": [
+          {
+            "month": "June",
+            "value": "3296",
+            "date": "2025-07-05"
+          },
+          {
+            "month": "July",
+            "value": "3199",
+            "date": "2025-08-10",
+            "remarks": "RCM adjusted"
+          },
+          {
+            "month": "August",
+            "value": "3182",
+            "date": "2025-07-22"
+          },
+          {
+            "month": "September",
+            "value": "1325",
+            "date": "2025-04-12"
+          },
+          {
+            "month": "November",
+            "value": "4108",
+            "date": "2025-06-22"
+          },
+          {
+            "month": "December",
+            "value": "2735",
+            "date": "2025-01-05",
+            "remarks": "Pending challan"
+          }
+        ]
+      },
+      {
+        "year": "2026",
+        "amount": [
+          {
+            "month": "February",
+            "value": "2361",
+            "date": "2026-12-18"
+          },
+          {
+            "month": "March",
+            "value": "503",
+            "date": "2026-07-16"
+          },
+          {
+            "month": "April",
+            "value": "609",
+            "date": "2026-01-27",
+            "remarks": "Short payment, to rectify"
+          },
+          {
+            "month": "July",
+            "value": "830",
+            "date": "2026-06-04"
+          },
+          {
+            "month": "September",
+            "value": "1973",
+            "date": "2026-06-26"
+          },
+          {
+            "month": "November",
+            "value": "545",
+            "date": "2026-08-02"
+          },
+          {
+            "month": "December",
+            "value": "3788",
+            "date": "2026-10-05",
+            "remarks": "Paid via NEFT"
+          }
+        ]
+      }
+    ],
+    "gstNumber": "12PINSV4589V3ZN"
+  }
+]
