@@ -71,19 +71,13 @@ const isYearlyAmount = (a: unknown): a is YearlyAmount =>
   !('quarter' in (a as any))
 // /Type guards
 
-// const isMonthlyAmounts = (a: any): a is MonthlyAmount[] =>
-//   Array.isArray(a) && a.length > 0 && 'month' in a[0]
-
-// const isQuarterlyAmounts = (a: any): a is QuarterlyAmount[] =>
-//   Array.isArray(a) && a.length > 0 && 'quarter' in a[0]
-
 const STICKY_TOP = 69 // match your Layout’s top bar height
 const stickyWrapStyle: React.CSSProperties = {
   position: 'sticky',
   top: STICKY_TOP,
   zIndex: 40, // above table header
   background: 'white',
-  padding: '8px 10px',
+  padding: '20px 10px 10px 10px',
   borderBottom: '1px solid #e5e7eb',
   boxShadow: '0 8px 8px -8px rgba(0,0,0,0.12)'
 }
@@ -98,9 +92,24 @@ const GstTds = () => {
   const [sortKey, setSortKey] = useState<'name' | 'pan' | 'paymentType' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [periodFilter, setPeriodFilter] = useState<string>('All')
+  const [unpaidOnly, setUnpaidOnly] = useState(false)
 
   const [form, setForm] = useState(initialFormState)
   const [showForm, setShowForm] = useState(false)
+
+  // Accent colors switch by active tab
+  const ACCENT = React.useMemo(
+    () =>
+      activeTab === 'GST'
+        ? { solid: '#6366f1', dark: '#4f46e5', text: '#ffffff' } // indigo
+        : { solid: '#038260ff', dark: '#038260ff', text: '#ffffff' }, // amber
+    [activeTab]
+  )
+
+  const SMOOTH: React.CSSProperties = {
+    transition:
+      'background-color 240ms ease, color 240ms ease, border-color 240ms ease, box-shadow 240ms ease'
+  }
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -151,11 +160,54 @@ const GstTds = () => {
   }
   // =========================
 
+  const isYearlyPaid = (amt: unknown) => isYearlyAmount(amt) && !!amt.date
+
+  const isMonthlyPeriodPaid = (amt: unknown, month: (typeof MONTHS)[number]) => {
+    if (!isMonthlyArray(amt)) return false
+    const found = amt.find((m) => m.month === month)
+    return !!found?.date
+  }
+
+  const isQuarterlyPeriodPaid = (amt: unknown, quarter: (typeof QUARTERS)[number]) => {
+    if (!isQuarterlyArray(amt)) return false
+    const found = amt.find((q) => q.quarter === quarter)
+    return !!found?.date
+  }
+
+  /** true if this bill has at least one unpaid item in the *current* view */
+  const hasAnyUnpaidForCurrentView = React.useCallback(
+    (bill: Bill) => {
+      const amt = bill.bill?.find((b) => b.year === currentYear)?.amount
+
+      if (activeSubTab === 'Yearly') {
+        // unpaid if there is no yearly amount or no date
+        return !isYearlyPaid(amt)
+      }
+
+      if (activeSubTab === 'Monthly') {
+        if (periodFilter === 'All') {
+          return MONTHS.some((m) => !isMonthlyPeriodPaid(amt, m))
+        }
+        return !isMonthlyPeriodPaid(amt, periodFilter as (typeof MONTHS)[number])
+      }
+
+      if (activeSubTab === 'Quarterly') {
+        if (periodFilter === 'All') {
+          return QUARTERS.some((q) => !isQuarterlyPeriodPaid(amt, q))
+        }
+        return !isQuarterlyPeriodPaid(amt, periodFilter as (typeof QUARTERS)[number])
+      }
+
+      return true
+    },
+    [activeSubTab, periodFilter]
+  )
+
   // Update the filtering to handle new amount types
   const filteredBills = useMemo(() => {
     const q = searchDebounced.toLowerCase()
 
-    return bills
+    const base = bills
       .filter((bill) => bill.type === activeTab)
       .filter((bill) => bill.paymentType === activeSubTab)
       .filter((bill) => {
@@ -173,7 +225,12 @@ const GstTds = () => {
         }
         return pool.some((s) => s.toLowerCase().includes(q))
       })
-  }, [bills, activeTab, activeSubTab, searchDebounced])
+
+    if (!unpaidOnly) return base
+
+    // keep only bills that have at least one unpaid item for the current view
+    return base.filter(hasAnyUnpaidForCurrentView)
+  }, [searchDebounced, bills, unpaidOnly, hasAnyUnpaidForCurrentView, activeTab, activeSubTab])
 
   const sortedBills = useMemo(() => {
     if (!sortKey) return filteredBills
@@ -509,12 +566,20 @@ const GstTds = () => {
   }
 
   return (
-    <Layout title="📝 Track GST/TDS Bills" financialYear>
+    <Layout title="📝 Track GST/TDS Bills" color={ACCENT.dark} financialYear>
       {/* Sticky top section */}
       <div style={stickyWrapStyle}>
         {/* Heading */}
         <div style={{ marginBottom: 12 }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#4f46e5', margin: 0 }}>
+          <h1
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: ACCENT.dark,
+              margin: 0,
+              ...SMOOTH
+            }}
+          >
             {activeTab === 'GST' ? 'GST Bills' : 'TDS Bills'}
           </h1>
           <p style={{ fontSize: '16px', color: '#6b7280', margin: '6px 0 0' }}>
@@ -556,9 +621,10 @@ const GstTds = () => {
                 padding: '10px 20px',
                 borderRadius: 6,
                 border: 'none',
-                background: activeTab === 'GST' ? '#6366f1' : 'transparent',
+                background: activeTab === 'GST' ? ACCENT.solid : 'transparent',
                 color: activeTab === 'GST' ? '#fff' : '#333',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                ...SMOOTH
               }}
             >
               GST
@@ -573,9 +639,10 @@ const GstTds = () => {
                 padding: '10px 20px',
                 borderRadius: 6,
                 border: 'none',
-                background: activeTab === 'TDS' ? '#6366f1' : 'transparent',
+                background: activeTab === 'TDS' ? ACCENT.solid : 'transparent',
                 color: activeTab === 'TDS' ? '#fff' : '#333',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                ...SMOOTH
               }}
             >
               TDS
@@ -593,9 +660,10 @@ const GstTds = () => {
                 padding: '10px 20px',
                 borderRadius: 6,
                 border: 'none',
-                background: activeSubTab === 'Yearly' ? '#6366f1' : 'transparent',
+                background: activeSubTab === 'Yearly' ? ACCENT.solid : 'transparent',
                 color: activeSubTab === 'Yearly' ? '#fff' : '#333',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                ...SMOOTH
               }}
             >
               Yearly
@@ -610,9 +678,10 @@ const GstTds = () => {
                   padding: '10px 20px',
                   borderRadius: 6,
                   border: 'none',
-                  background: activeSubTab === 'Monthly' ? '#6366f1' : 'transparent',
+                  background: activeSubTab === 'Monthly' ? ACCENT.solid : 'transparent',
                   color: activeSubTab === 'Monthly' ? '#fff' : '#333',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  ...SMOOTH
                 }}
               >
                 Monthly
@@ -628,9 +697,10 @@ const GstTds = () => {
                   padding: '10px 20px',
                   borderRadius: 6,
                   border: 'none',
-                  background: activeSubTab === 'Quarterly' ? '#6366f1' : 'transparent',
+                  background: activeSubTab === 'Quarterly' ? ACCENT.solid : 'transparent',
                   color: activeSubTab === 'Quarterly' ? '#fff' : '#333',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  ...SMOOTH
                 }}
               >
                 Quarterly
@@ -648,9 +718,10 @@ const GstTds = () => {
                 padding: '8px 14px',
                 borderRadius: 6,
                 border: 'none',
-                background: periodFilter === 'All' ? '#6366f1' : 'transparent',
-                color: periodFilter === 'All' ? '#fff' : '#333',
-                cursor: 'pointer'
+                background: periodFilter === 'All' ? ACCENT.solid : 'transparent',
+                color: periodFilter === 'All' ? ACCENT.text : '#333',
+                cursor: 'pointer',
+                ...SMOOTH
               }}
             >
               All
@@ -663,9 +734,10 @@ const GstTds = () => {
                   padding: '8px 14px',
                   borderRadius: 6,
                   border: 'none',
-                  background: periodFilter === p ? '#6366f1' : 'transparent',
-                  color: periodFilter === p ? '#fff' : '#333',
-                  cursor: 'pointer'
+                  background: periodFilter === p ? ACCENT.solid : 'transparent',
+                  color: periodFilter === p ? ACCENT.text : '#333',
+                  cursor: 'pointer',
+                  ...SMOOTH
                 }}
               >
                 {p}
@@ -689,6 +761,45 @@ const GstTds = () => {
               border: '1px solid #ccc'
             }}
           />
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              marginLeft: 12,
+              paddingLeft: 12,
+              borderLeft: '1px solid #e5e7eb'
+            }}
+          >
+            <button
+              onClick={() => setUnpaidOnly(false)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: 'none',
+                background: !unpaidOnly ? ACCENT.solid : 'transparent',
+                color: !unpaidOnly ? ACCENT.text : '#333',
+                cursor: 'pointer',
+                ...SMOOTH
+              }}
+            >
+              All Bills
+            </button>
+            <button
+              onClick={() => setUnpaidOnly(true)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: 'none',
+                background: unpaidOnly ? ACCENT.solid : 'transparent',
+                color: unpaidOnly ? ACCENT.text : '#333',
+                cursor: 'pointer',
+                ...SMOOTH
+              }}
+            >
+              Unpaid Only
+            </button>
+          </div>
           {isAllView && (
             <div style={{ fontSize: 13, color: '#6b7280', minWidth: 140, textAlign: 'right' }}>
               Showing {visibleCount}/{totalCount}
@@ -698,10 +809,11 @@ const GstTds = () => {
             style={{
               padding: '10px 40px',
               borderRadius: 6,
-              background: '#6366f1',
-              color: '#fff',
+              background: ACCENT.solid,
+              color: ACCENT.text,
               border: 'none',
               cursor: 'pointer',
+              ...SMOOTH,
               fontWeight: 'bold'
             }}
             onClick={() => (
@@ -721,13 +833,13 @@ const GstTds = () => {
       {/* Table */}
       <style>
         {`
-        /* smooth hover */
-        .hoverable-row { transition: background-color 120ms ease-in-out; }
-        .hoverable-row:hover td { background: #eef2ff; }
+          .hoverable-row { transition: background-color 120ms ease-in-out; }
+          .hoverable-row:hover td { background: #eef2ff; }
+          .hoverable-row:hover td.sticky-cell { background: #e0e7ff !important; }
 
-        /* make the sticky name cell also adopt the hover color */
-        .hoverable-row:hover td.sticky-cell { background: #e0e7ff !important; }
-      `}
+          /* duplicates keep the cell for sticky/hover, hide text after first row */
+          .hide-text { visibility: hidden; }
+        `}
       </style>
 
       <div style={{ width: '100%', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
@@ -746,7 +858,7 @@ const GstTds = () => {
 
               // borders
               const THIN = '1px solid #e5e7eb' // slate-200
-              const GROUP = '2px solid #94a3b8' // slate-400 (darker outline)
+              const GROUP = '1.5px solid #94a3b8' // slate-400 (darker outline)
 
               const tableStyle: React.CSSProperties = {
                 width: '100%',
@@ -759,7 +871,7 @@ const GstTds = () => {
                 position: 'sticky',
                 top: 0,
                 zIndex: 3,
-                background: '#4f46e5',
+                background: ACCENT.dark,
                 color: 'white',
                 textAlign: 'left',
                 padding: '10px 16px',
@@ -782,7 +894,6 @@ const GstTds = () => {
                 minWidth: 240,
                 maxWidth: 360
               }
-              const idCellBase: React.CSSProperties = { ...tdBase, minWidth: 180 }
               const periodCellBase: React.CSSProperties = { ...tdBase, minWidth: 120 }
               const amountCellBase: React.CSSProperties = { ...tdBase, minWidth: 120 }
               const dateCellBase: React.CSSProperties = {
@@ -801,101 +912,93 @@ const GstTds = () => {
                   <table style={tableStyle}>
                     <thead>
                       <tr>
-                        <th style={{ ...theadTh, left: 0, zIndex: 4, position: 'sticky' }}>Name</th>
-                        <th style={theadTh}>{activeTab === 'GST' ? 'GST No.' : 'PAN'}</th>
+                        <th style={{ ...theadTh, left: 0, zIndex: 4, position: 'sticky' }}>
+                          {activeTab === 'GST' ? 'Name / GST' : 'Name / PAN'}
+                        </th>
                         <th style={theadTh}>{periodLabel}</th>
                         <th style={theadTh}>Amount</th>
                         <th style={theadTh}>Date</th>
                         <th style={theadTh}>Remarks</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {visibleSortedBills.map((bill) => {
-                        const key = bill.pan || bill.gstNumber || bill.name // stable key
-                        const { byMonth, byQuarter } = buildPeriodLookup(bill)
 
-                        const rows = (activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => {
-                          let v = '',
-                            d = '',
-                            r = ''
-                          if (byMonth) {
-                            const item = byMonth.get(p as any)
-                            v = item?.value ?? ''
-                            d = item?.date ?? ''
-                            r = item?.remarks ?? ''
-                          } else if (byQuarter) {
-                            const item = byQuarter.get(p as any)
-                            v = item?.value ?? ''
-                            d = item?.date ?? ''
-                            r = item?.remarks ?? ''
-                          }
-                          return { period: p, amount: v, date: d, remarks: r }
-                        })
+                    {visibleSortedBills.map((bill) => {
+                      const key = bill.pan || bill.gstNumber || bill.name
+                      const { byMonth, byQuarter } = buildPeriodLookup(bill)
 
-                        return rows.map((r, i) => {
-                          const isLast = i === rows.length - 1
-                          // ...keep your existing cell styles computed above...
-                          const stickyNameCell: React.CSSProperties = {
-                            ...stickyNameCellBase,
-                            // row-spanned cell gets thick bottom across the whole group
-                            borderBottom: GROUP,
-                            // reinforce the line on sticky cell (helps with some browsers)
-                            boxShadow: `${stickyNameCellBase.boxShadow}`,
-                            background: 'white'
-                          }
-                          const idCell: React.CSSProperties = {
-                            ...idCellBase,
-                            borderBottom: GROUP
-                          }
-                          const periodCell: React.CSSProperties = {
-                            ...periodCellBase,
-                            borderBottom: isLast ? GROUP : THIN
-                          }
-                          const amountCell: React.CSSProperties = {
-                            ...amountCellBase,
-                            borderBottom: isLast ? GROUP : THIN
-                          }
-                          const dateCell: React.CSSProperties = {
-                            ...dateCellBase,
-                            borderBottom: isLast ? GROUP : THIN
-                          }
-                          const remarksCell: React.CSSProperties = {
-                            ...remarksCellBase,
-                            borderBottom: isLast ? GROUP : THIN
-                          }
-                          return (
-                            <tr key={`${key}-${r.period}`} className="hoverable-row">
-                              {i === 0 && (
-                                <>
-                                  <td
-                                    className="sticky-cell"
-                                    style={stickyNameCell}
-                                    rowSpan={rows.length}
-                                  >
-                                    {bill.name}
-                                  </td>
-                                  <td style={idCell} rowSpan={rows.length}>
-                                    {bill.pan || bill.gstNumber}
-                                  </td>
-                                </>
-                              )}
-                              <td style={{ ...periodCell, borderBottom: isLast ? GROUP : THIN }}>
-                                {r.period}
-                              </td>
-                              <td style={{ ...amountCell, borderBottom: isLast ? GROUP : THIN }}>
-                                {r.amount || '-'}
-                              </td>
-                              <td style={{ ...dateCell, borderBottom: isLast ? GROUP : THIN }}>
-                                {r.date || '-'}
-                              </td>
-                              <td style={{ ...remarksCell, borderBottom: isLast ? GROUP : THIN }}>
-                                {r.remarks || '-'}
-                              </td>
-                            </tr>
-                          )
-                        })
-                      })}
-                    </tbody>
+                      let rows = (activeSubTab === 'Monthly' ? MONTHS : QUARTERS).map((p) => {
+                        let v = '',
+                          d = '',
+                          r = ''
+                        if (byMonth) {
+                          const item = byMonth.get(p as any)
+                          v = item?.value ?? ''
+                          d = item?.date ?? ''
+                          r = item?.remarks ?? ''
+                        } else if (byQuarter) {
+                          const item = byQuarter.get(p as any)
+                          v = item?.value ?? ''
+                          d = item?.date ?? ''
+                          r = item?.remarks ?? ''
+                        }
+                        return { period: p, amount: v, date: d, remarks: r }
+                      })
+
+                      if (unpaidOnly) rows = rows.filter((r) => !r.date)
+                      if (rows.length === 0) return null
+
+                      return (
+                        <tbody key={key}>
+                          {rows.map((r, i) => {
+                            const isLast = i === rows.length - 1
+
+                            const stickyPartyCell: React.CSSProperties = {
+                              ...stickyNameCellBase, // reuse your existing base (left sticky, shadow, etc.)
+                              minWidth: 320,
+                              maxWidth: 420,
+                              whiteSpace: 'normal',
+                              background: 'white',
+                              borderBottom: isLast ? GROUP : THIN
+                            }
+                            const periodCell: React.CSSProperties = {
+                              ...periodCellBase,
+                              borderBottom: isLast ? GROUP : THIN
+                            }
+                            const amountCell: React.CSSProperties = {
+                              ...amountCellBase,
+                              borderBottom: isLast ? GROUP : THIN
+                            }
+                            const dateCell: React.CSSProperties = {
+                              ...dateCellBase,
+                              borderBottom: isLast ? GROUP : THIN
+                            }
+                            const remarksCell: React.CSSProperties = {
+                              ...remarksCellBase,
+                              borderBottom: isLast ? GROUP : THIN
+                            }
+
+                            return (
+                              <tr key={`${key}-${r.period}`} className="hoverable-row">
+                                {/* ONE sticky column with Name + ID. Duplicate per row; hide text after first */}
+                                <td className="sticky-cell" style={stickyPartyCell}>
+                                  <div className={i > 0 ? 'hide-text' : ''} aria-hidden={i > 0}>
+                                    <div style={{ fontWeight: 600 }}>{bill.name}</div>
+                                    <div style={{ fontSize: 12, color: '#6b7280' }}>
+                                      {bill.pan || bill.gstNumber}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td style={periodCell}>{r.period}</td>
+                                <td style={amountCell}>{r.amount || '-'}</td>
+                                <td style={dateCell}>{r.date || '-'}</td>
+                                <td style={remarksCell}>{r.remarks || '-'}</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      )
+                    })}
                   </table>
                   {isAllView && visibleCount < totalCount && (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: '12px' }}>
@@ -930,7 +1033,7 @@ const GstTds = () => {
               style={{
                 display: 'grid',
                 gridTemplateColumns: `250px 200px ${tableHasEditors ? '120px 180px 1fr' : ''}`,
-                backgroundColor: '#4f46e5',
+                backgroundColor: ACCENT.dark,
                 color: 'white',
                 fontWeight: 'bold',
                 padding: '10px 16px'

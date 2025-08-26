@@ -5,7 +5,8 @@ const Layout: React.FC<{
   hideAssessmentYear?: boolean
   financialYear?: boolean
   children: React.ReactNode
-}> = ({ title, hideAssessmentYear, financialYear, children }) => {
+  color?: string
+}> = ({ title, hideAssessmentYear, financialYear, children, color }) => {
   const [year, setYear] = useState<string>('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -51,7 +52,7 @@ const Layout: React.FC<{
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          backgroundColor: '#4f46e5',
+          backgroundColor: color ?? '#4f46e5',
           color: '#fff',
           fontSize: scrolled ? '1.3rem' : '1.5rem',
           fontWeight: 'bold',
@@ -70,7 +71,7 @@ const Layout: React.FC<{
             <button
               onClick={() => setShowDropdown((prev) => !prev)}
               style={{
-                backgroundColor: '#6366f1',
+                backgroundColor: color ?? '#6366f1',
                 padding: scrolled ? '6px 14px' : '8px 16px',
                 borderRadius: '999px',
                 fontSize: '1.1rem',
