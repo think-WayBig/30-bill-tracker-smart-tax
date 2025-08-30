@@ -24,7 +24,8 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "react-hot-toast": "^2.5.2",
-    "react-window": "^1.8.11"
+    "react-window": "^1.8.11",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

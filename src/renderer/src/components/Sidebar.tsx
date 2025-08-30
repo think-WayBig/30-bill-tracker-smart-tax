@@ -222,6 +222,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
 
       {renderButton('notices', 'Notices', '📬')}
       {renderButton('taxes', 'GST/TDS', '📝', false, false, taxesAccent)}
+      {renderButton('excel', 'Statements', '🏦')}
 
       <div style={{ marginTop: 'auto', width: '100%' }}>
         {renderButton('settings', 'Settings', '⚙️')}
