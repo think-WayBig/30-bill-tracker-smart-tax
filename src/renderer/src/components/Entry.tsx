@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Layout from './Layout'
+import Layout from './helpers/Layout'
 
 const currentYear = new Date().getFullYear()
 const yearOptions = Array.from({ length: 11 }, (_, i) => (2020 + i).toString())

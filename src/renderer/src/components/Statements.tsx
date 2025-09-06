@@ -1,17 +1,61 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
-import Layout from './Layout'
+import Layout from './helpers/Layout'
+import { SectionHeader } from './helpers/SectionHeader'
 import { StatementsEditorDialog } from './StatementsEditorDialog'
+import { StatementsTable, OnCellEdit } from './StatementsTable'
+import {
+  emptyStatementStyle,
+  importBtnStyle,
+  searchBarContainerStyle,
+  searchBarStyle
+} from './Statement.styles'
 
-type Cell = string
+const BANK_HEADERS = [
+  'date',
+  'narration',
+  'chqNo',
+  'valueDt',
+  'withdrawal',
+  'deposit',
+  'closing',
+  'name',
+  'txnType'
+] as const
 
-const normalize = (data: any[][]): string[][] =>
-  (data ?? []).map((row) => row.map((c) => (c == null ? '' : String(c))))
+const toRows = (data: any[][]): BankStatementRow[] => {
+  return data.slice(1).map((row) => {
+    const obj: any = {}
+    BANK_HEADERS.forEach((key, idx) => {
+      obj[key] = row[idx] != null ? String(row[idx]) : ''
+    })
+    return obj as BankStatementRow
+  })
+}
+
+const SAVE_DEBOUNCE_MS = 500
+
+type SaveTimers = Map<string, number> // rowId -> timeout id
 
 const Statements: React.FC = () => {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [fileData, setFileData] = useState<Cell[][]>([])
+  // Final saved rows
+  const [fileData, setFileData] = useState<BankStatementRow[]>([])
+
+  // Temporary preview before Save
+  const [previewData, setPreviewData] = useState<string[][]>([])
+
   const [showDialog, setShowDialog] = useState(false)
+  const [query, setQuery] = useState('')
+
+  const inputRef = useRef<HTMLInputElement>(null)
+  const saveTimersRef = useRef<SaveTimers>(new Map())
+
+  useEffect(() => {
+    ;(async () => {
+      const rows = await window.electronAPI.loadStatements()
+      setFileData(rows ?? [])
+    })()
+  }, [])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -19,24 +63,15 @@ const Statements: React.FC = () => {
 
     try {
       const data = await file.arrayBuffer()
-
-      // READ: enable date parsing at workbook level
-      const workbook = XLSX.read(data, {
-        type: 'array',
-        cellDates: true // read date cells as Date where possible
-      })
-
+      const workbook = XLSX.read(data, { type: 'array', cellDates: true })
       const sheetName = workbook.SheetNames[0]
       const worksheet = workbook.Sheets[sheetName]
-
-      // PARSE: format values (so dates aren’t serials). Choose the format you prefer.
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         header: 1,
-        raw: false, // apply number/date formatting
-        dateNF: 'yyyy-mm-dd' // e.g., 2025-04-01
+        raw: false
       }) as any[][]
 
-      setFileData(normalize(jsonData))
+      setPreviewData(jsonData)
       setShowDialog(true)
     } catch (error) {
       alert(`❌ Failed to import file: ${error}`)
@@ -45,71 +80,147 @@ const Statements: React.FC = () => {
     }
   }
 
-  const handleImportClick = () => inputRef.current?.click()
+  const handleSave = async (updated: string[][]) => {
+    try {
+      // save each row
+      const rows = toRows(updated)
+      for (const row of rows) {
+        await window.electronAPI.saveStatement({
+          date: row.date,
+          narration: row.narration,
+          chqNo: row.chqNo,
+          valueDt: row.valueDt,
+          withdrawal: row.withdrawal,
+          deposit: row.deposit,
+          closing: row.closing,
+          name: row.name,
+          txnType: row.txnType
+        })
+      }
 
-  const handleSaveToApp = (updated: Cell[][]) => {
-    // TODO: Save the modified data to the software
-    console.log('Saving data:', updated)
-    alert('✅ Data saved successfully!')
-    setFileData(updated)
-    setShowDialog(false)
+      const saved = await window.electronAPI.loadStatements()
+      setFileData(saved ?? [])
+
+      setPreviewData([])
+      setShowDialog(false)
+      alert('✅ Statements saved successfully!')
+    } catch (err: any) {
+      alert(`❌ Failed to save statements: ${err?.message || err}`)
+    }
+  }
+
+  const scheduleSaveRow = (row: BankStatementRow) => {
+    const id = row.id
+    if (!id) return
+
+    // clear previous timer
+    const prev = saveTimersRef.current.get(id)
+    if (prev) window.clearTimeout(prev)
+
+    const t = window.setTimeout(async () => {
+      try {
+        await window.electronAPI.updateStatement(row)
+      } catch (e: any) {
+        console.error(e)
+        alert(`❌ Failed to save change for row ${id}: ${e?.message || e}`)
+      } finally {
+        saveTimersRef.current.delete(id)
+      }
+    }, SAVE_DEBOUNCE_MS)
+
+    saveTimersRef.current.set(id, t)
+  }
+
+  const handleCellEdit: OnCellEdit = (rowIndex, key, value) => {
+    setFileData((prev) => {
+      const next = prev.map((r, i) =>
+        i === rowIndex ? ({ ...r, [key]: value } as BankStatementRow) : r
+      )
+      const edited = next[rowIndex]
+      // schedule debounced save for this single row
+      scheduleSaveRow(edited)
+      return next
+    })
+  }
+
+  const handleDeleteRow = async (rowId: string) => {
+    try {
+      const res = await window.electronAPI.deleteStatement(rowId)
+      if (!res?.success) {
+        alert(`❌ Failed to delete: ${res?.error || 'Unknown error'}`)
+        return
+      }
+      setFileData((prev) => prev.filter((r) => r.id !== rowId))
+    } catch (e: any) {
+      alert(`❌ Failed to delete: ${e?.message || e}`)
+    }
   }
 
   return (
     <Layout title="🏦 Manage Bank Statements" hideAssessmentYear>
-      <div style={{ maxWidth: 800, margin: '2rem auto', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#4f46e5' }}>
-          Manage Bank Statements
-        </h1>
-        <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '1.5rem' }}>
-          Import and manage your bank statements by uploading an Excel file.
-        </p>
+      <SectionHeader
+        title="Manage Bank Statements"
+        description="Import and manage your bank statements by uploading an Excel file."
+      />
 
-        <div
-          style={{
-            background: '#fff',
-            padding: '2rem',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            textAlign: 'center'
-          }}
+      {/* Toolbar */}
+      <div style={searchBarContainerStyle}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search bills..."
+          aria-label="Search bills"
+          style={searchBarStyle}
+        />
+
+        <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          id="excel-upload"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
         >
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            id="excel-upload"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <button
-            type="button"
-            onClick={handleImportClick}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: '#fff',
-              background: '#6366f1',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'background 0.3s'
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-          >
-            Import Excel File
-          </button>
-        </div>
+          Import
+        </button>
       </div>
 
+      {/* Dialog */}
       <StatementsEditorDialog
         open={showDialog}
-        data={fileData}
-        onClose={() => setShowDialog(false)}
-        onSave={handleSaveToApp}
+        data={previewData}
+        onClose={() => {
+          setPreviewData([])
+          setShowDialog(false)
+        }}
+        onSave={handleSave}
       />
+
+      {fileData.length > 0 && (
+        <StatementsTable
+          rows={fileData}
+          onCellEdit={handleCellEdit}
+          onRowDelete={handleDeleteRow}
+          query={query}
+        />
+      )}
+
+      {fileData.length === 0 && (
+        <div style={emptyStatementStyle}>
+          No statements yet. Import an Excel file to get started.
+        </div>
+      )}
     </Layout>
   )
 }

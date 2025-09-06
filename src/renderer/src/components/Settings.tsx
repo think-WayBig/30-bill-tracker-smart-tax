@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Layout from './Layout'
+import Layout from './helpers/Layout'
 
 export default function Settings() {
   const [folderPath, setFolderPath] = useState<string | null>(null)

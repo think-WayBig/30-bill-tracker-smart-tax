@@ -84,6 +84,19 @@ interface DeleteBillPayload {
   pan?: string
 }
 
+interface BankStatementRow {
+  id: string
+  date: string
+  narration: string
+  chqNo: string
+  valueDt: string
+  withdrawal: string
+  deposit: string
+  closing: string
+  name: string
+  txnType: string
+}
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
@@ -150,7 +163,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   updateBill: (bill: Bill) => ipcRenderer.invoke('update-bill', bill),
 
-  deleteBill: (bill: DeleteBillPayload) => ipcRenderer.invoke('delete-bill', bill)
+  deleteBill: (bill: DeleteBillPayload) => ipcRenderer.invoke('delete-bill', bill),
+
+  /** Statements Code */
+  saveStatement: (statement: Omit<BankStatementRow, 'id'>) =>
+    ipcRenderer.invoke('save-statement', statement),
+
+  loadStatements: () => ipcRenderer.invoke('load-statements'),
+
+  updateStatement: (statement: BankStatementRow) =>
+    ipcRenderer.invoke('update-statement', statement),
+
+  deleteStatement: (id: string) => ipcRenderer.invoke('delete-statement', id)
 })
 
 if (process.contextIsolated) {

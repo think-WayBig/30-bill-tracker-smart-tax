@@ -1,0 +1,269 @@
+import React, { useMemo } from 'react'
+import {
+  deleteBtnStyle,
+  tableContainerStyle,
+  tableEmptyStyle,
+  tableHeaderStyle,
+  tableRowStyle,
+  textAreaStyle
+} from './Statement.styles'
+
+export type OnCellEdit = (rowIndex: number, key: keyof BankStatementRow, value: string) => void
+
+export type OnRowDelete = (rowId: string) => void
+
+const HEADERS = [
+  'date',
+  'narration',
+  'chqNo',
+  'valueDt',
+  'withdrawal',
+  'deposit',
+  'closing',
+  'name',
+  'txnType'
+] as const
+
+type HeaderKeys = (typeof HEADERS)[number]
+
+const label = (key: HeaderKeys): string => {
+  switch (key) {
+    case 'chqNo':
+      return 'Chq No.'
+    case 'valueDt':
+      return 'Value Dt'
+    case 'txnType':
+      return 'Txn Type'
+    default:
+      return key.charAt(0).toUpperCase() + key.slice(1)
+  }
+}
+
+const placeholderFor = (key: HeaderKeys): string => {
+  switch (key) {
+    case 'date':
+    case 'valueDt':
+      return 'dd/mm/yyyy'
+    case 'withdrawal':
+    case 'deposit':
+    case 'closing':
+      return 'Amount'
+    case 'narration':
+      return 'Narration'
+    case 'name':
+      return 'Name'
+    case 'txnType':
+      return 'Type'
+    case 'chqNo':
+      return 'Cheque No.'
+    default:
+      return 'Not meant to show'
+  }
+}
+
+const COLUMN_WIDTHS: Partial<Record<keyof BankStatementRow, number | string>> = {
+  date: 100,
+  narration: 360,
+  chqNo: 120,
+  valueDt: 120,
+  withdrawal: 120,
+  deposit: 120,
+  closing: 140,
+  name: 220,
+  txnType: 120
+}
+
+const TOTAL_WIDTH = (() => {
+  let width = 0
+  for (const key in COLUMN_WIDTHS) {
+    const val = COLUMN_WIDTHS[key as keyof BankStatementRow]
+    if (typeof val === 'number') {
+      width += val
+    }
+  }
+  // add actions column
+  width += 100
+  return width
+})()
+
+const toCss = (w?: number | string) => (typeof w === 'number' ? `${w}px` : w)
+
+const NAME_DATALIST_ID = 'name-options'
+
+type Props = {
+  rows: BankStatementRow[]
+  onCellEdit: OnCellEdit
+  onRowDelete: OnRowDelete
+  query?: string
+}
+
+export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit, query = '' }) => {
+  const lcQuery = query.trim().toLowerCase()
+
+  const filtered = lcQuery
+    ? rows.filter((r) => (r.name ?? '').toLowerCase().includes(lcQuery))
+    : rows
+
+  // Unique names, computed once per rows change
+  const nameOptions = useMemo(() => {
+    const set = new Set<string>()
+    for (const r of rows) {
+      const n = (r.name ?? '').trim()
+      if (n) set.add(n)
+    }
+    // Sort and cap to avoid huge DOM lists
+    return Array.from(set)
+      .sort((a, b) => a.localeCompare(b))
+      .slice(0, 200)
+  }, [rows])
+
+  if (!rows.length) {
+    return (
+      <div style={tableEmptyStyle}>No data yet. Import an Excel file to see and edit rows.</div>
+    )
+  }
+
+  const sumColumn = (key: keyof BankStatementRow) =>
+    filtered.reduce((acc, r) => acc + (parseFloat(r[key] || '0') || 0), 0)
+
+  const totalWithdrawal = sumColumn('withdrawal')
+  const totalDeposit = sumColumn('deposit')
+  const totalClosing = sumColumn('closing')
+
+  return (
+    <div style={tableContainerStyle}>
+      <datalist id={NAME_DATALIST_ID}>
+        {nameOptions.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
+      <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', minWidth: TOTAL_WIDTH }}>
+        <colgroup>
+          {HEADERS.map((key) => (
+            <col key={key} style={{ width: toCss(COLUMN_WIDTHS[key]) }} />
+          ))}
+          <col style={{ width: 100 }} />
+        </colgroup>
+
+        <thead>
+          <tr style={{ background: '#4f46e5', color: '#fff' }}>
+            {HEADERS.map((h) => (
+              <th key={h} style={tableHeaderStyle}>
+                {label(h)}
+              </th>
+            ))}
+            <th style={tableHeaderStyle}>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filtered.map((row, rowIndex) => (
+            <tr key={rowIndex} style={tableRowStyle(rowIndex)}>
+              {HEADERS.map((key) => (
+                <>
+                  <style>
+                    {`.editable-textarea {
+                      width: 100%;
+                      min-height: 48px;
+                      font-size: 13px;
+                      padding: 8px 10px;
+                      border: 1px solid #e5e7eb;
+                      border-radius: 6px;
+                      outline: none;
+                      background: #fff;
+                      resize: none;
+                    }
+
+                    .editable-cell:hover .editable-textarea {
+                      resize: vertical;
+                    }`}
+                  </style>
+                  <td
+                    key={String(key)}
+                    style={{ padding: 8, verticalAlign: 'top' }}
+                    className="editable-cell"
+                  >
+                    {key === 'name' ? (
+                      <>
+                        <input
+                          type="text"
+                          list={NAME_DATALIST_ID}
+                          value={row.name ?? ''}
+                          onChange={(e) => onCellEdit(rowIndex, 'name', e.target.value)}
+                          style={textAreaStyle}
+                          placeholder="Name"
+                        />
+                      </>
+                    ) : (
+                      <textarea
+                        rows={2}
+                        value={row[key] ?? ''}
+                        onChange={(e) => onCellEdit(rowIndex, key, e.target.value)}
+                        className="editable-textarea"
+                        style={textAreaStyle}
+                        placeholder={placeholderFor(key)}
+                      />
+                    )}
+                  </td>
+                </>
+              ))}
+              <td style={{ padding: 8 }}>
+                <button
+                  type="button"
+                  data-rowid={row.id}
+                  style={deleteBtnStyle}
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to remove this row?')) {
+                      onRowDelete(row.id)
+                    }
+                  }}
+                  title="Remove"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+
+        <tfoot>
+          <tr style={{ background: '#f3f4f6' }}>
+            {HEADERS.map((key) => {
+              if (key === 'valueDt') {
+                return (
+                  <td key={key} style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}>
+                    Totals
+                  </td>
+                )
+              }
+              if (key === 'withdrawal') {
+                return (
+                  <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
+                    {totalWithdrawal.toFixed(2)}
+                  </td>
+                )
+              }
+              if (key === 'deposit') {
+                return (
+                  <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
+                    {totalDeposit.toFixed(2)}
+                  </td>
+                )
+              }
+              if (key === 'closing') {
+                return (
+                  <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
+                    {totalClosing.toFixed(2)}
+                  </td>
+                )
+              }
+              return <td key={key} style={{ padding: 8, paddingLeft: 12 }} />
+            })}
+            {/* For styling last cell */}
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  )
+}

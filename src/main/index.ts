@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { dialog } from 'electron'
+import { v4 as uuidv4 } from 'uuid'
 
 import fs from 'fs'
 import path from 'path'
@@ -839,6 +840,104 @@ ipcMain.handle('delete-bill', async (_event, payload: DeleteBillPayload) => {
 
     if (filtered.length === before) {
       return { success: false, error: 'Bill not found.' }
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2))
+    return { success: true, removed: before - filtered.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+const getStatementsPath = () => {
+  const dir = path.join(app.getPath('userData'), 'data')
+  const filePath = path.join(dir, 'statements.json')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return filePath
+}
+
+interface BankStatementRow {
+  id: string
+  date: string
+  narration: string
+  chqNo: string
+  valueDt: string
+  withdrawal: string
+  deposit: string
+  closing: string
+  name: string
+  txnType: string
+}
+
+// Create / Save Statement
+ipcMain.handle('save-statement', async (_event, statement: Omit<BankStatementRow, 'id'>) => {
+  try {
+    const filePath = getStatementsPath()
+    const existing: BankStatementRow[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    const newStatement: BankStatementRow = { ...statement, id: uuidv4() }
+    existing.push(newStatement)
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    return { success: true, data: newStatement }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Read / Load all Statements
+ipcMain.handle('load-statements', async () => {
+  try {
+    const filePath = getStatementsPath()
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Failed to load statements:', error)
+    return []
+  }
+})
+
+// Update Statement
+ipcMain.handle('update-statement', async (_event, updated: BankStatementRow) => {
+  try {
+    const filePath = getStatementsPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Statements file not found.' }
+    }
+
+    const existing: BankStatementRow[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const index = existing.findIndex((s) => s.id === updated.id)
+    if (index === -1) {
+      return { success: false, error: 'Statement not found.' }
+    }
+
+    existing[index] = { ...existing[index], ...updated }
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    return { success: true, data: existing[index] }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Delete Statement
+ipcMain.handle('delete-statement', async (_event, id: string) => {
+  try {
+    const filePath = getStatementsPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Statements file not found.' }
+    }
+
+    const existing: BankStatementRow[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const before = existing.length
+    const filtered = existing.filter((s) => s.id !== id)
+
+    if (filtered.length === before) {
+      return { success: false, error: 'Statement not found.' }
     }
 
     fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2))

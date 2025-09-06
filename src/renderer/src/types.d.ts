@@ -71,6 +71,19 @@ declare global {
     pan?: string
   }
 
+  interface BankStatementRow {
+    id: string
+    date: string
+    narration: string
+    chqNo: string
+    valueDt: string
+    withdrawal: string
+    deposit: string
+    closing: string
+    name: string
+    txnType: string
+  }
+
   interface Window {
     electronAPI: {
       // Entry-related APIs
@@ -137,6 +150,21 @@ declare global {
       updateBill: (bill: Bill) => Promise<{ success: boolean; error?: string }>
       deleteBill: (
         payload: DeleteBillPayload
+      ) => Promise<{ success: boolean; removed?: number; error?: string }>
+
+      // Statements-related APIs
+      saveStatement: (
+        statement: Omit<BankStatementRow, 'id'>
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      loadStatements: () => Promise<BankStatementRow[]>
+
+      updateStatement: (
+        statement: BankStatementRow
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      deleteStatement: (
+        id: string
       ) => Promise<{ success: boolean; removed?: number; error?: string }>
     }
 
