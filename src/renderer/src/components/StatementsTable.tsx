@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import {
-  deleteBtnStyle,
+  // deleteBtnStyle,
   tableContainerStyle,
   tableEmptyStyle,
   tableHeaderStyle,
@@ -73,18 +73,19 @@ const COLUMN_WIDTHS: Partial<Record<keyof BankStatementRow, number | string>> = 
   txnType: 120
 }
 
-const TOTAL_WIDTH = (() => {
-  let width = 0
-  for (const key in COLUMN_WIDTHS) {
-    const val = COLUMN_WIDTHS[key as keyof BankStatementRow]
-    if (typeof val === 'number') {
-      width += val
-    }
-  }
-  // add actions column
-  width += 100
-  return width
-})()
+/** === Not required anymore === */
+// const TOTAL_WIDTH = (() => {
+//   let width = 0
+//   for (const key in COLUMN_WIDTHS) {
+//     const val = COLUMN_WIDTHS[key as keyof BankStatementRow]
+//     if (typeof val === 'number') {
+//       width += val
+//     }
+//   }
+//   // add actions column
+//   width += 100
+//   return width
+// })()
 
 const toCss = (w?: number | string) => (typeof w === 'number' ? `${w}px` : w)
 
@@ -93,15 +94,19 @@ const NAME_DATALIST_ID = 'name-options'
 type Props = {
   rows: BankStatementRow[]
   onCellEdit: OnCellEdit
-  onRowDelete: OnRowDelete
+  onRowDelete: OnRowDelete // This is not required for now
   query?: string
 }
 
-export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit, query = '' }) => {
+export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' }) => {
   const lcQuery = query.trim().toLowerCase()
 
   const filtered = lcQuery
-    ? rows.filter((r) => (r.name ?? '').toLowerCase().includes(lcQuery))
+    ? rows.filter(
+        (r) =>
+          (r.name ?? '').toLowerCase().includes(lcQuery) ||
+          (r.narration ?? '').toLowerCase().includes(lcQuery)
+      )
     : rows
 
   // Unique names, computed once per rows change
@@ -137,12 +142,12 @@ export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit
           <option key={n} value={n} />
         ))}
       </datalist>
-      <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', minWidth: TOTAL_WIDTH }}>
+      <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', width: '100%' }}>
         <colgroup>
           {HEADERS.map((key) => (
             <col key={key} style={{ width: toCss(COLUMN_WIDTHS[key]) }} />
           ))}
-          <col style={{ width: 100 }} />
+          {/* <col style={{ width: 100 }} /> */}
         </colgroup>
 
         <thead>
@@ -152,7 +157,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit
                 {label(h)}
               </th>
             ))}
-            <th style={tableHeaderStyle}>Actions</th>
+            {/* <th style={tableHeaderStyle}>Actions</th> */}
           </tr>
         </thead>
 
@@ -207,7 +212,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit
                   </td>
                 </>
               ))}
-              <td style={{ padding: 8 }}>
+              {/* <td style={{ padding: 8 }}>
                 <button
                   type="button"
                   data-rowid={row.id}
@@ -221,7 +226,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit
                 >
                   Remove
                 </button>
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>
@@ -260,7 +265,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onRowDelete, onCellEdit
               return <td key={key} style={{ padding: 8, paddingLeft: 12 }} />
             })}
             {/* For styling last cell */}
-            <td></td>
+            {/* <td></td> */}
           </tr>
         </tfoot>
       </table>
