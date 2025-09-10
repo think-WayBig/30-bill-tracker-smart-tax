@@ -1,5 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import Layout from '../helpers/Layout'
+import {
+  containerStyle,
+  columnStyle,
+  formStyle,
+  labelStyle,
+  inputStyle,
+  buttonStyle,
+  searchBarWrapperStyle,
+  tableHeadingStyle,
+  searchBarStyle,
+  thStyle,
+  tdStyle,
+  expanderButtonStyle
+} from './Notices.styles'
 
 type Notice = {
   name: string
@@ -124,10 +138,10 @@ const Notices: React.FC = () => {
 
       if (field === 'date' || field === 'dueDate') {
         return asc
-          // @ts-ignore
-          ? new Date(valA).getTime() - new Date(valB).getTime()
-          // @ts-ignore
-          : new Date(valB).getTime() - new Date(valA).getTime()
+          ? // @ts-ignore
+            new Date(valA).getTime() - new Date(valB).getTime()
+          : // @ts-ignore
+            new Date(valB).getTime() - new Date(valA).getTime()
       }
 
       return asc
@@ -150,10 +164,10 @@ const Notices: React.FC = () => {
 
       if (field === 'date' || field === 'dueDate') {
         return asc
-          // @ts-ignore
-          ? new Date(valA).getTime() - new Date(valB).getTime()
-          // @ts-ignore
-          : new Date(valB).getTime() - new Date(valA).getTime()
+          ? // @ts-ignore
+            new Date(valA).getTime() - new Date(valB).getTime()
+          : // @ts-ignore
+            new Date(valB).getTime() - new Date(valA).getTime()
       }
 
       return asc
@@ -525,95 +539,3 @@ const NoticeTable = ({
     )}
   </div>
 )
-
-const containerStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: '2rem',
-  flexWrap: 'wrap'
-}
-
-const columnStyle: React.CSSProperties = {
-  flex: '1 1 45%',
-  display: 'flex',
-  flexDirection: 'column'
-}
-
-const formStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-  backgroundColor: '#fff',
-  borderRadius: '12px',
-  padding: '2rem',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-  border: '1px solid #e0e7ff',
-  minWidth: '350px'
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '10px',
-  border: '1px solid #a5b4fc',
-  borderRadius: '8px',
-  fontSize: '16px',
-  backgroundColor: '#f9fafe'
-}
-
-const labelStyle: React.CSSProperties = {
-  fontWeight: 600,
-  color: '#4f46e5'
-}
-
-const buttonStyle: React.CSSProperties = {
-  padding: '10px',
-  backgroundColor: '#4f46e5',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  fontSize: '16px',
-  marginTop: '10px'
-}
-
-const tableHeadingStyle: React.CSSProperties = {
-  color: '#4f46e5',
-  backgroundColor: '#f5f7ff',
-  paddingTop: 40,
-  paddingBottom: 15
-}
-
-const thStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  textAlign: 'left',
-  fontWeight: 'bold'
-}
-
-const tdStyle: React.CSSProperties = {
-  padding: '10px 16px'
-}
-
-const searchBarWrapperStyle: React.CSSProperties = {
-  position: 'sticky',
-  top: '70px',
-  zIndex: 10,
-  paddingBottom: '0.5rem'
-}
-
-const searchBarStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  width: '100%',
-  fontSize: '15px',
-  borderRadius: '8px',
-  border: '1px solid #ccc',
-  outline: 'none'
-}
-
-const expanderButtonStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  backgroundColor: '#e0e7ff',
-  color: '#1e1b4b',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontSize: '14px',
-  fontWeight: 600
-}
