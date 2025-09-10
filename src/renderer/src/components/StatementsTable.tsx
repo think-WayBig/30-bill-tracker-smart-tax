@@ -96,9 +96,10 @@ type Props = {
   onCellEdit: OnCellEdit
   onRowDelete: OnRowDelete // This is not required for now
   query?: string
+  editMode: boolean
 }
 
-export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' }) => {
+export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, query = '' }) => {
   const lcQuery = query.trim().toLowerCase()
 
   const filtered = lcQuery
@@ -142,6 +143,25 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
           <option key={n} value={n} />
         ))}
       </datalist>
+      <style>{`
+      .editable-textarea {
+        width: 100%;
+        min-height: 48px;
+        font-size: 13px;
+        padding: 8px 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        outline: none;
+        background: #fff;
+        resize: none;
+      }
+      .editable-cell:hover .editable-textarea {
+        resize: vertical;
+      }
+      .editable-textarea.disabled {
+        resize: none !important;
+      }
+    `}</style>
       <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', width: '100%' }}>
         <colgroup>
           {HEADERS.map((key) => (
@@ -164,54 +184,56 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
         <tbody>
           {filtered.map((row, rowIndex) => (
             <tr key={rowIndex} style={tableRowStyle(rowIndex)}>
-              {HEADERS.map((key) => (
-                <>
-                  <style>
-                    {`.editable-textarea {
-                      width: 100%;
-                      min-height: 48px;
-                      font-size: 13px;
-                      padding: 8px 10px;
-                      border: 1px solid #e5e7eb;
-                      border-radius: 6px;
-                      outline: none;
-                      background: #fff;
-                      resize: none;
-                    }
+              {HEADERS.map((key) => {
+                const isLocked =
+                  !editMode &&
+                  [
+                    'date',
+                    'narration',
+                    'chqNo',
+                    'valueDt',
+                    'withdrawal',
+                    'deposit',
+                    'closing'
+                  ].includes(key)
 
-                    .editable-cell:hover .editable-textarea {
-                      resize: vertical;
-                    }`}
-                  </style>
+                return (
                   <td
                     key={String(key)}
                     style={{ padding: 8, verticalAlign: 'top' }}
                     className="editable-cell"
                   >
                     {key === 'name' ? (
-                      <>
-                        <input
-                          type="text"
-                          list={NAME_DATALIST_ID}
-                          value={row.name ?? ''}
-                          onChange={(e) => onCellEdit(row.id!, 'name', e.target.value)}
-                          style={textAreaStyle}
-                          placeholder="Name"
-                        />
-                      </>
+                      <input
+                        type="text"
+                        list={NAME_DATALIST_ID}
+                        value={row.name ?? ''}
+                        onChange={(e) => !isLocked && onCellEdit(row.id!, 'name', e.target.value)}
+                        style={{
+                          ...textAreaStyle,
+                          backgroundColor: isLocked ? '#f9fafb' : '#fff',
+                          pointerEvents: isLocked ? 'none' : 'auto'
+                        }}
+                        readOnly={isLocked}
+                        placeholder="Name"
+                      />
                     ) : (
                       <textarea
                         rows={2}
                         value={row[key] ?? ''}
-                        onChange={(e) => onCellEdit(row.id!, key, e.target.value)}
-                        className="editable-textarea"
-                        style={textAreaStyle}
+                        onChange={(e) => !isLocked && onCellEdit(row.id!, key, e.target.value)}
+                        className={`editable-textarea ${isLocked ? 'disabled' : ''}`}
+                        style={{
+                          ...textAreaStyle,
+                          backgroundColor: isLocked ? '#f9fafb' : '#fff'
+                        }}
+                        readOnly={isLocked}
                         placeholder={placeholderFor(key)}
                       />
                     )}
                   </td>
-                </>
-              ))}
+                )
+              })}
               {/* <td style={{ padding: 8 }}>
                 <button
                   type="button"

@@ -44,6 +44,8 @@ const Statements: React.FC = () => {
   // Temporary preview before Save
   const [previewData, setPreviewData] = useState<string[][]>([])
 
+  const [editMode, setEditMode] = useState(false)
+
   const [showDialog, setShowDialog] = useState(false)
   const [query, setQuery] = useState('')
 
@@ -194,6 +196,18 @@ const Statements: React.FC = () => {
         >
           Import
         </button>
+
+        <button
+          type="button"
+          onClick={() => setEditMode((prev) => !prev)}
+          style={{
+            ...importBtnStyle,
+            background: '#ffff',
+            border: '1px solid #6366f1'
+          }}
+        >
+          {editMode ? '🔒' : '✏️'}
+        </button>
       </div>
 
       {/* Dialog */}
@@ -213,6 +227,7 @@ const Statements: React.FC = () => {
           onCellEdit={handleCellEdit}
           onRowDelete={handleDeleteRow}
           query={query}
+          editMode={editMode}
         />
       )}
 
