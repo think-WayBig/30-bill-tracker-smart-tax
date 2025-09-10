@@ -133,7 +133,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
 
   const totalWithdrawal = sumColumn('withdrawal')
   const totalDeposit = sumColumn('deposit')
-  const totalClosing = sumColumn('closing')
+  const net = totalDeposit - totalWithdrawal
 
   return (
     <div style={tableContainerStyle}>
@@ -257,8 +257,16 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
               }
               if (key === 'closing') {
                 return (
-                  <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
-                    {totalClosing.toFixed(2)}
+                  <td
+                    key={key}
+                    style={{
+                      padding: 8,
+                      paddingLeft: 12,
+                      fontWeight: 600,
+                      color: net >= 0 ? 'green' : 'red'
+                    }}
+                  >
+                    {net.toFixed(2)}
                   </td>
                 )
               }

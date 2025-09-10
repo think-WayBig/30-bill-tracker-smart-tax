@@ -4,6 +4,9 @@
  * ==========================================
  */
 export const searchBarContainerStyle: React.CSSProperties = {
+  position: 'sticky',
+  top: 69,
+  zIndex: 10,
   display: 'flex',
   gap: 12,
   alignItems: 'center',
