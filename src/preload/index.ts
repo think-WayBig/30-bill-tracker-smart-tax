@@ -174,7 +174,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateStatement: (statement: BankStatementRow) =>
     ipcRenderer.invoke('update-statement', statement),
 
-  deleteStatement: (id: string) => ipcRenderer.invoke('delete-statement', id)
+  deleteStatement: (id: string) => ipcRenderer.invoke('delete-statement', id),
+
+  findPdfNameByCpin: (cpin: string, directory: string) =>
+    ipcRenderer.invoke('find-pdf-name-by-cpin', cpin, directory)
 })
 
 if (process.contextIsolated) {

@@ -10,6 +10,7 @@ import {
   searchBarContainerStyle,
   searchBarStyle
 } from './Statement.styles'
+import { extractCpinFromNarration } from '@renderer/utils/cpin'
 
 const BANK_HEADERS = [
   'date',
@@ -51,6 +52,18 @@ const Statements: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const saveTimersRef = useRef<SaveTimers>(new Map())
+
+  useEffect(() => {
+    const cpin = extractCpinFromNarration(
+      'CBDT/BANK REFERENCE NO:K2509732840988/CIN NO:25040700904775HDFC/ONLINE'
+    )
+
+    ;(async () => {
+      const folderPath = localStorage.getItem('selectedFolder')
+      const res = await window.electronAPI.findPdfNameByCpin(cpin, folderPath)
+      console.log(res)
+    })()
+  }, [])
 
   useEffect(() => {
     ;(async () => {

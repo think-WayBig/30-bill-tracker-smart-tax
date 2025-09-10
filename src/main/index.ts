@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { dialog } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
+import pdfParse from 'pdf-parse'
 
 import fs from 'fs'
 import path from 'path'
@@ -944,5 +945,81 @@ ipcMain.handle('delete-statement', async (_event, id: string) => {
     return { success: true, removed: before - filtered.length }
   } catch (error: any) {
     return { success: false, error: error.message }
+  }
+})
+
+/** =======================
+ * Scanning PDFs for getting names
+ * ========================
+ */
+function* walk(dir: string): Generator<string> {
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  for (const e of entries) {
+    const p = path.join(dir, e.name)
+    if (e.isDirectory()) yield* walk(p)
+    else yield p
+  }
+}
+
+// Strip zero-width/bidi chars; normalize unicode digits to ASCII
+function normalizeText(s: string) {
+  if (!s) return ''
+  // remove bidi/zero-width
+  let out = s.replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+  // convert Arabic-Indic digits to ASCII if any
+  const arabicZero = '٠'.charCodeAt(0)
+  const devanagariZero = '०'.charCodeAt(0)
+  out = out
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - arabicZero))
+    .replace(/[\u0966-\u096F]/g, (d) => String(d.charCodeAt(0) - devanagariZero))
+  return out
+}
+
+function extractNameFromPdfText(text: string): string | null {
+  // Common challan formats have "Name" or "Taxpayer Name"
+  const lines = normalizeText(text).split(/\r?\n/)
+  // Try a few patterns in order
+  const patterns = [
+    /^\s*Name\s*:\s*(.+)\s*$/i,
+    /^\s*Taxpayer\s*Name\s*:\s*(.+)\s*$/i,
+    /^\s*Name of (the )?taxpayer\s*:\s*(.+)\s*$/i
+  ]
+
+  for (const line of lines) {
+    for (const re of patterns) {
+      const m = line.match(re)
+      if (m) return (m[1] || m[2]).trim()
+    }
+  }
+
+  // Fallback: search anywhere in text (less precise)
+  const m = normalizeText(text).match(/\bName\s*:\s*(.+?)\s*(?:\r?\n|$)/i)
+  return m ? m[1].trim() : null
+}
+
+ipcMain.handle('find-pdf-name-by-cpin', async (_evt, cpin: string, directory: string) => {
+  try {
+    if (!cpin || !/^\d{10,18}$/.test(cpin)) {
+      return { success: false, error: 'Invalid CPIN' }
+    }
+    if (!fs.existsSync(directory)) {
+      return { success: false, error: 'Directory not found' }
+    }
+
+    const target = String(cpin)
+    for (const filePath of walk(directory)) {
+      if (!filePath.toLowerCase().endsWith('.pdf')) continue
+      // Read + parse
+      const buf = fs.readFileSync(filePath)
+      const data = await pdfParse(buf)
+      const text = normalizeText(data.text)
+      if (text.includes(target)) {
+        const name = extractNameFromPdfText(text)
+        return { success: true, filePath, name: name || '' }
+      }
+    }
+    return { success: false, error: 'No matching PDF found for this CPIN' }
+  } catch (err: any) {
+    return { success: false, error: err.message }
   }
 })
