@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Layout from './helpers/Layout'
+import Layout from '../helpers/Layout'
 
 type Notice = {
   name: string

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
-import Layout from './helpers/Layout'
-import { SectionHeader } from './helpers/SectionHeader'
+import Layout from '../helpers/Layout'
+import { SectionHeader } from '../helpers/SectionHeader'
 import { StatementsEditorDialog } from './StatementsEditorDialog'
 import { StatementsTable, OnCellEdit } from './StatementsTable'
 import {

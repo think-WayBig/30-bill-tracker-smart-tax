@@ -1,6 +1,6 @@
 // Group.tsx
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import Layout from './helpers/Layout'
+import Layout from '../helpers/Layout'
 import { GroupList } from './GroupList'
 import type { ListChildComponentProps } from 'react-window'
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import Sidebar from './Sidebar'
-import Entry from './Entry'
-import Book from './Book'
-import Group from './Group'
-import Billing from './Billing'
+import Entry from './book/Entry'
+import Book from './book/Book'
+import Group from './group/Group'
+import Billing from './book/Billing'
 import Settings from './Settings'
-import Notices from './Notices'
-import GstTds from './GstTds'
-import Statements from './Statements'
+import Notices from './notices/Notices'
+import GstTds from './gstTds/GstTds'
+import Statements from './statements/Statements'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
