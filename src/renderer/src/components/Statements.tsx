@@ -131,12 +131,12 @@ const Statements: React.FC = () => {
     saveTimersRef.current.set(id, t)
   }
 
-  const handleCellEdit: OnCellEdit = (rowIndex, key, value) => {
+  const handleCellEdit: OnCellEdit = (rowId, key, value) => {
     setFileData((prev) => {
-      const next = prev.map((r, i) =>
-        i === rowIndex ? ({ ...r, [key]: value } as BankStatementRow) : r
+      const next = prev.map((r) =>
+        r.id === rowId ? ({ ...r, [key]: value } as BankStatementRow) : r
       )
-      const edited = next[rowIndex]
+      const edited = next.find((r) => r.id === rowId)!
       // schedule debounced save for this single row
       scheduleSaveRow(edited)
       return next

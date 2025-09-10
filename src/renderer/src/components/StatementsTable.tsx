@@ -8,7 +8,7 @@ import {
   textAreaStyle
 } from './Statement.styles'
 
-export type OnCellEdit = (rowIndex: number, key: keyof BankStatementRow, value: string) => void
+export type OnCellEdit = (rowId: string, key: keyof BankStatementRow, value: string) => void
 
 export type OnRowDelete = (rowId: string) => void
 
@@ -64,13 +64,13 @@ const placeholderFor = (key: HeaderKeys): string => {
 const COLUMN_WIDTHS: Partial<Record<keyof BankStatementRow, number | string>> = {
   date: 100,
   narration: 360,
-  chqNo: 120,
+  chqNo: 180,
   valueDt: 120,
   withdrawal: 120,
   deposit: 120,
   closing: 140,
-  name: 220,
-  txnType: 120
+  name: 320,
+  txnType: 180
 }
 
 /** === Not required anymore === */
@@ -194,7 +194,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
                           type="text"
                           list={NAME_DATALIST_ID}
                           value={row.name ?? ''}
-                          onChange={(e) => onCellEdit(rowIndex, 'name', e.target.value)}
+                          onChange={(e) => onCellEdit(row.id!, 'name', e.target.value)}
                           style={textAreaStyle}
                           placeholder="Name"
                         />
@@ -203,7 +203,7 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, query = '' 
                       <textarea
                         rows={2}
                         value={row[key] ?? ''}
-                        onChange={(e) => onCellEdit(rowIndex, key, e.target.value)}
+                        onChange={(e) => onCellEdit(row.id!, key, e.target.value)}
                         className="editable-textarea"
                         style={textAreaStyle}
                         placeholder={placeholderFor(key)}
