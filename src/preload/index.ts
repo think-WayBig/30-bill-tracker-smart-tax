@@ -177,7 +177,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteStatement: (id: string) => ipcRenderer.invoke('delete-statement', id),
 
   findPdfNameByCpin: (cpin: string, directory: string) =>
-    ipcRenderer.invoke('find-pdf-name-by-cpin', cpin, directory)
+    ipcRenderer.invoke('find-pdf-name-by-cpin', cpin, directory),
+
+  /** Savings Statements Code */
+  saveStatement2: (statement: Omit<BankStatementRow, 'id'>) =>
+    ipcRenderer.invoke('save-statement2', statement),
+
+  loadStatements2: () => ipcRenderer.invoke('load-statements2'),
+
+  updateStatement2: (statement: BankStatementRow) =>
+    ipcRenderer.invoke('update-statement2', statement),
+
+  deleteStatement2: (id: string) => ipcRenderer.invoke('delete-statement2', id),
+
+  findPdfNameByCpin2: (cpin: string, directory: string) =>
+    ipcRenderer.invoke('find-pdf-name-by-cpin2', cpin, directory)
 })
 
 if (process.contextIsolated) {

@@ -17,8 +17,16 @@ const COLLAPSED_W = 56
 // at top (near constants)
 const PURPLE = '#4f46e5'
 const TDS_ACCENT = '#038260ff'
-const getTaxesAccent = () =>
-  localStorage.getItem('taxes.activeTab') === 'TDS' ? TDS_ACCENT : PURPLE
+const SAVING_STATEMENTS_ACCENT = '#d35f00ff'
+const getTaxesAccent = () => {
+  if (localStorage.getItem('activeScreen') === 'excel2') {
+    return SAVING_STATEMENTS_ACCENT
+  } else if (localStorage.getItem('taxes.activeTab') === 'TDS') {
+    return TDS_ACCENT
+  } else {
+    return PURPLE
+  }
+}
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
@@ -30,6 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebarCollapsed') === '1')
 
   const [taxesAccent, setTaxesAccent] = useState(getTaxesAccent())
+  const [statementsAccent, setStatementsAccent] = useState(getTaxesAccent())
 
   // Hover over the sidebar expands it even if collapsed
   const [hovering, setHovering] = useState(false)
@@ -49,6 +58,18 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   useEffect(() => {
     // refresh when sidebar is hovered or when user switches to the taxes screen
     if (hovering || active === 'taxes') setTaxesAccent(getTaxesAccent())
+  }, [hovering, active])
+
+  // effects (anywhere inside component)
+  useEffect(() => {
+    const onStatmentsPageChange = () => setStatementsAccent(getTaxesAccent())
+    window.addEventListener('statements:page-change', onStatmentsPageChange)
+    return () => window.removeEventListener('statements:page-change', onStatmentsPageChange)
+  }, [])
+
+  useEffect(() => {
+    // refresh when sidebar is hovered or when user switches to the taxes screen
+    if (hovering || active === 'statements') setStatementsAccent(getTaxesAccent())
   }, [hovering, active])
 
   const handleClick = (key: string) => {
@@ -222,7 +243,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
 
       {renderButton('notices', 'Notices', '📬')}
       {renderButton('taxes', 'GST/TDS', '📝', false, false, taxesAccent)}
-      {renderButton('excel', 'Statements', '🏦')}
+      {renderButton('excel', 'Current Statements', '🏦')}
+      {renderButton('excel2', 'Savings Statements', '🏦', false, false, statementsAccent)}
 
       <div style={{ marginTop: 'auto', width: '100%' }}>
         {renderButton('settings', 'Settings', '⚙️')}

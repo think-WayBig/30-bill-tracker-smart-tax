@@ -166,6 +166,21 @@ declare global {
       deleteStatement: (
         id: string
       ) => Promise<{ success: boolean; removed?: number; error?: string }>
+
+      // Savings Statements-related APIs
+      saveStatement2: (
+        statement: Omit<BankStatementRow, 'id'>
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      loadStatements2: () => Promise<BankStatementRow[]>
+
+      updateStatement2: (
+        statement: BankStatementRow
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      deleteStatement2: (
+        id: string
+      ) => Promise<{ success: boolean; removed?: number; error?: string }>
     }
 
     api: {

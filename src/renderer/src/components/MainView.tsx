@@ -7,7 +7,8 @@ import Billing from './book/Billing'
 import Settings from './Settings'
 import Notices from './notices/Notices'
 import GstTds from './gstTds/GstTds'
-import Statements from './statements/Statements'
+import CurrentStatements from './current_statements/Statements'
+import SavingsStatements from './savings_statements/Statements'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -42,7 +43,8 @@ const MainView = () => {
         {activeScreen === 'settings' && <Settings />}
         {activeScreen === 'notices' && <Notices />}
         {activeScreen === 'taxes' && <GstTds />}
-        {activeScreen === 'excel' && <Statements />}
+        {activeScreen === 'excel' && <CurrentStatements />}
+        {activeScreen === 'excel2' && <SavingsStatements />}
       </div>
     </div>
   )

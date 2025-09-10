@@ -10,7 +10,6 @@ import {
   searchBarContainerStyle,
   searchBarStyle
 } from './Statement.styles'
-import { extractCpinFromNarration } from '@renderer/utils/cpin'
 
 const BANK_HEADERS = [
   'date',
@@ -52,22 +51,9 @@ const Statements: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const saveTimersRef = useRef<SaveTimers>(new Map())
-
-  useEffect(() => {
-    const cpin = extractCpinFromNarration(
-      'CBDT/BANK REFERENCE NO:K2509732840988/CIN NO:25040700904775HDFC/ONLINE'
-    )
-
-    ;(async () => {
-      const folderPath = localStorage.getItem('selectedFolder')
-      const res = await window.electronAPI.findPdfNameByCpin(cpin, folderPath)
-      console.log(res)
-    })()
-  }, [])
-
   useEffect(() => {
     ;(async () => {
-      const rows = await window.electronAPI.loadStatements()
+      const rows = await window.electronAPI.loadStatements2()
       setFileData(rows ?? [])
     })()
   }, [])
@@ -100,7 +86,7 @@ const Statements: React.FC = () => {
       // save each row
       const rows = toRows(updated)
       for (const row of rows) {
-        await window.electronAPI.saveStatement({
+        await window.electronAPI.saveStatement2({
           date: row.date,
           narration: row.narration,
           chqNo: row.chqNo,
@@ -113,7 +99,7 @@ const Statements: React.FC = () => {
         })
       }
 
-      const saved = await window.electronAPI.loadStatements()
+      const saved = await window.electronAPI.loadStatements2()
       setFileData(saved ?? [])
 
       setPreviewData([])
@@ -134,7 +120,7 @@ const Statements: React.FC = () => {
 
     const t = window.setTimeout(async () => {
       try {
-        await window.electronAPI.updateStatement(row)
+        await window.electronAPI.updateStatement2(row)
       } catch (e: any) {
         console.error(e)
         alert(`❌ Failed to save change for row ${id}: ${e?.message || e}`)
@@ -160,7 +146,7 @@ const Statements: React.FC = () => {
 
   const handleDeleteRow = async (rowId: string) => {
     try {
-      const res = await window.electronAPI.deleteStatement(rowId)
+      const res = await window.electronAPI.deleteStatement2(rowId)
       if (!res?.success) {
         alert(`❌ Failed to delete: ${res?.error || 'Unknown error'}`)
         return
@@ -172,10 +158,11 @@ const Statements: React.FC = () => {
   }
 
   return (
-    <Layout title="🏦 Manage Bank Statements" hideAssessmentYear>
+    <Layout title="🏦 Manage Bank Statements" hideAssessmentYear color="#d35f00ff">
       <SectionHeader
-        title="Manage Bank Statements"
+        title="Savings Statements"
         description="Import and manage your bank statements by uploading an Excel file."
+        color="#ff7403ff"
       />
 
       {/* Toolbar */}
@@ -204,8 +191,8 @@ const Statements: React.FC = () => {
           type="button"
           onClick={() => inputRef.current?.click()}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
         >
           Import
         </button>
@@ -216,7 +203,7 @@ const Statements: React.FC = () => {
           style={{
             ...importBtnStyle,
             background: '#ffff',
-            border: '1px solid #6366f1'
+            border: '1px solid #d35f00ff'
           }}
         >
           {editMode ? '🔒' : '✏️'}
