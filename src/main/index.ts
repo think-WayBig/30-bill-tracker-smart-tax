@@ -199,6 +199,36 @@ ipcMain.handle('update-end-year', async (_event, fileCode, endYear) => {
   }
 })
 
+ipcMain.handle('update-name', async (_event, fileCode, newName) => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'data')
+    const filePath = path.join(dir, 'entries.json')
+
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Entries file not found.' }
+    }
+
+    const entries = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const index = entries.findIndex(
+      (entry: any) => entry.fileCode?.toLowerCase() === fileCode.toLowerCase()
+    )
+
+    if (index === -1) {
+      return { success: false, error: 'Entry not found for this File Code.' }
+    }
+
+    // Update name
+    entries[index].name = newName
+
+    fs.writeFileSync(filePath, JSON.stringify(entries, null, 2))
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
 ipcMain.handle('load-entries', async () => {
   try {
     const dir = path.join(app.getPath('userData'), 'data')

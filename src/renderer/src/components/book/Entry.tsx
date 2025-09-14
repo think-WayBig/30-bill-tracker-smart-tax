@@ -14,6 +14,9 @@ const Entry: React.FC = () => {
   const [updateFileCode, setUpdateFileCode] = useState('')
   const [newEndYear, setNewEndYear] = useState(currentYear.toString())
 
+  const [updateNameFileCode, setUpdateNameFileCode] = useState('')
+  const [updateName, setUpdateName] = useState('')
+
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -173,6 +176,74 @@ const Entry: React.FC = () => {
 
           <button type="submit" style={{ ...buttonStyle, backgroundColor: '#059669' }}>
             Update End Year
+          </button>
+        </form>
+
+        {/* Update Name By File Code Form */}
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault()
+
+            if (!updateNameFileCode) {
+              alert('❌ Please enter a file code')
+              return
+            }
+
+            const save = await window.electronAPI.updateName(updateNameFileCode, updateName)
+
+            if (save.success) {
+              alert('✅ Name updated successfully!')
+              setUpdateNameFileCode('')
+              setUpdateName('')
+            } else {
+              alert(`❌ Error: ${save.error}`)
+            }
+          }}
+          style={formStyle}
+        >
+          <label style={labelStyle}>File Code</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="Enter File Code"
+              value={updateNameFileCode}
+              onChange={(e) => setUpdateNameFileCode(e.target.value)}
+              required
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            <button
+              type="button"
+              style={{ ...buttonStyle, backgroundColor: '#2563eb', flexShrink: 0 }}
+              onClick={async () => {
+                if (!updateNameFileCode) {
+                  alert('❌ Enter a file code to fetch')
+                  return
+                }
+                const entries = await window.electronAPI.loadEntries()
+                const match = entries.find((entry) => entry.fileCode === updateNameFileCode)
+                if (match) {
+                  setUpdateName(match.name)
+                } else {
+                  alert('❌ No entry found for that file code')
+                }
+              }}
+            >
+              Fetch
+            </button>
+          </div>
+
+          <label style={labelStyle}>Name</label>
+          <input
+            type="text"
+            placeholder="Enter New Name"
+            value={updateName}
+            onChange={(e) => setUpdateName(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <button type="submit" style={{ ...buttonStyle, backgroundColor: '#10b981' }}>
+            Update Name
           </button>
         </form>
       </div>

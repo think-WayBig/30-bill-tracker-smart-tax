@@ -92,6 +92,10 @@ declare global {
         fileCode: string,
         endYear: string
       ) => Promise<{ success: boolean; error?: string }>
+      updateName: (
+        fileCode: string,
+        newName: string
+      ) => Promise<{ success: boolean; error?: string }>
       loadEntries: () => Promise<Entry[]>
       saveEntries: (entries: Entry[]) => Promise<{ success: boolean; error?: string }>
       updateRemarks: (

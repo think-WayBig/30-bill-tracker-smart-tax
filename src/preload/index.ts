@@ -107,6 +107,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateEndYear: (fileCode: string, endYear: string) =>
     ipcRenderer.invoke('update-end-year', fileCode, endYear),
 
+  updateName: (fileCode: string, newName: string) =>
+    ipcRenderer.invoke('update-name', fileCode, newName),
+
   loadEntries: (): Promise<Entry[]> => ipcRenderer.invoke('load-entries'),
 
   saveEntries: (entries: Entry[]): Promise<{ success: boolean; error?: string }> =>
