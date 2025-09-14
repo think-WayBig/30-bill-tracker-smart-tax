@@ -139,6 +139,9 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, q
   const totalDeposit = sumColumn('deposit')
   const net = totalDeposit - totalWithdrawal
 
+  const countCredits = filtered.filter((r) => parseFloat(r.deposit || '0') > 0).length
+  const countDebits = filtered.filter((r) => parseFloat(r.withdrawal || '0') > 0).length
+
   return (
     <div style={tableContainerStyle}>
       <datalist id={NAME_DATALIST_ID}>
@@ -259,6 +262,17 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, q
         <tfoot>
           <tr style={{ background: '#f3f4f6' }}>
             {HEADERS.map((key) => {
+              if (key === 'chqNo') {
+                return (
+                  <td
+                    key={key}
+                    colSpan={2}
+                    style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}
+                  >
+                    Credits: {countCredits} &nbsp;&nbsp; Debits: {countDebits}
+                  </td>
+                )
+              }
               if (key === 'valueDt') {
                 return (
                   <td key={key} style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}>
