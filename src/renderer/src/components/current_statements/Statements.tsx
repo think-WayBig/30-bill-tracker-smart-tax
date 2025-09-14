@@ -269,22 +269,13 @@ const Statements: React.FC = () => {
 
           /* Footer with lighter accent */
           #printable tfoot td {
-            background: #eef2ff !important; /* pale indigo */
-            color: #111 !important;
-            font-weight: 600;
+            background: #eef2ff !important;
+            zoom: 0.9;
           }
 
           /* Stronger borders on totals row */
           #printable tfoot tr:last-child td {
             border-top: 2pt solid var(--accent-color);
-          }
-
-          /* Accent highlights for numbers (optional) */
-          #printable tfoot td:nth-child(5),
-          #printable tfoot td:nth-child(6),
-          #printable tfoot td:nth-child(7) {
-            color: var(--accent-color);
-            font-weight: 700;
           }
 
           /* Keep zebra striping, but soften it */
