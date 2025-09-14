@@ -106,7 +106,10 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, q
     ? rows.filter(
         (r) =>
           (r.name ?? '').toLowerCase().includes(lcQuery) ||
-          (r.narration ?? '').toLowerCase().includes(lcQuery)
+          (r.narration ?? '').toLowerCase().includes(lcQuery) ||
+          (r.withdrawal ?? '').toLowerCase().includes(lcQuery) ||
+          (r.deposit ?? '').toLowerCase().includes(lcQuery) ||
+          (r.closing ?? '').toLowerCase().includes(lcQuery)
       )
     : rows
 
