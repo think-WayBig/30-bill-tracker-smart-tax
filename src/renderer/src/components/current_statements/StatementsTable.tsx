@@ -47,7 +47,7 @@ const placeholderFor = (key: HeaderKeys): string => {
     case 'withdrawal':
     case 'deposit':
     case 'closing':
-      return 'Amount'
+      return '--'
     case 'narration':
       return 'Narration'
     case 'name':

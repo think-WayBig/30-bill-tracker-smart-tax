@@ -159,6 +159,139 @@ const Statements: React.FC = () => {
 
   return (
     <Layout title="🏦 Manage Bank Statements" hideAssessmentYear color="#d35f00ff">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 8mm; }
+
+          /* Hide everything except the printable area */
+          body * { visibility: hidden; }
+          #printable, #printable * { visibility: visible; }
+          #printable { position: absolute; left: 0; top: 0; width: 100%; }
+
+          /* Hide app chrome / controls */
+          .app-toolbar, button, input[type="file"] { display: none !important; }
+
+          /* Table niceties */
+          table { width: 100% !important; table-layout: auto !important; }
+          thead { display: table-header-group; }  /* repeat header on every page */
+          tfoot { display: table-footer-group; }
+          tr, td, th { page-break-inside: avoid; }
+
+          /* Optional: remove backgrounds for better B/W printing */
+          th { background: #fff !important; color: #000 !important; }
+
+          textarea, input {
+            background: none !important;
+            border: 0 !important;
+            padding: 0 !important;
+            resize: none !important;
+            box-shadow: none !important;
+          }
+
+          tfoot {
+            zoom: 0.9
+          }
+        }
+
+        /* Show only in print */
+        .print-only { display: none; }
+        @media print { .print-only { display: block; } }
+
+        /* Hide in print */
+        .screen-only { display: block; }
+        @media print { .screen-only { display: none !important; } }
+
+        @media print {
+          /* Subtle, readable typography */
+          #printable {
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+            color: #111;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          /* Neat grid with soft borders */
+          #printable table {
+            border-collapse: collapse;            /* cosmetic only */
+            border: 0.5pt solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;                     /* keeps rounded corners on PDF */
+          }
+
+          #printable th, #printable td {
+            border: 0.5pt solid #e5e7eb;          /* light cell lines */
+            line-height: 1.25;
+          }
+
+          /* Stronger rule under header, keep your white header bg */
+          #printable thead th {
+            font-weight: 700;
+            border-bottom: 1pt solid #111;
+          }
+
+          /* Zebra striping for readability (very light) */
+          #printable tbody tr:nth-child(even) td {
+            background: #fafafa;
+          }
+
+          /* Right-align numeric columns (5=Withdrawal, 6=Deposit, 7=Closing) */
+          #printable tbody td:nth-child(5),
+          #printable tbody td:nth-child(6),
+          #printable tbody td:nth-child(7),
+          #printable tfoot td:nth-child(5),
+          #printable tfoot td:nth-child(6),
+          #printable tfoot td:nth-child(7) {
+            text-align: right;
+            font-variant-numeric: tabular-nums;   /* aligned digits */
+          }
+
+          /* Slight emphasis for footer */
+          #printable tfoot td {
+            background: #f5f5f5;
+            font-weight: 600;
+          }
+        }
+
+        @media print {
+          /* Accent color */
+          :root {
+            --accent-color: #ff7403ff;
+          }
+
+          /* Header with accent background */
+          #printable thead th {
+            background: var(--accent-color) !important;
+            color: #fff !important;
+            font-weight: 700;
+            border-bottom: 1pt solid #333;
+          }
+
+          /* Footer with lighter accent */
+          #printable tfoot td {
+            background: #fff7f1ff !important; /* pale indigo */
+            color: #111 !important;
+            font-weight: 600;
+          }
+
+          /* Stronger borders on totals row */
+          #printable tfoot tr:last-child td {
+            border-top: 2pt solid var(--accent-color);
+          }
+
+          /* Accent highlights for numbers (optional) */
+          #printable tfoot td:nth-child(5),
+          #printable tfoot td:nth-child(6),
+          #printable tfoot td:nth-child(7) {
+            color: var(--accent-color);
+            font-weight: 700;
+          }
+
+          /* Keep zebra striping, but soften it */
+          #printable tbody tr:nth-child(even) td {
+            background: #f9fafb;
+          }
+        }
+      `}</style>
       <SectionHeader
         title="Savings Statements"
         description="Import and manage your bank statements by uploading an Excel file."
@@ -194,7 +327,7 @@ const Statements: React.FC = () => {
           onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
           onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
         >
-          Import
+          📄 Import
         </button>
 
         <button
@@ -203,10 +336,29 @@ const Statements: React.FC = () => {
           style={{
             ...importBtnStyle,
             background: '#ffff',
+            color: '#d35f00ff',
             border: '1px solid #d35f00ff'
           }}
         >
-          {editMode ? '🔒' : '✏️'}
+          {editMode ? '🔒 Lock' : '✏️ Edit'}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            // optional: lock edits for cleaner print
+            if (editMode) setEditMode(false)
+            // wait a tick if you just toggled edit mode
+            setTimeout(() => window.print(), 50)
+          }}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
+          className="screen-only"
+          aria-label="Print visible rows"
+          title="Print visible rows"
+        >
+          🖨️ Print
         </button>
       </div>
 
@@ -221,21 +373,31 @@ const Statements: React.FC = () => {
         onSave={handleSave}
       />
 
-      {fileData.length > 0 && (
-        <StatementsTable
-          rows={fileData}
-          onCellEdit={handleCellEdit}
-          onRowDelete={handleDeleteRow}
-          query={query}
-          editMode={editMode}
-        />
-      )}
-
-      {fileData.length === 0 && (
-        <div style={emptyStatementStyle}>
-          No statements yet. Import an Excel file to get started.
+      <div id="printable">
+        {/* Print header (only shows on print) */}
+        <div className="print-only" style={{ marginBottom: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 16 }}>Bank Statements</div>
+          <div style={{ fontSize: 12 }}>
+            Printed: {new Date().toLocaleString()}
+            {query?.trim() ? `  •  Filter: "${query.trim()}"` : ''}
+          </div>
         </div>
-      )}
+        {fileData.length > 0 && (
+          <StatementsTable
+            rows={fileData}
+            onCellEdit={handleCellEdit}
+            onRowDelete={handleDeleteRow}
+            query={query}
+            editMode={editMode}
+          />
+        )}
+
+        {fileData.length === 0 && (
+          <div style={emptyStatementStyle}>
+            No statements yet. Import an Excel file to get started.
+          </div>
+        )}
+      </div>
     </Layout>
   )
 }
