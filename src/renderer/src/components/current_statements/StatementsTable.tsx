@@ -109,7 +109,8 @@ export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, q
           (r.narration ?? '').toLowerCase().includes(lcQuery) ||
           (r.withdrawal ?? '').toLowerCase().includes(lcQuery) ||
           (r.deposit ?? '').toLowerCase().includes(lcQuery) ||
-          (r.closing ?? '').toLowerCase().includes(lcQuery)
+          (r.closing ?? '').toLowerCase().includes(lcQuery) ||
+          (r.txnType ?? '').toLowerCase().includes(lcQuery)
       )
     : rows
 
