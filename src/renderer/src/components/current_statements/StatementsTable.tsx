@@ -97,22 +97,37 @@ type Props = {
   onRowDelete: OnRowDelete // This is not required for now
   query?: string
   editMode: boolean
+  showUnnamed: boolean
 }
 
-export const StatementsTable: React.FC<Props> = ({ rows, onCellEdit, editMode, query = '' }) => {
+export const StatementsTable: React.FC<Props> = ({
+  rows,
+  onCellEdit,
+  editMode,
+  showUnnamed,
+  query = ''
+}) => {
   const lcQuery = query.trim().toLowerCase()
 
-  const filtered = lcQuery
-    ? rows.filter(
-        (r) =>
-          (r.name ?? '').toLowerCase().includes(lcQuery) ||
-          (r.narration ?? '').toLowerCase().includes(lcQuery) ||
-          (r.withdrawal ?? '').toLowerCase().includes(lcQuery) ||
-          (r.deposit ?? '').toLowerCase().includes(lcQuery) ||
-          (r.closing ?? '').toLowerCase().includes(lcQuery) ||
-          (r.txnType ?? '').toLowerCase().includes(lcQuery)
-      )
-    : rows
+  const filtered = useMemo(() => {
+    let res = lcQuery
+      ? rows.filter(
+          (r) =>
+            (r.name ?? '').toLowerCase().includes(lcQuery) ||
+            (r.narration ?? '').toLowerCase().includes(lcQuery) ||
+            (r.withdrawal ?? '').toLowerCase().includes(lcQuery) ||
+            (r.deposit ?? '').toLowerCase().includes(lcQuery) ||
+            (r.closing ?? '').toLowerCase().includes(lcQuery) ||
+            (r.txnType ?? '').toLowerCase().includes(lcQuery)
+        )
+      : rows
+
+    if (showUnnamed) {
+      res = res.filter((r) => !r.name || r.name.trim() === '')
+    }
+
+    return res
+  }, [rows, lcQuery, showUnnamed])
 
   // Unique names, computed once per rows change
   const nameOptions = useMemo(() => {

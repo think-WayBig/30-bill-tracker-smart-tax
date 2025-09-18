@@ -51,12 +51,15 @@ const Statements: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const saveTimersRef = useRef<SaveTimers>(new Map())
+
   useEffect(() => {
     ;(async () => {
       const rows = await window.electronAPI.loadStatements2()
       setFileData(rows ?? [])
     })()
   }, [])
+
+  const [showUnnamed, setShowUnnamed] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -302,25 +305,6 @@ const Statements: React.FC = () => {
 
         <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
 
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".xlsx,.xls"
-          id="excel-upload"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
-        >
-          📄 Import
-        </button>
-
         <button
           type="button"
           onClick={() => setEditMode((prev) => !prev)}
@@ -332,6 +316,16 @@ const Statements: React.FC = () => {
           }}
         >
           {editMode ? '🔒 Lock' : '✏️ Edit'}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowUnnamed((prev) => !prev)}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+        >
+          {showUnnamed ? 'Show All' : 'Show Unnamed'}
         </button>
 
         <button
@@ -350,6 +344,25 @@ const Statements: React.FC = () => {
           title="Print visible rows"
         >
           🖨️ Print
+        </button>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          id="excel-upload"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
+        >
+          📄 Import
         </button>
       </div>
 
@@ -380,6 +393,7 @@ const Statements: React.FC = () => {
             onRowDelete={handleDeleteRow}
             query={query}
             editMode={editMode}
+            showUnnamed={showUnnamed}
           />
         )}
 
