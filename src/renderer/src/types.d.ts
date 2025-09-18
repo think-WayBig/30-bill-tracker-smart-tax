@@ -111,6 +111,10 @@ declare global {
         pan: string,
         docsComplete: { value: boolean; year: string }[]
       ) => Promise<{ success: boolean; error?: string }>
+      updateAuditCase: (
+        pan: string,
+        auditCase: { value: boolean; year: string }[]
+      ) => Promise<{ success: boolean; error?: string }>
       deleteEntry: (fileCode: string) => Promise<{ success: boolean; error?: string }>
       getAcknoFromFile: (
         pan: string,

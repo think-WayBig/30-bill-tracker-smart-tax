@@ -23,6 +23,11 @@ interface DocsComplete {
   year: string
 }
 
+interface AuditCase {
+  value: boolean
+  year: string
+}
+
 interface Entry {
   name: string
   fileCode: string
@@ -123,6 +128,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   updateDocsComplete: (pan: string, docsComplete: DocsComplete[]) =>
     ipcRenderer.invoke('update-docs-complete', pan, docsComplete),
+
+  updateAuditCase: (pan: string, auditCase: AuditCase[]) =>
+    ipcRenderer.invoke('update-audit-case', pan, auditCase),
 
   saveGroup: (group: string) => ipcRenderer.invoke('save-group', group),
   deleteGroup: (group: string) => ipcRenderer.invoke('delete-group', group),

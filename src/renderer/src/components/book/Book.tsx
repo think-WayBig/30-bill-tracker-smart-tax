@@ -7,6 +7,7 @@ type AcknoEntry = {
   filePath: string
 }
 
+// The arrays are because of multiple years
 type Entry = {
   name: string
   fileCode: string
@@ -19,6 +20,7 @@ type Entry = {
   group?: string
   remarks?: { remark: string; year: string }[]
   docsComplete?: { value: boolean; year: string; completedOn?: string }[]
+  auditCase?: { value: boolean; year: string }[]
 }
 
 const Book = ({ activeScreen }: { activeScreen: string }) => {
@@ -27,6 +29,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<'name' | 'fileCode' | 'pan' | 'group' | 'ackDate' | ''>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [showAuditCases, setShowAuditCases] = useState(false)
 
   const isDocsIncompleteView = activeScreen === 'book-entries-docs-incomplete'
   const isDocsCompleteView = activeScreen === 'book-entries-docs-complete'
@@ -96,6 +99,10 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
         if (isDocsCompleteView) return docsStatus && !hasAck
         if (isDocsIncompleteView) return !docsStatus
 
+        if (showAuditCases) {
+          return e.auditCase?.some((a) => a.year === currentYear && a.value) ?? false
+        }
+
         return true
       })
       .filter((e) => {
@@ -115,7 +122,15 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
           remarks.toLowerCase().includes(q)
         )
       })
-  }, [entries, currentYear, isManageNonPending, isDocsCompleteView, isDocsIncompleteView, search])
+  }, [
+    entries,
+    currentYear,
+    isManageNonPending,
+    isDocsCompleteView,
+    isDocsIncompleteView,
+    search,
+    showAuditCases
+  ])
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) {
@@ -215,6 +230,23 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
             outline: 'none'
           }}
         />
+        <button
+          type="button"
+          onClick={() => setShowAuditCases((prev) => !prev)}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: showAuditCases ? '#4f46e5' : '#f3f4f6',
+            color: showAuditCases ? '#fff' : '#374151',
+            borderRadius: '6px',
+            fontSize: '15px',
+            fontWeight: 500,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          {showAuditCases ? 'Show All' : 'Show Audit Cases'}
+        </button>
+
         <div
           style={{
             padding: '8px 16px',
@@ -258,6 +290,7 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
               <th style={thStyle}>Docs Received On</th>
               <th style={thStyle}>AckNo.</th>
               <th style={thStyle}>Billing Status</th>
+              <th style={thStyle}>Audit Case</th>
               <th style={thStyle}>Remarks</th>
               <th style={thStyle}>Start Year</th>
               <th style={thStyle}>End Year</th>
@@ -357,6 +390,50 @@ const Book = ({ activeScreen }: { activeScreen: string }) => {
                     <td style={{ ...tdStyle, color: getStatusColor(billing || 'Not started') }}>
                       {billing || 'Not started'}
                     </td>
+
+                    <td
+                      style={{
+                        ...tdStyle,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: '7px'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        style={{ transform: 'scale(1.8)' }}
+                        checked={
+                          entry.auditCase?.find((a) => a.year === currentYear)?.value ?? false
+                        }
+                        onChange={async (e) => {
+                          const value = e.target.checked
+
+                          // Update UI state
+                          setEntries((prev) =>
+                            prev.map((en) => {
+                              if (en.pan !== entry.pan) return en
+                              const updatedAudit = [...(en.auditCase || [])]
+                              const index = updatedAudit.findIndex((a) => a.year === currentYear)
+                              if (index !== -1) {
+                                updatedAudit[index].value = value
+                              } else {
+                                updatedAudit.push({ year: currentYear, value })
+                              }
+                              return { ...en, auditCase: updatedAudit }
+                            })
+                          )
+
+                          // Persist to backend
+                          const updatedAudit = [...(entry.auditCase || [])]
+                          const idx = updatedAudit.findIndex((a) => a.year === currentYear)
+                          if (idx !== -1) updatedAudit[idx].value = value
+                          else updatedAudit.push({ year: currentYear, value })
+                          await window.electronAPI.updateAuditCase(entry.pan, updatedAudit)
+                        }}
+                      />
+                    </td>
+
                     <td style={{ ...tdStyle, width: '300px' }}>
                       <input
                         type="text"

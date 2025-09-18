@@ -322,8 +322,8 @@ const Statements: React.FC = () => {
           type="button"
           onClick={() => setShowUnnamed((prev) => !prev)}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
         >
           {showUnnamed ? 'Show All' : 'Show Unnamed'}
         </button>
