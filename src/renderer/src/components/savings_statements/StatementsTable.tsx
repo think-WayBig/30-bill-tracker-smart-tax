@@ -98,6 +98,8 @@ type Props = {
   query?: string
   editMode: boolean
   showUnnamed: boolean
+  editingNameRowId: string | null
+  setEditingNameRowId: (id: string | null) => void
 }
 
 export const StatementsTable: React.FC<Props> = ({
@@ -105,6 +107,8 @@ export const StatementsTable: React.FC<Props> = ({
   onCellEdit,
   editMode,
   showUnnamed,
+  editingNameRowId,
+  setEditingNameRowId,
   query = ''
 }) => {
   const lcQuery = query.trim().toLowerCase()
@@ -123,11 +127,15 @@ export const StatementsTable: React.FC<Props> = ({
       : rows
 
     if (showUnnamed) {
-      res = res.filter((r) => !r.name || r.name.trim() === '')
+      res = res.filter((r) => {
+        const isUnnamed = !r.name || r.name.trim() === ''
+        const isBeingEdited = editingNameRowId === r.id
+        return isUnnamed || isBeingEdited
+      })
     }
 
     return res
-  }, [rows, lcQuery, showUnnamed])
+  }, [rows, lcQuery, showUnnamed, editingNameRowId])
 
   // Unique names, computed once per rows change
   const nameOptions = useMemo(() => {
@@ -230,6 +238,8 @@ export const StatementsTable: React.FC<Props> = ({
                         type="text"
                         list={NAME_DATALIST_ID}
                         value={row.name ?? ''}
+                        onFocus={() => setEditingNameRowId(row.id!)}
+                        onBlur={() => setEditingNameRowId(null)}
                         onChange={(e) => !isLocked && onCellEdit(row.id!, 'name', e.target.value)}
                         style={{
                           ...textAreaStyle,

@@ -60,6 +60,7 @@ const Statements: React.FC = () => {
   }, [])
 
   const [showUnnamed, setShowUnnamed] = useState(false)
+  const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -393,6 +394,8 @@ const Statements: React.FC = () => {
             query={query}
             editMode={editMode}
             showUnnamed={showUnnamed}
+            editingNameRowId={editingNameRowId}
+            setEditingNameRowId={setEditingNameRowId}
           />
         )}
 
