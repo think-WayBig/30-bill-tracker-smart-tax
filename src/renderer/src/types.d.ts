@@ -84,6 +84,24 @@ declare global {
     txnType: string
   }
 
+  interface YearlyAuditData {
+    lastYearFee?: number
+    sentToCA?: string
+    sentOn?: string
+    receivedOn?: string
+    dateOfUpload?: string
+    itrFiledOn?: string
+    fee?: number
+  }
+
+  interface AuditEntry {
+    pan: string
+    name: string
+    accounts: {
+      [year: number]: YearlyAuditData
+    }
+  }
+
   interface Window {
     electronAPI: {
       // Entry-related APIs
@@ -189,6 +207,19 @@ declare global {
       deleteStatement2: (
         id: string
       ) => Promise<{ success: boolean; removed?: number; error?: string }>
+
+      // Audits-related APIs
+      saveAudit: (
+        entry: AuditEntry
+      ) => Promise<{ success: boolean; data: AuditEntry; error?: string }>
+
+      loadAudits: () => Promise<AuditEntry[]>
+
+      updateAudit: (
+        entry: AuditEntry
+      ) => Promise<{ success: boolean; data: AuditEntry; error?: string }>
+
+      deleteAudit: (pan: string) => Promise<{ success: boolean; removed?: number; error?: string }>
     }
 
     api: {

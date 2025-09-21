@@ -9,6 +9,7 @@ import Notices from './notices/Notices'
 import GstTds from './gstTds/GstTds'
 import CurrentStatements from './current_statements/Statements'
 import SavingsStatements from './savings_statements/Statements'
+import Audits from './audits/Audits'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -45,6 +46,7 @@ const MainView = () => {
         {activeScreen === 'taxes' && <GstTds />}
         {activeScreen === 'excel' && <CurrentStatements />}
         {activeScreen === 'excel2' && <SavingsStatements />}
+        {activeScreen === 'audits' && <Audits />}
       </div>
     </div>
   )

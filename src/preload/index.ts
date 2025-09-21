@@ -102,6 +102,24 @@ interface BankStatementRow {
   txnType: string
 }
 
+interface YearlyAuditData {
+  lastYearFee?: number
+  sentToCA?: string
+  sentOn?: string
+  receivedOn?: string
+  dateOfUpload?: string
+  itrFiledOn?: string
+  fee?: number
+}
+
+interface AuditEntry {
+  pan: string
+  name: string
+  accounts: {
+    [year: number]: YearlyAuditData
+  }
+}
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
@@ -202,7 +220,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteStatement2: (id: string) => ipcRenderer.invoke('delete-statement2', id),
 
   findPdfNameByCpin2: (cpin: string, directory: string) =>
-    ipcRenderer.invoke('find-pdf-name-by-cpin2', cpin, directory)
+    ipcRenderer.invoke('find-pdf-name-by-cpin2', cpin, directory),
+
+  saveAudit: (entry: AuditEntry) => ipcRenderer.invoke('save-audit', entry),
+  loadAudits: () => ipcRenderer.invoke('load-audits'),
+  updateAudit: (entry: AuditEntry) => ipcRenderer.invoke('update-audit', entry),
+  deleteAudit: (id: string) => ipcRenderer.invoke('delete-audit', id)
 })
 
 if (process.contextIsolated) {

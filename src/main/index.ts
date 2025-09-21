@@ -1170,3 +1170,117 @@ ipcMain.handle('delete-statement2', async (_event, id: string) => {
     return { success: false, error: error.message }
   }
 })
+
+/** ==================
+ * Audits (Audit Case Entries)
+ * ==================
+ */
+
+interface YearlyAuditData {
+  lastYearFee?: number
+  sentToCA?: string
+  sentOn?: string
+  receivedOn?: string
+  dateOfUpload?: string
+  itrFiledOn?: string
+  fee?: number
+}
+
+interface AuditEntry {
+  pan: string
+  name: string
+  accounts: {
+    [year: number]: YearlyAuditData
+  }
+}
+
+const getAuditsPath = () => {
+  const dir = path.join(app.getPath('userData'), 'data')
+  const filePath = path.join(dir, 'audits.json')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return filePath
+}
+
+// Create / Save Audit Entry
+ipcMain.handle('save-audit', async (_event, entry: AuditEntry) => {
+  try {
+    const filePath = getAuditsPath()
+    const existing: AuditEntry[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    // prevent duplicates
+    if (existing.some((e) => e.pan.toUpperCase() === entry.pan.toUpperCase())) {
+      return { success: false, error: 'PAN already exists' }
+    }
+
+    existing.push(entry)
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf-8')
+
+    return { success: true, data: entry }
+  } catch (error: any) {
+    console.error('Failed to save audit entry:', error)
+    return { success: false, error: error.message }
+  }
+})
+
+// Read / Load all Audit Entries
+ipcMain.handle('load-audits', async () => {
+  try {
+    const filePath = getAuditsPath()
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Failed to load audits:', error)
+    return []
+  }
+})
+
+// Update Audit Entry (by PAN)
+ipcMain.handle('update-audit', async (_event, updated: AuditEntry) => {
+  try {
+    const filePath = getAuditsPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Audits file not found.' }
+    }
+
+    const existing: AuditEntry[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const index = existing.findIndex((e) => e.pan.toUpperCase() === updated.pan.toUpperCase())
+    if (index === -1) {
+      return { success: false, error: 'Audit entry not found.' }
+    }
+
+    existing[index] = { ...existing[index], ...updated }
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf-8')
+
+    return { success: true, data: existing[index] }
+  } catch (error: any) {
+    console.error('Failed to update audit entry:', error)
+    return { success: false, error: error.message }
+  }
+})
+
+// Delete Audit Entry (by PAN)
+ipcMain.handle('delete-audit', async (_event, pan: string) => {
+  try {
+    const filePath = getAuditsPath()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Audits file not found.' }
+    }
+
+    const existing: AuditEntry[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const before = existing.length
+    const filtered = existing.filter((e) => e.pan.toUpperCase() !== pan.toUpperCase())
+
+    if (filtered.length === before) {
+      return { success: false, error: 'Audit entry not found.' }
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2), 'utf-8')
+    return { success: true, removed: before - filtered.length }
+  } catch (error: any) {
+    console.error('Failed to delete audit entry:', error)
+    return { success: false, error: error.message }
+  }
+})
