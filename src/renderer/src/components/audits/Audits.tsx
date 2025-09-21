@@ -20,6 +20,51 @@ const carryForwardLastYearFee = (entry: AuditEntry, baseYear: number): AuditEntr
   }
 }
 
+// AckNo last 6 digits are ddmmyy -> return "YYYY-MM-DD"
+const ackNoToISO = (ack?: string): string | undefined => {
+  if (!ack) return undefined
+  const digits = ack.replace(/\D/g, '')
+  if (digits.length < 6) return undefined
+  const last6 = digits.slice(-6)
+  const dd = last6.slice(0, 2)
+  const mm = last6.slice(2, 4)
+  const yy = last6.slice(4, 6)
+  // assume 20yy (adjust if you need 19xx for very old years)
+  return `20${yy}-${mm}-${dd}`
+}
+
+const updateItrFiledOnIfMissing = async (
+  row: AuditEntry,
+  year: number,
+  folderPath: string,
+  setRows: React.Dispatch<React.SetStateAction<AuditEntry[]>>
+) => {
+  const current = row.accounts?.[year]?.itrFiledOn?.trim()
+  if (current) return // already set
+
+  // ask Book's helper from preload
+  const res = await window.electronAPI.getAcknoFromFile?.(row.pan, folderPath, String(year))
+  const ackNum = res?.success ? res.ackno?.num : undefined
+  const iso = ackNoToISO(ackNum)
+  if (!iso) return
+
+  // optimistic UI
+  const updated: AuditEntry = {
+    ...row,
+    accounts: {
+      ...row.accounts,
+      [year]: {
+        ...(row.accounts?.[year] || {}),
+        itrFiledOn: iso
+      }
+    }
+  }
+  setRows((prev) => prev.map((r) => (r.pan === row.pan ? updated : r)))
+
+  // persist
+  await window.electronAPI.updateAudit(updated)
+}
+
 // put above the component or inside it before useMemo calls
 const getDisplayCAForYear = (entry: AuditEntry, yr: number): string => {
   const years = Object.keys(entry.accounts || {})
@@ -54,6 +99,21 @@ const Audits: React.FC = () => {
       mounted = false
     }
   }, [])
+
+  useEffect(() => {
+    const folderPath = localStorage.getItem('selectedFolder')
+    if (!folderPath) return
+    if (!rows.length) return
+    ;(async () => {
+      for (const r of rows) {
+        try {
+          await updateItrFiledOnIfMissing(r, currentYear, folderPath, setRows)
+        } catch (e) {
+          console.error('Ack/ITR sync failed for', r.pan, e)
+        }
+      }
+    })()
+  }, [rows, currentYear]) // re-check when rows load or assessment year changes
 
   const caOptions = useMemo(() => {
     const set = new Set<string>()
@@ -110,14 +170,16 @@ const Audits: React.FC = () => {
 
   const handleDialogSubmit = async (data: AuditEntry) => {
     try {
-      // Rule #1 (dialog can set lastYearFee directly) is already satisfied by `data`
-      // Rule #3: if dialog has `fee` for currentYear, set next year's lastYearFee
-      const toSave = carryForwardLastYearFee(data, currentYear)
-
-      const res = await window.electronAPI.saveAudit(toSave)
+      const res = await window.electronAPI.saveAudit(data)
       if (res?.success && res.data) {
         setRows((prev) => [...prev, res.data])
         setDialogOpen(false)
+
+        const folderPath = localStorage.getItem('selectedFolder')
+        if (folderPath) {
+          // try to set ITR Filed On from AckNo immediately
+          await updateItrFiledOnIfMissing(res.data, currentYear, folderPath, setRows)
+        }
       } else {
         alert(res?.error ?? 'Failed to save audit entry')
       }
