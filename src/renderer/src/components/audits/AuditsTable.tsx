@@ -29,6 +29,24 @@ const COLUMN_WIDTHS: Record<string, string> = {
   fee: '10%'
 }
 
+const SUMMARY_H = 40 // px; tweak to match your th height
+const summaryThStyle: React.CSSProperties = {
+  ...thStyle,
+  height: SUMMARY_H,
+  position: 'sticky',
+  top: 0,
+  zIndex: 3,
+  background: '#eef2ff'
+}
+const labelsThStyle: React.CSSProperties = {
+  ...thStyle,
+  position: 'sticky',
+  top: SUMMARY_H,
+  zIndex: 2,
+  background: '#4f46e5',
+  color: 'white'
+}
+
 const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }) => {
   const [sortAsc, setSortAsc] = React.useState<boolean | null>(null) // null = no sort, true = asc, false = desc
 
@@ -81,7 +99,7 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
   }, [])
 
   return (
-    <div style={{ overflowX: 'auto', width: '100%' }}>
+    <div style={{ overflow: 'auto', width: '100%', maxHeight: '85vh' }}>
       <datalist id={NAME_CA_DATALIST_ID}>
         {caOptions.map((n) => (
           <option key={n} value={n} />
@@ -109,35 +127,32 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
         </colgroup>
 
         <thead>
-          {/* Top summary row */}
-          <tr style={{ backgroundColor: '#eef2ff', color: '#111827' }}>
-            <th style={thStyle}> </th> {/* PAN */}
-            <th style={thStyle}> </th> {/* Name */}
-            <th style={thStyle}> </th> {/* Sent To CA */}
-            <th style={thStyle}>Count: {stats.sentOn}</th> {/* Sent On */}
-            <th style={thStyle}>Count: {stats.receivedOn}</th> {/* Received On */}
-            <th style={thStyle}>Count: {stats.dateOfUpload}</th> {/* Date of Upload */}
-            <th style={thStyle}>Count: {stats.itrFiledOn}</th> {/* ITR Filed On */}
-            <th style={thStyle}>Total: {stats.lastYearFeeTotal}</th>
-            <th style={thStyle}>Total: {stats.feeTotal}</th> {/* Fee */}
+          <tr>
+            <th style={summaryThStyle}></th>
+            <th style={summaryThStyle}></th>
+            <th style={summaryThStyle}></th>
+            <th style={summaryThStyle}>Count: {stats.sentOn}</th>
+            <th style={summaryThStyle}>Count: {stats.receivedOn}</th>
+            <th style={summaryThStyle}>Count: {stats.dateOfUpload}</th>
+            <th style={summaryThStyle}>Count: {stats.itrFiledOn}</th>
+            <th style={summaryThStyle}>Total: {stats.lastYearFeeTotal}</th>
+            <th style={summaryThStyle}>Total: {stats.feeTotal}</th>
           </tr>
-
-          {/* Existing labels row */}
-          <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-            <th style={thStyle}>PAN</th>
+          <tr>
+            <th style={labelsThStyle}>PAN</th>
             <th
-              style={{ ...thStyle, cursor: 'pointer' }}
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
               onClick={() => setSortAsc((prev) => (prev === null ? true : !prev))}
             >
               Name {sortAsc === null ? '' : sortAsc ? '🔼' : '🔽'}
             </th>
-            <th style={thStyle}>Sent To CA</th>
-            <th style={thStyle}>Sent On</th>
-            <th style={thStyle}>Received On</th>
-            <th style={thStyle}>Date of Upload</th>
-            <th style={thStyle}>ITR Filed On</th>
-            <th style={thStyle}>Last Year Fee</th>
-            <th style={thStyle}>Fee</th>
+            <th style={labelsThStyle}>Sent To CA</th>
+            <th style={labelsThStyle}>Sent On</th>
+            <th style={labelsThStyle}>Received On</th>
+            <th style={labelsThStyle}>Date of Upload</th>
+            <th style={labelsThStyle}>ITR Filed On</th>
+            <th style={labelsThStyle}>Last Year Fee</th>
+            <th style={labelsThStyle}>Fee</th>
           </tr>
         </thead>
 
