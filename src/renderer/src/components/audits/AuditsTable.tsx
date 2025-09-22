@@ -12,9 +12,11 @@ type Props = {
   year: number
   onCellEdit: OnAuditCellEdit
   caOptions?: string[]
+  accountantOptions?: string[]
 }
 
 const NAME_CA_DATALIST_ID = 'audit-ca-options'
+const ACCOUNTANT_DATALIST_ID = 'audit-accountant-options'
 
 // percentage widths so table spans 100%
 const COLUMN_WIDTHS: Record<string, string> = {
@@ -26,7 +28,8 @@ const COLUMN_WIDTHS: Record<string, string> = {
   receivedOn: '10%',
   dateOfUpload: '10%',
   itrFiledOn: '10%',
-  fee: '10%'
+  fee: '10%',
+  accountant: '100px'
 }
 
 const SUMMARY_H = 40 // px; tweak to match your th height
@@ -47,7 +50,13 @@ const labelsThStyle: React.CSSProperties = {
   color: 'white'
 }
 
-const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }) => {
+const AuditsTable: React.FC<Props> = ({
+  rows,
+  year,
+  onCellEdit,
+  accountantOptions = [],
+  caOptions = []
+}) => {
   const [sortAsc, setSortAsc] = React.useState<boolean | null>(null) // null = no sort, true = asc, false = desc
 
   const sortedRows = React.useMemo(() => {
@@ -98,6 +107,22 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
     return ''
   }, [])
 
+  const getDisplayAccountant = React.useCallback((entry: AuditEntry, yr: number) => {
+    const cur = entry.accounts?.[yr]?.accountant
+    if (typeof cur === 'string') return cur
+    const years = Object.keys(entry.accounts || {})
+      .map(Number)
+      .sort((a, b) => a - b)
+    for (let i = years.length - 1; i >= 0; i--) {
+      const y = years[i]
+      if (y <= yr) {
+        const v = entry.accounts[y]?.accountant ?? ''
+        if (v) return v
+      }
+    }
+    return ''
+  }, [])
+
   return (
     <div style={{ overflow: 'auto', width: '100%', maxHeight: '85vh' }}>
       <datalist id={NAME_CA_DATALIST_ID}>
@@ -106,10 +131,17 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
         ))}
       </datalist>
 
+      <datalist id={ACCOUNTANT_DATALIST_ID}>
+        {(accountantOptions ?? []).map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
+
       <table
         style={{
           borderCollapse: 'collapse',
           width: '100%',
+          minWidth: '1100px',
           background: '#fff',
           tableLayout: 'fixed'
         }}
@@ -124,6 +156,7 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
           <col style={{ width: COLUMN_WIDTHS.itrFiledOn }} />
           <col style={{ width: COLUMN_WIDTHS.lastYearFee }} />
           <col style={{ width: COLUMN_WIDTHS.fee }} />
+          <col style={{ width: COLUMN_WIDTHS.accountant }} />
         </colgroup>
 
         <thead>
@@ -137,6 +170,7 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
             <th style={summaryThStyle}>Count: {stats.itrFiledOn}</th>
             <th style={summaryThStyle}>Total: {stats.lastYearFeeTotal}</th>
             <th style={summaryThStyle}>Total: {stats.feeTotal}</th>
+            <th style={summaryThStyle}></th>
           </tr>
           <tr>
             <th style={labelsThStyle}>PAN</th>
@@ -153,13 +187,14 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
             <th style={labelsThStyle}>ITR Filed On</th>
             <th style={labelsThStyle}>Last Year Fee</th>
             <th style={labelsThStyle}>Fee</th>
+            <th style={labelsThStyle}>Accountant</th>
           </tr>
         </thead>
 
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
+              <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
                 No data available
               </td>
             </tr>
@@ -233,6 +268,7 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
                   <td style={tdStyle}>
                     <input
                       type="number"
+                      disabled
                       value={acc.lastYearFee ?? ''}
                       onChange={(e) => onCellEdit(r.pan, 'lastYearFee', Number(e.target.value))}
                       style={inputStyle}
@@ -243,6 +279,15 @@ const AuditsTable: React.FC<Props> = ({ rows, year, onCellEdit, caOptions = [] }
                       type="number"
                       value={acc.fee ?? ''}
                       onChange={(e) => onCellEdit(r.pan, 'fee', Number(e.target.value))}
+                      style={inputStyle}
+                    />
+                  </td>
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      list={ACCOUNTANT_DATALIST_ID}
+                      value={getDisplayAccountant(r, year)}
+                      onChange={(e) => onCellEdit(r.pan, 'accountant', e.target.value)}
                       style={inputStyle}
                     />
                   </td>

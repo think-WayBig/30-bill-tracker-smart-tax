@@ -16,6 +16,7 @@ type Props = {
   onClose: () => void
   onSubmit: (data: AuditEntry) => void
   caOptions?: string[]
+  accountantOptions?: string[]
 }
 
 const EMPTY_YEAR_DATA: YearlyAuditData = {
@@ -25,10 +26,17 @@ const EMPTY_YEAR_DATA: YearlyAuditData = {
   receivedOn: '',
   dateOfUpload: '',
   itrFiledOn: '',
-  fee: undefined
+  fee: undefined,
+  accountant: ''
 }
 
-const AuditsDialog: React.FC<Props> = ({ open, onClose, onSubmit, caOptions = [] }) => {
+const AuditsDialog: React.FC<Props> = ({
+  open,
+  onClose,
+  onSubmit,
+  caOptions = [],
+  accountantOptions = []
+}) => {
   const currentYear = localStorage.getItem('selectedYear')! // assessment year
 
   const [pan, setPan] = useState('')
@@ -162,6 +170,21 @@ const AuditsDialog: React.FC<Props> = ({ open, onClose, onSubmit, caOptions = []
                     value={data.fee ?? ''}
                     onChange={(e) => handleChange(year, 'fee', Number(e.target.value))}
                   />
+                </div>
+                <div>
+                  <div style={label}>Accountant</div>
+                  <input
+                    style={input}
+                    list="audit-accountant-options"
+                    type="text"
+                    value={data.accountant ?? ''}
+                    onChange={(e) => handleChange(year, 'accountant', e.target.value)}
+                  />
+                  <datalist id="audit-accountant-options">
+                    {accountantOptions.map((a) => (
+                      <option key={a} value={a} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
             </div>

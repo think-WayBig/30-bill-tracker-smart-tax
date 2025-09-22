@@ -126,6 +126,17 @@ const Audits: React.FC = () => {
     return Array.from(set).sort((a, b) => a.localeCompare(b))
   }, [rows])
 
+  const accountantOptions = useMemo(() => {
+    const set = new Set<string>()
+    rows.forEach((r) => {
+      Object.values(r.accounts || {}).forEach((acc) => {
+        const a = (acc.accountant || '').trim()
+        if (a) set.add(a)
+      })
+    })
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [rows])
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return rows
@@ -234,6 +245,7 @@ const Audits: React.FC = () => {
         rows={filtered}
         onCellEdit={onCellEdit}
         caOptions={caOptions}
+        accountantOptions={accountantOptions}
         year={currentYear}
       />
 

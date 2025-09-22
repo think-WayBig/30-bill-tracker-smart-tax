@@ -92,6 +92,7 @@ declare global {
     dateOfUpload?: string
     itrFiledOn?: string
     fee?: number
+    accountant?: string
   }
 
   interface AuditEntry {
