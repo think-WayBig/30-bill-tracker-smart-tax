@@ -214,6 +214,24 @@ const Notices: React.FC = () => {
   const itrActive = itrNotices.filter((n) => !n.done)
   const itrDone = itrNotices.filter((n) => n.done)
 
+  const handleSaveEdit = async (original: Notice, updates: Partial<Notice>) => {
+    const updatedNotice: Notice = { ...original, ...updates }
+    console.log('Saving edits:', updatedNotice)
+    const result = await window.electronAPI.updateNotice(updatedNotice)
+    console.log('Update result:', result)
+    if (result.success) {
+      setNotices((prev) =>
+        prev.map((n) =>
+          n.name === original.name && n.date === original.date && n.type === original.type
+            ? updatedNotice
+            : n
+        )
+      )
+    } else {
+      alert(`❌ Error: ${result.error}`)
+    }
+  }
+
   return (
     <Layout title="📬 Add GST / ITR Notices" hideAssessmentYear>
       <div style={containerStyle}>
@@ -292,6 +310,8 @@ const Notices: React.FC = () => {
             showDone={showDoneGst}
             onToggleShowDone={() => setShowDoneGst((v) => !v)}
             onDelete={handleDelete}
+            onSaveEdit={handleSaveEdit}
+            years={years}
           />
         </div>
 
@@ -370,6 +390,8 @@ const Notices: React.FC = () => {
             showDone={showDoneItr}
             onToggleShowDone={() => setShowDoneItr((v) => !v)}
             onDelete={handleDelete}
+            onSaveEdit={handleSaveEdit}
+            years={years}
           />
         </div>
       </div>
@@ -379,17 +401,7 @@ const Notices: React.FC = () => {
 
 export default Notices
 
-const NoticeTable = ({
-  notices,
-  doneNotices,
-  onSort,
-  sortField,
-  sortAsc,
-  onToggleDone,
-  onDelete,
-  showDone,
-  onToggleShowDone
-}: {
+type NoticeTableProps = {
   notices: Notice[]
   doneNotices: Notice[]
   onSort: (field: keyof Notice) => void
@@ -399,143 +411,263 @@ const NoticeTable = ({
   onDelete: (notice: Notice) => void
   showDone: boolean
   onToggleShowDone: () => void
-}) => (
-  <div style={{ marginTop: '1rem' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
-      <thead>
-        <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
-            Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
-          </th>
-          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('year')}>
-            Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
-          </th>
-          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('date')}>
-            Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
-          </th>
-          <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('dueDate')}>
-            Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
-          </th>
-          <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
-          <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        {notices.length === 0 ? (
-          <tr>
-            <td colSpan={6} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
-              No pending notices
-            </td>
+  onSaveEdit: (original: Notice, updates: Partial<Notice>) => void
+  years: string[]
+}
+
+const NoticeTable: React.FC<NoticeTableProps> = ({
+  notices,
+  doneNotices,
+  onSort,
+  sortField,
+  sortAsc,
+  onToggleDone,
+  onDelete,
+  showDone,
+  onToggleShowDone,
+  onSaveEdit,
+  years
+}) => {
+  const [editingKey, setEditingKey] = React.useState<string | null>(null)
+  const [draftYear, setDraftYear] = React.useState<string>('')
+  const [draftDue, setDraftDue] = React.useState<string>('')
+
+  const makeKey = (n: Notice) => `${n.type}|${n.name}|${n.date}`
+
+  const startEdit = (n: Notice) => {
+    setEditingKey(makeKey(n))
+    setDraftYear(n.year || '')
+    setDraftDue(n.dueDate || '')
+  }
+
+  const cancelEdit = () => {
+    setEditingKey(null)
+    setDraftYear('')
+    setDraftDue('')
+  }
+
+  const saveEdit = (n: Notice) => {
+    onSaveEdit(n, { year: draftYear, dueDate: draftDue })
+    cancelEdit()
+  }
+
+  return (
+    <div style={{ marginTop: '1rem' }}>
+      {/* Tiny CSS to hide action buttons until row hover */}
+      <style>{`
+        .row-actions { opacity: 0; transition: opacity .15s; white-space: nowrap; }
+        tr:hover .row-actions { opacity: 1; }
+        .icon-btn { background: transparent; border: none; cursor: pointer; padding: 2px 4px; font-size: 16px; line-height: 1; }
+      `}</style>
+
+      <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+            <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
+              Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
+            </th>
+            <th
+              style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+              onClick={() => onSort('year')}
+            >
+              Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
+            </th>
+            <th
+              style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+              onClick={() => onSort('date')}
+            >
+              Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
+            </th>
+            <th
+              style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+              onClick={() => onSort('dueDate')}
+            >
+              Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
+            </th>
+            <th style={{ ...thStyle, textAlign: 'center', width: 70 }}>Done</th>
+            <th style={{ ...thStyle, textAlign: 'center', width: 84 }}>Actions</th>
           </tr>
-        ) : (
-          notices.map((n, i) => (
-            <tr key={i} className="hoverable-row">
-              <td style={{ ...tdStyle, maxWidth: '200px' }}>{n.name}</td>
-              <td style={tdStyle}>{n.year || '-'}</td>
-              <td style={tdStyle}>{n.date}</td>
-              <td style={{ ...tdStyle, color: isDueSoon(n.dueDate) ? 'red' : undefined }}>
-                {n.dueDate}
-              </td>
-              <td style={{ ...tdStyle, textAlign: 'center' }}>
-                <input
-                  type="checkbox"
-                  checked={n.done ?? false}
-                  onChange={() => onToggleDone({ ...n, done: !n.done })}
-                  style={{ transform: 'scale(1.8)' }}
-                />
-              </td>
-              <td style={{ ...tdStyle, textAlign: 'center' }}>
-                <button
-                  onClick={() => onDelete(n)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#ef4444',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '20px'
-                  }}
-                  title="Delete notice"
-                >
-                  🗑️
-                </button>
+        </thead>
+        <tbody>
+          {notices.length === 0 ? (
+            <tr>
+              {/* 6 columns now */}
+              <td colSpan={6} style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
+                No pending notices
               </td>
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-
-    {doneNotices.length > 0 && (
-      <div style={{ marginTop: '1rem' }}>
-        <button onClick={onToggleShowDone} style={expanderButtonStyle}>
-          {showDone ? 'Hide' : 'Show'} Done ({doneNotices.length})
-        </button>
-
-        {showDone && (
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              background: '#f8f8f8',
-              marginTop: '0.5rem'
-            }}
-          >
-            <thead>
-              <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
-                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
-                  Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
-                </th>
-                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('year')}>
-                  Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
-                </th>
-                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('date')}>
-                  Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
-                </th>
-                <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('dueDate')}>
-                  Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
-                </th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Done</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doneNotices.map((n, i) => (
+          ) : (
+            notices.map((n, i) => {
+              const key = makeKey(n)
+              const isEditing = editingKey === key
+              return (
                 <tr key={i} className="hoverable-row">
-                  <td style={{ ...tdStyle, maxWidth: '200px' }}>{n.name}</td>
-                  <td style={tdStyle}>{n.year || '-'}</td>
+                  <td
+                    style={{ ...tdStyle, maxWidth: '220px' }}
+                    onDoubleClick={() => startEdit(n)}
+                    title="Double-click to edit"
+                  >
+                    {n.name}
+                  </td>
+
+                  <td
+                    style={tdStyle}
+                    onDoubleClick={() => startEdit(n)}
+                    title="Double-click to edit"
+                  >
+                    {isEditing ? (
+                      <select
+                        value={draftYear}
+                        onChange={(e) => setDraftYear(e.target.value)}
+                        style={{ width: '100%' }}
+                      >
+                        {years.map((y) => (
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      n.year || '-'
+                    )}
+                  </td>
+
                   <td style={tdStyle}>{n.date}</td>
-                  <td style={tdStyle}>{n.dueDate}</td>
+
+                  <td
+                    style={{
+                      ...tdStyle,
+                      color: !isEditing && isDueSoon(n.dueDate) ? 'red' : undefined
+                    }}
+                    onDoubleClick={() => startEdit(n)}
+                    title="Double-click to edit"
+                  >
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        value={draftDue}
+                        onChange={(e) => setDraftDue(e.target.value)}
+                        style={{ width: '100%' }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveEdit(n)
+                          if (e.key === 'Escape') cancelEdit()
+                        }}
+                      />
+                    ) : (
+                      n.dueDate
+                    )}
+                  </td>
+
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     <input
                       type="checkbox"
                       checked={n.done ?? false}
                       onChange={() => onToggleDone({ ...n, done: !n.done })}
-                      style={{ transform: 'scale(1.8)' }}
+                      style={{ transform: 'scale(1.2)' }} // slightly smaller
+                      title="Mark done"
                     />
                   </td>
+
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
-                    <button
-                      onClick={() => onDelete(n)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#ef4444',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '20px'
-                      }}
-                      title="Delete notice"
-                    >
-                      🗑️
-                    </button>
+                    {isEditing ? (
+                      <div className="row-actions" style={{ opacity: 1 }}>
+                        <button className="icon-btn" onClick={() => saveEdit(n)} title="Save">
+                          ✅
+                        </button>
+                        <button className="icon-btn" onClick={cancelEdit} title="Cancel">
+                          ✖️
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="row-actions">
+                        <button className="icon-btn" onClick={() => startEdit(n)} title="Edit">
+                          ✏️
+                        </button>
+                        <button className="icon-btn" onClick={() => onDelete(n)} title="Delete">
+                          🗑️
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    )}
-  </div>
-)
+              )
+            })
+          )}
+        </tbody>
+      </table>
+
+      {doneNotices.length > 0 && (
+        <div style={{ marginTop: '1rem' }}>
+          <button onClick={onToggleShowDone} style={expanderButtonStyle}>
+            {showDone ? 'Hide' : 'Show'} Done ({doneNotices.length})
+          </button>
+
+          {showDone && (
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                background: '#f8f8f8',
+                marginTop: '0.5rem'
+              }}
+            >
+              <thead>
+                <tr style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+                  <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => onSort('name')}>
+                    Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
+                  </th>
+                  <th
+                    style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+                    onClick={() => onSort('year')}
+                  >
+                    Year {sortField === 'year' && (sortAsc ? '↑' : '↓')}
+                  </th>
+                  <th
+                    style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+                    onClick={() => onSort('date')}
+                  >
+                    Issue Date {sortField === 'date' && (sortAsc ? '↑' : '↓')}
+                  </th>
+                  <th
+                    style={{ ...thStyle, cursor: 'pointer', width: 120 }}
+                    onClick={() => onSort('dueDate')}
+                  >
+                    Due Date {sortField === 'dueDate' && (sortAsc ? '↑' : '↓')}
+                  </th>
+                  <th style={{ ...thStyle, textAlign: 'center', width: 70 }}>Done</th>
+                  <th style={{ ...thStyle, textAlign: 'center', width: 84 }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {doneNotices.map((n, i) => (
+                  <tr key={i} className="hoverable-row">
+                    <td style={{ ...tdStyle, maxWidth: '220px' }}>{n.name}</td>
+                    <td style={tdStyle}>{n.year || '-'}</td>
+                    <td style={tdStyle}>{n.date}</td>
+                    <td style={tdStyle}>{n.dueDate}</td>
+                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={n.done ?? false}
+                        onChange={() => onToggleDone({ ...n, done: !n.done })}
+                        style={{ transform: 'scale(1.2)' }}
+                        title="Mark done/undone"
+                      />
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <div className="row-actions">
+                        <button className="icon-btn" onClick={() => onDelete(n)} title="Delete">
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

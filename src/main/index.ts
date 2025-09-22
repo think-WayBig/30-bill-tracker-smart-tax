@@ -700,13 +700,24 @@ ipcMain.handle('update-notice', async (_event, updatedNotice) => {
     if (!fs.existsSync(filePath)) return { success: false, error: 'No notices file found' }
 
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-    const updated = data.map((n) =>
-      n.name === updatedNotice.name &&
-      n.date === updatedNotice.date &&
-      n.type === updatedNotice.type
-        ? { ...n, done: updatedNotice.done }
-        : n
-    )
+
+    const updated = data.map((n) => {
+      const isSame =
+        n.name === updatedNotice.name &&
+        n.date === updatedNotice.date &&
+        n.type === updatedNotice.type
+
+      if (!isSame) return n
+
+      // Merge only editable fields (keep identity fields intact)
+      return {
+        ...n,
+        // keep the old value if not provided in the update payload
+        dueDate: updatedNotice.dueDate ?? n.dueDate,
+        year: updatedNotice.year ?? n.year,
+        done: updatedNotice.done ?? n.done
+      }
+    })
 
     fs.writeFileSync(filePath, JSON.stringify(updated, null, 2))
     return { success: true }
