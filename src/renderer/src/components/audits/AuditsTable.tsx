@@ -22,14 +22,15 @@ const ACCOUNTANT_DATALIST_ID = 'audit-accountant-options'
 const COLUMN_WIDTHS: Record<string, string> = {
   pan: '5%',
   name: '15%',
-  lastYearFee: '10%',
   sentToCA: '10%',
   sentOn: '10%',
   receivedOn: '10%',
   dateOfUpload: '10%',
   itrFiledOn: '10%',
+  lastYearFee: '10%',
   fee: '10%',
-  accountant: '100px'
+  feeDate: '130px',
+  accountant: '160px'
 }
 
 const SUMMARY_H = 40 // px; tweak to match your th height
@@ -141,7 +142,7 @@ const AuditsTable: React.FC<Props> = ({
         style={{
           borderCollapse: 'collapse',
           width: '100%',
-          minWidth: '1100px',
+          minWidth: '1350px',
           background: '#fff',
           tableLayout: 'fixed'
         }}
@@ -156,6 +157,7 @@ const AuditsTable: React.FC<Props> = ({
           <col style={{ width: COLUMN_WIDTHS.itrFiledOn }} />
           <col style={{ width: COLUMN_WIDTHS.lastYearFee }} />
           <col style={{ width: COLUMN_WIDTHS.fee }} />
+          <col style={{ width: COLUMN_WIDTHS.feeDate }} />
           <col style={{ width: COLUMN_WIDTHS.accountant }} />
         </colgroup>
 
@@ -170,6 +172,7 @@ const AuditsTable: React.FC<Props> = ({
             <th style={summaryThStyle}>Count: {stats.itrFiledOn}</th>
             <th style={summaryThStyle}>Total: {stats.lastYearFeeTotal}</th>
             <th style={summaryThStyle}>Total: {stats.feeTotal}</th>
+            <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
           </tr>
           <tr>
@@ -187,6 +190,7 @@ const AuditsTable: React.FC<Props> = ({
             <th style={labelsThStyle}>ITR Filed On</th>
             <th style={labelsThStyle}>Last Year Fee</th>
             <th style={labelsThStyle}>Fee</th>
+            <th style={labelsThStyle}>Fee Date</th>
             <th style={labelsThStyle}>Accountant</th>
           </tr>
         </thead>
@@ -194,7 +198,7 @@ const AuditsTable: React.FC<Props> = ({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
+              <td colSpan={11} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
                 No data available
               </td>
             </tr>
@@ -279,6 +283,14 @@ const AuditsTable: React.FC<Props> = ({
                       type="number"
                       value={acc.fee ?? ''}
                       onChange={(e) => onCellEdit(r.pan, 'fee', Number(e.target.value))}
+                      style={inputStyle}
+                    />
+                  </td>
+                  <td style={tdStyle}>
+                    <input
+                      type="date"
+                      value={acc.feeDate ?? ''}
+                      onChange={(e) => onCellEdit(r.pan, 'feeDate', e.target.value)}
                       style={inputStyle}
                     />
                   </td>

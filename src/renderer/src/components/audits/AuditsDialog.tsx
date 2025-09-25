@@ -27,8 +27,11 @@ const EMPTY_YEAR_DATA: YearlyAuditData = {
   dateOfUpload: '',
   itrFiledOn: '',
   fee: undefined,
+  feeDate: '',
   accountant: ''
 }
+
+const todayLocalISO = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
 
 const AuditsDialog: React.FC<Props> = ({
   open,
@@ -60,13 +63,18 @@ const AuditsDialog: React.FC<Props> = ({
   if (!open) return null
 
   const handleChange = (year: string, key: keyof YearlyAuditData, value: any) => {
-    setAccounts((prev) => ({
-      ...prev,
-      [year]: {
-        ...prev[year],
-        [key]: value
+    setAccounts((prev) => {
+      const cur = prev[year] || {}
+      // FIRST-TIME fee in dialog -> set feeDate (don't touch later)
+      if (key === 'fee') {
+        const next: YearlyAuditData = { ...cur, fee: Number(value) }
+        if (cur.fee == null && !cur.feeDate) {
+          next.feeDate = todayLocalISO()
+        }
+        return { ...prev, [year]: next }
       }
-    }))
+      return { ...prev, [year]: { ...cur, [key]: value } }
+    })
   }
 
   return (
@@ -169,6 +177,15 @@ const AuditsDialog: React.FC<Props> = ({
                     type="number"
                     value={data.fee ?? ''}
                     onChange={(e) => handleChange(year, 'fee', Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <div style={label}>Fee Date</div>
+                  <input
+                    style={input}
+                    type="date"
+                    value={data.feeDate ?? ''}
+                    onChange={(e) => handleChange(year, 'feeDate', e.target.value)}
                   />
                 </div>
                 <div>

@@ -33,6 +33,8 @@ const ackNoToISO = (ack?: string): string | undefined => {
   return `20${yy}-${mm}-${dd}`
 }
 
+const todayLocalISO = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+
 const updateItrFiledOnIfMissing = async (
   row: AuditEntry,
   year: number,
@@ -160,6 +162,16 @@ const Audits: React.FC = () => {
           [key]: value as any
         }
       }
+    }
+
+    if (key === 'fee') {
+      const prevFee = row.accounts?.[currentYear]?.fee
+      const prevFeeDate = row.accounts?.[currentYear]?.feeDate
+      if ((prevFee === undefined || prevFee === null) && !prevFeeDate) {
+        updatedRow.accounts[currentYear].feeDate = todayLocalISO()
+      }
+      // carry forward still applies
+      updatedRow = carryForwardLastYearFee(updatedRow, currentYear)
     }
 
     // Rule #3: if editing `fee` in year Y, set (Y+1).lastYearFee = fee

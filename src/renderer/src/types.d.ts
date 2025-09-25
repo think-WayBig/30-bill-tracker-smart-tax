@@ -83,7 +83,6 @@ declare global {
     name: string
     txnType: string
   }
-
   interface YearlyAuditData {
     lastYearFee?: number
     sentToCA?: string
@@ -92,6 +91,7 @@ declare global {
     dateOfUpload?: string
     itrFiledOn?: string
     fee?: number
+    feeDate?: string
     accountant?: string
   }
 
