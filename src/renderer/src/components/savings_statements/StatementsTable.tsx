@@ -288,39 +288,44 @@ export const StatementsTable: React.FC<Props> = ({
         <tfoot>
           <tr style={{ background: '#f3f4f6' }}>
             {HEADERS.map((key) => {
-              if (key === 'chqNo') {
+              if (key === 'narration') {
                 return (
                   <td
                     key={key}
                     colSpan={2}
-                    style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}
+                    style={{
+                      padding: 8,
+                      paddingLeft: 12,
+                      fontWeight: 600,
+                      textAlign: 'end'
+                    }}
                   >
                     Credits: {countCredits} &nbsp;&nbsp; Debits: {countDebits}
                   </td>
                 )
               }
-              if (key === 'valueDt') {
+              if (key === 'chqNo') {
                 return (
                   <td key={key} style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}>
                     Totals
                   </td>
                 )
               }
-              if (key === 'withdrawal') {
+              if (key === 'valueDt') {
                 return (
                   <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
                     {totalWithdrawal.toFixed(2)}
                   </td>
                 )
               }
-              if (key === 'deposit') {
+              if (key === 'withdrawal') {
                 return (
                   <td key={key} style={{ padding: 8, paddingLeft: 12 }}>
                     {totalDeposit.toFixed(2)}
                   </td>
                 )
               }
-              if (key === 'closing') {
+              if (key === 'deposit') {
                 return (
                   <td
                     key={key}
@@ -337,8 +342,6 @@ export const StatementsTable: React.FC<Props> = ({
               }
               return <td key={key} style={{ padding: 8, paddingLeft: 12 }} />
             })}
-            {/* For styling last cell */}
-            {/* <td></td> */}
           </tr>
         </tfoot>
       </table>
