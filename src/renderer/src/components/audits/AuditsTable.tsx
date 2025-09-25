@@ -29,7 +29,7 @@ const COLUMN_WIDTHS: Record<string, string> = {
   itrFiledOn: '10%',
   lastYearFee: '10%',
   fee: '10%',
-  feeDate: '130px',
+  feeDate: '150px',
   accountant: '160px'
 }
 
@@ -49,6 +49,12 @@ const labelsThStyle: React.CSSProperties = {
   zIndex: 2,
   background: '#4f46e5',
   color: 'white'
+}
+
+const emptyValue = (v: unknown) => {
+  if (v === 0) return '0'
+  const s = (v ?? '').toString().trim()
+  return s ? s : ''
 }
 
 const AuditsTable: React.FC<Props> = ({
@@ -146,7 +152,7 @@ const AuditsTable: React.FC<Props> = ({
   }, [])
 
   return (
-    <div style={{ overflow: 'auto', width: '100%', maxHeight: '85vh' }}>
+    <div className="audits-scroll" style={{ overflow: 'auto', width: '100%', maxHeight: '85vh' }}>
       <datalist id={NAME_CA_DATALIST_ID}>
         {caOptions.map((n) => (
           <option key={n} value={n} />
@@ -272,6 +278,7 @@ const AuditsTable: React.FC<Props> = ({
                     {r.pan}
                   </td>
                   <td
+                    className="name-col"
                     style={{
                       ...tdStyle,
                       whiteSpace: 'nowrap',
@@ -279,9 +286,10 @@ const AuditsTable: React.FC<Props> = ({
                       textOverflow: 'ellipsis'
                     }}
                   >
-                    {r.name}
+                    <span className="print-trunc">{r.name}</span>
                   </td>
 
+                  {/* Sent To CA */}
                   <td style={tdStyle}>
                     <input
                       type="text"
@@ -290,7 +298,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'sentToCA', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(getDisplayCA(r, year))}</span>
                   </td>
+
+                  {/* Sent On */}
                   <td style={tdStyle}>
                     <input
                       type="date"
@@ -298,7 +309,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'sentOn', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.sentOn)}</span>
                   </td>
+
+                  {/* Received On */}
                   <td style={tdStyle}>
                     <input
                       type="date"
@@ -306,7 +320,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'receivedOn', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.receivedOn)}</span>
                   </td>
+
+                  {/* Date of Upload */}
                   <td style={tdStyle}>
                     <input
                       type="date"
@@ -314,7 +331,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'dateOfUpload', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.dateOfUpload)}</span>
                   </td>
+
+                  {/* ITR Filed On */}
                   <td style={tdStyle}>
                     <input
                       type="date"
@@ -322,7 +342,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'itrFiledOn', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.itrFiledOn)}</span>
                   </td>
+
+                  {/* Last Year Fee */}
                   <td style={tdStyle}>
                     <input
                       type="number"
@@ -331,7 +354,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'lastYearFee', Number(e.target.value))}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.lastYearFee)}</span>
                   </td>
+
+                  {/* Fee */}
                   <td style={tdStyle}>
                     <input
                       type="number"
@@ -339,7 +365,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'fee', Number(e.target.value))}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.fee)}</span>
                   </td>
+
+                  {/* Fee Date */}
                   <td style={tdStyle}>
                     <input
                       type="date"
@@ -347,7 +376,10 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'feeDate', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(acc.feeDate)}</span>
                   </td>
+
+                  {/* Accountant */}
                   <td style={tdStyle}>
                     <input
                       type="text"
@@ -356,6 +388,7 @@ const AuditsTable: React.FC<Props> = ({
                       onChange={(e) => onCellEdit(r.pan, 'accountant', e.target.value)}
                       style={inputStyle}
                     />
+                    <span className="print-value">{emptyValue(getDisplayAccountant(r, year))}</span>
                   </td>
                 </tr>
               )

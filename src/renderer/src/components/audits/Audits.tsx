@@ -229,6 +229,119 @@ const Audits: React.FC = () => {
 
   return (
     <Layout title="📝 Audit Windows">
+      {/* --- PRINT STYLES --- */}
+      <style>{`
+        .print-only { visibility: hidden; zoom: 0.1 }
+
+        .print-value { display: none; }
+
+        @media print {
+          @page { size: A4 landscape; margin: 6mm; }
+
+          .print-only { visibility: unset; zoom: 1 }
+
+          .print-value { display: none; }
+
+          :root {
+            --accent: #4f46e5;        /* platform indigo */
+            --row-alt: #f6f8ff;       /* very light indigo for zebra */
+            --grid: #e5e7eb;          /* slate-200 borders */
+            --ink: #111;              /* text */
+            --ink-muted: #6b7280;     /* slate-500 */
+          }
+
+          /* Show only audits area */
+          body * { visibility: hidden; }
+          #audits-printable, #audits-printable * { visibility: visible; }
+          #audits-printable {
+            position: absolute; left: 0; top: 0; width: 100%;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+            color: var(--ink);
+          }
+
+          /* Let table paginate (no scroll clipping) */
+          #audits-printable .audits-scroll { overflow: visible !important; max-height: none !important; }
+
+          /* Repeat header per page; avoid row splits */
+          #audits-printable thead { display: table-header-group; }
+          #audits-printable tfoot { display: table-footer-group; }
+          #audits-printable tr, #audits-printable td, #audits-printable th { page-break-inside: avoid; }
+
+          /* Table visuals */
+          #audits-printable table {
+            width: 100% !important;
+            min-width: 0 !important;
+            table-layout: auto !important;
+            border-collapse: collapse;
+            border: 0.5pt solid var(--grid);
+            font-size: 11px;
+            line-height: 1.25;
+          }
+          #audits-printable col { width: auto !important; }
+
+          /* Colored header */
+          #audits-printable thead th {
+            position: static !important; /* disable sticky in print */
+            background: var(--accent) !important;
+            color: #fff !important;
+            font-weight: 700;
+            padding: 6px 8px;
+            border-bottom: 1pt solid #333;
+          }
+
+          /* Cells */
+          #audits-printable td {
+            border: 0.5pt solid var(--grid);
+            padding: 4px 6px;
+            vertical-align: top;
+          }
+
+          /* Zebra */
+          #audits-printable tbody tr:nth-child(even) td { background: var(--row-alt); }
+
+          /* Numbers right-aligned (Last Year Fee, Fee) */
+          #audits-printable td:nth-child(8),
+          #audits-printable td:nth-child(9) {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+          }
+
+          /* Name truncation (from earlier) */
+          #audits-printable td.name-col .name-text,
+          #audits-printable td.name-col .print-trunc {
+            display: inline-block !important;
+            width: 24ch !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            font-weight: 600 !important;
+            color: #000 !important;
+          }
+          #audits-printable th:nth-child(2) { width: 24ch !important; }
+
+          /* 👇 PRINT VALUES: hide inputs/selects, show spans with dash fallback */
+          #audits-printable input,
+          #audits-printable select {
+            display: none !important;
+          }
+          #audits-printable .print-value {
+            display: inline !important;
+            color: var(--ink);
+          }
+
+          /* Muted dash color (optional) */
+          #audits-printable .print-value:empty::after { content: ''; color: var(--ink-muted); }
+          #audits-printable th:nth-child(1),
+          #audits-printable td:nth-child(1) {
+            width: 5ch !important;
+            white-space: nowrap !important;
+          }
+        }
+
+      `}</style>
+
+      {/* --- your toolbar --- */}
       <div style={containerStyle}>
         <input
           type="text"
@@ -250,24 +363,48 @@ const Audits: React.FC = () => {
           Delete Entry
         </button>
 
+        {/* PRINT BUTTON */}
+        <button
+          type="button"
+          onClick={() => setTimeout(() => window.print(), 50)}
+          style={{ ...btnStyle, marginLeft: 8 }}
+          className="screen-only"
+          title="Print visible rows"
+        >
+          🖨️ Print
+        </button>
+
         <div style={entriesStyle}>Total entries: {filtered.length}</div>
       </div>
 
-      <AuditsTable
-        rows={filtered}
-        onCellEdit={onCellEdit}
-        caOptions={caOptions}
-        accountantOptions={accountantOptions}
-        year={currentYear}
-      />
+      {/* --- PRINTABLE AREA --- */}
+      <div id="audits-printable">
+        {/* Print header (shows only on print) */}
+        <div className="print-only" style={{ margin: '0 0 12px 0' }}>
+          <div style={{ fontWeight: 700, fontSize: 16 }}>Audit Register</div>
+          <div style={{ fontSize: 12 }}>
+            AY: {currentYear} • Printed: {new Date().toLocaleString('en-IN')}
+            {search?.trim() ? ` • Filter: "${search.trim()}"` : ''}
+          </div>
+        </div>
 
+        <AuditsTable
+          rows={filtered}
+          onCellEdit={onCellEdit}
+          caOptions={caOptions}
+          accountantOptions={accountantOptions}
+          year={currentYear}
+        />
+      </div>
+
+      {/* dialogs (won't print) */}
       <AuditsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onSubmit={handleDialogSubmit}
         caOptions={caOptions}
+        accountantOptions={accountantOptions}
       />
-
       <DeleteAuditDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
