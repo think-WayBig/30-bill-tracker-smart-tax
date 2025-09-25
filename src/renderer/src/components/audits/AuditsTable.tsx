@@ -58,14 +58,35 @@ const AuditsTable: React.FC<Props> = ({
   accountantOptions = [],
   caOptions = []
 }) => {
-  const [sortAsc, setSortAsc] = React.useState<boolean | null>(null) // null = no sort, true = asc, false = desc
+  const [sortKey, setSortKey] = React.useState<'name' | 'sentOn' | null>(null)
+  const [sortAsc, setSortAsc] = React.useState<boolean>(true) // used only for name
 
   const sortedRows = React.useMemo(() => {
-    if (sortAsc === null) return rows
-    return [...rows].sort((a, b) =>
-      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    )
-  }, [rows, sortAsc])
+    if (sortKey === null) return rows
+
+    const copy = [...rows]
+
+    if (sortKey === 'name') {
+      copy.sort((a, b) => (sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)))
+      return copy
+    }
+
+    // sortKey === 'sentOn' → empty first, then newest → oldest
+    copy.sort((a, b) => {
+      const aVal = a.accounts?.[year]?.sentOn ?? ''
+      const bVal = b.accounts?.[year]?.sentOn ?? ''
+      const aEmpty = aVal.trim() === ''
+      const bEmpty = bVal.trim() === ''
+      if (aEmpty && !bEmpty) return -1
+      if (!aEmpty && bEmpty) return 1
+      if (aEmpty && bEmpty) return 0
+      // both non-empty: compare as dates (YYYY-MM-DD)
+      const aTime = Date.parse(aVal)
+      const bTime = Date.parse(bVal)
+      return bTime - aTime // newer first
+    })
+    return copy
+  }, [rows, sortKey, sortAsc, year])
 
   const stats = React.useMemo(() => {
     let sentOn = 0
@@ -179,12 +200,24 @@ const AuditsTable: React.FC<Props> = ({
             <th style={labelsThStyle}>PAN</th>
             <th
               style={{ ...labelsThStyle, cursor: 'pointer' }}
-              onClick={() => setSortAsc((prev) => (prev === null ? true : !prev))}
+              onClick={() => {
+                setSortKey((k) => {
+                  if (k === 'name') setSortAsc((asc) => !asc)
+                  else setSortAsc(true)
+                  return 'name'
+                })
+              }}
             >
-              Name {sortAsc === null ? '' : sortAsc ? '🔼' : '🔽'}
+              Name {sortKey === 'name' ? (sortAsc ? '🔼' : '🔽') : ''}
             </th>
             <th style={labelsThStyle}>Sent To CA</th>
-            <th style={labelsThStyle}>Sent On</th>
+            <th
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
+              onClick={() => setSortKey((k) => (k === 'sentOn' ? null : 'sentOn'))}
+              title="Empty dates first, then newest → oldest"
+            >
+              Sent On {sortKey === 'sentOn' ? '↓' : ''}
+            </th>
             <th style={labelsThStyle}>Received On</th>
             <th style={labelsThStyle}>Date of Upload</th>
             <th style={labelsThStyle}>ITR Filed On</th>
