@@ -293,7 +293,12 @@ export const StatementsTable: React.FC<Props> = ({
                   <td
                     key={key}
                     colSpan={2}
-                    style={{ padding: 8, paddingLeft: 12, fontWeight: 600 }}
+                    style={{
+                      padding: 8,
+                      paddingLeft: 12,
+                      fontWeight: 600,
+                      textAlign: 'end'
+                    }}
                   >
                     Credits: {countCredits} &nbsp;&nbsp; Debits: {countDebits}
                   </td>
@@ -320,7 +325,7 @@ export const StatementsTable: React.FC<Props> = ({
                   </td>
                 )
               }
-              if (key === 'closing') {
+              if (key === 'deposit') {
                 return (
                   <td
                     key={key}
