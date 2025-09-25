@@ -58,12 +58,25 @@ const AuditsTable: React.FC<Props> = ({
   accountantOptions = [],
   caOptions = []
 }) => {
-  const [sortKey, setSortKey] = React.useState<'name' | 'sentOn' | null>(null)
-  const [sortAsc, setSortAsc] = React.useState<boolean>(true) // used only for name
+  type DateField = 'sentOn' | 'receivedOn' | 'dateOfUpload' | 'itrFiledOn'
+
+  const [sortKey, setSortKey] = React.useState<'name' | DateField | null>(null)
+  const [sortAsc, setSortAsc] = React.useState(true) // still used for Name only
+
+  const compareDateField = (a: AuditEntry, b: AuditEntry, field: DateField, yr: number) => {
+    const aVal = a.accounts?.[yr]?.[field] ?? ''
+    const bVal = b.accounts?.[yr]?.[field] ?? ''
+    const aEmpty = aVal.trim() === ''
+    const bEmpty = bVal.trim() === ''
+    if (aEmpty && !bEmpty) return -1
+    if (!aEmpty && bEmpty) return 1
+    if (aEmpty && bEmpty) return 0
+    // both non-empty (YYYY-MM-DD from <input type="date">)
+    return Date.parse(bVal) - Date.parse(aVal) // newer first
+  }
 
   const sortedRows = React.useMemo(() => {
     if (sortKey === null) return rows
-
     const copy = [...rows]
 
     if (sortKey === 'name') {
@@ -71,22 +84,9 @@ const AuditsTable: React.FC<Props> = ({
       return copy
     }
 
-    // sortKey === 'sentOn' → empty first, then newest → oldest
-    copy.sort((a, b) => {
-      const aVal = a.accounts?.[year]?.sentOn ?? ''
-      const bVal = b.accounts?.[year]?.sentOn ?? ''
-      const aEmpty = aVal.trim() === ''
-      const bEmpty = bVal.trim() === ''
-      if (aEmpty && !bEmpty) return -1
-      if (!aEmpty && bEmpty) return 1
-      if (aEmpty && bEmpty) return 0
-      // both non-empty: compare as dates (YYYY-MM-DD)
-      const aTime = Date.parse(aVal)
-      const bTime = Date.parse(bVal)
-      return bTime - aTime // newer first
-    })
+    copy.sort((a, b) => compareDateField(a, b, sortKey as DateField, year))
     return copy
-  }, [rows, sortKey, sortAsc, year])
+  }, [sortKey, rows, sortAsc, year])
 
   const stats = React.useMemo(() => {
     let sentOn = 0
@@ -218,9 +218,30 @@ const AuditsTable: React.FC<Props> = ({
             >
               Sent On {sortKey === 'sentOn' ? '↓' : ''}
             </th>
-            <th style={labelsThStyle}>Received On</th>
-            <th style={labelsThStyle}>Date of Upload</th>
-            <th style={labelsThStyle}>ITR Filed On</th>
+
+            <th
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
+              onClick={() => setSortKey((k) => (k === 'receivedOn' ? null : 'receivedOn'))}
+              title="Empty dates first, then newest → oldest"
+            >
+              Received On {sortKey === 'receivedOn' ? '↓' : ''}
+            </th>
+
+            <th
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
+              onClick={() => setSortKey((k) => (k === 'dateOfUpload' ? null : 'dateOfUpload'))}
+              title="Empty dates first, then newest → oldest"
+            >
+              Date of Upload {sortKey === 'dateOfUpload' ? '↓' : ''}
+            </th>
+
+            <th
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
+              onClick={() => setSortKey((k) => (k === 'itrFiledOn' ? null : 'itrFiledOn'))}
+              title="Empty dates first, then newest → oldest"
+            >
+              ITR Filed On {sortKey === 'itrFiledOn' ? '↓' : ''}
+            </th>
             <th style={labelsThStyle}>Last Year Fee</th>
             <th style={labelsThStyle}>Fee</th>
             <th style={labelsThStyle}>Fee Date</th>
