@@ -10,6 +10,8 @@ import GstTds from './gstTds/GstTds'
 import CurrentStatements from './current_statements/Statements'
 import SavingsStatements from './savings_statements/Statements'
 import Audits from './audits/Audits'
+import CurrentStatementsSummary from './current_statements/StatementsSummary'
+import SavingsStatementsSummary from './savings_statements/StatementsSummary'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -24,6 +26,15 @@ const MainView = () => {
   useEffect(() => {
     localStorage.setItem('activeScreen', activeScreen)
   }, [activeScreen])
+
+  useEffect(() => {
+    const onNavigate = (e: Event) => {
+      const screen = (e as CustomEvent).detail?.screen
+      if (typeof screen === 'string') setActiveScreen(screen)
+    }
+    window.addEventListener('app:navigate', onNavigate as EventListener)
+    return () => window.removeEventListener('app:navigate', onNavigate as EventListener)
+  }, [])
 
   const isBillingScreen = activeScreen.startsWith('billing')
   const isBookScreen =
@@ -47,6 +58,8 @@ const MainView = () => {
         {activeScreen === 'excel' && <CurrentStatements />}
         {activeScreen === 'excel2' && <SavingsStatements />}
         {activeScreen === 'audits' && <Audits />}
+        {activeScreen === 'current-statements-summary' && <CurrentStatementsSummary />}
+        {activeScreen === 'savings-statements-summary' && <SavingsStatementsSummary />}
       </div>
     </div>
   )

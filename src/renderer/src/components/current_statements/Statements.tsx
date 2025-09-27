@@ -331,6 +331,23 @@ const Statements: React.FC = () => {
         <button
           type="button"
           onClick={() => {
+            const screen = 'current-statements-summary' // matches MainView
+            localStorage.setItem('activeScreen', screen)
+            window.dispatchEvent(new Event('statements:page-change')) // if you use it for accent refresh
+            window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
+          }}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          aria-label="Open statements summary"
+          title="Open statements summary"
+        >
+          📊 Summary
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             // optional: lock edits for cleaner print
             if (editMode) setEditMode(false)
             // wait a tick if you just toggled edit mode
