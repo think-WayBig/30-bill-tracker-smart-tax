@@ -150,6 +150,23 @@ export const StatementsTable: React.FC<Props> = ({
       .slice(0, 200)
   }, [rows])
 
+  const normalizeChq = (s?: string) => (s ?? '').toString().replace(/\s+/g, '').toUpperCase()
+
+  const dupFlags = useMemo(() => {
+    // count normalized chqNos
+    const counts = new Map<string, number>()
+    for (const r of filtered) {
+      const key = normalizeChq(r.chqNo)
+      if (!key) continue
+      counts.set(key, (counts.get(key) || 0) + 1)
+    }
+    // flag rows where count > 1
+    return filtered.map((r) => {
+      const key = normalizeChq(r.chqNo)
+      return !!key && (counts.get(key) || 0) > 1
+    })
+  }, [filtered])
+
   if (!rows.length) {
     return (
       <div style={tableEmptyStyle}>No data yet. Import an Excel file to see and edit rows.</div>
@@ -213,7 +230,13 @@ export const StatementsTable: React.FC<Props> = ({
 
         <tbody>
           {filtered.map((row, rowIndex) => (
-            <tr key={rowIndex} style={tableRowStyle(rowIndex)}>
+            <tr
+              key={rowIndex}
+              className={dupFlags[rowIndex] ? 'dupe-row' : undefined}
+              style={{
+                ...tableRowStyle(rowIndex)
+              }}
+            >
               {HEADERS.map((key) => {
                 const isLocked =
                   !editMode &&

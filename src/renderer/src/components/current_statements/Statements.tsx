@@ -286,6 +286,34 @@ const Statements: React.FC = () => {
             background: #f9fafb;
           }
         }
+
+       /* screen: bold red text, keep row background unchanged */
+        .dupe-row td {
+          background: transparent !important;      /* override any prior fill */
+          color: #b91c1c !important;               /* red-700 */
+          font-weight: 700 !important;
+        }
+
+        /* also color text inside inputs/areas */
+        .dupe-row td input,
+        .dupe-row td textarea {
+          color: #b91c1c !important;
+          font-weight: 700 !important;
+        }
+
+        /* print: same effect in the printable area */
+        @media print {
+          #printable .dupe-row td {
+            background: transparent !important;
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+          }
+          #printable .dupe-row td input,
+          #printable .dupe-row td textarea {
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+          }
+        }
       `}</style>
       <SectionHeader
         title="Current Statements"
