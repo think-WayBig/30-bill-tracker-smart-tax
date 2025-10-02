@@ -93,6 +93,7 @@ declare global {
     fee?: number
     feeDate?: string
     accountant?: string
+    dscExpiry?: string
   }
 
   interface AuditEntry {

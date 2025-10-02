@@ -30,6 +30,7 @@ const COLUMN_WIDTHS: Record<string, string> = {
   lastYearFee: '10%',
   fee: '10%',
   feeDate: '150px',
+  dscExpiry: '150px',
   accountant: '160px'
 }
 
@@ -185,6 +186,7 @@ const AuditsTable: React.FC<Props> = ({
           <col style={{ width: COLUMN_WIDTHS.lastYearFee }} />
           <col style={{ width: COLUMN_WIDTHS.fee }} />
           <col style={{ width: COLUMN_WIDTHS.feeDate }} />
+          <col style={{ width: COLUMN_WIDTHS.dscExpiry }} />
           <col style={{ width: COLUMN_WIDTHS.accountant }} />
         </colgroup>
 
@@ -199,6 +201,7 @@ const AuditsTable: React.FC<Props> = ({
             <th style={summaryThStyle}>Count: {stats.itrFiledOn}</th>
             <th style={summaryThStyle}>Total: {stats.lastYearFeeTotal}</th>
             <th style={summaryThStyle}>Total: {stats.feeTotal}</th>
+            <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
           </tr>
@@ -251,6 +254,7 @@ const AuditsTable: React.FC<Props> = ({
             <th style={labelsThStyle}>Last Year Fee</th>
             <th style={labelsThStyle}>Fee</th>
             <th style={labelsThStyle}>Fee Date</th>
+            <th style={labelsThStyle}>DSC Expiry</th>
             <th style={labelsThStyle}>Accountant</th>
           </tr>
         </thead>
@@ -258,7 +262,7 @@ const AuditsTable: React.FC<Props> = ({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={11} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
+              <td colSpan={12} style={{ ...tdStyle, textAlign: 'center', color: '#6b7280' }}>
                 No data available
               </td>
             </tr>
@@ -377,6 +381,17 @@ const AuditsTable: React.FC<Props> = ({
                       style={inputStyle}
                     />
                     <span className="print-value">{emptyValue(acc.feeDate)}</span>
+                  </td>
+
+                  {/* DSC Expiry */}
+                  <td style={tdStyle}>
+                    <input
+                      type="date"
+                      value={acc.dscExpiry ?? ''}
+                      onChange={(e) => onCellEdit(r.pan, 'dscExpiry', e.target.value)}
+                      style={inputStyle}
+                    />
+                    <span className="print-value">{emptyValue(acc.dscExpiry)}</span>
                   </td>
 
                   {/* Accountant */}
