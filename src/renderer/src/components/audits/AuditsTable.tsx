@@ -20,18 +20,18 @@ const ACCOUNTANT_DATALIST_ID = 'audit-accountant-options'
 
 // percentage widths so table spans 100%
 const COLUMN_WIDTHS: Record<string, string> = {
-  pan: '5%',
   name: '15%',
-  sentToCA: '10%',
-  sentOn: '10%',
-  receivedOn: '10%',
-  dateOfUpload: '10%',
-  itrFiledOn: '10%',
-  lastYearFee: '10%',
-  fee: '10%',
-  feeDate: '150px',
-  dscExpiry: '150px',
-  accountant: '160px'
+  sentToCA: '13%',
+  sentOn: '13%',
+  receivedOn: '13%',
+  dateOfUpload: '13%',
+  itrFiledOn: '13%',
+  lastYearFee: '13%',
+  fee: '14%',
+  feeDate: '160px',
+  dscExpiry: '160px',
+  accountant: '170px',
+  pan: '10%'
 }
 
 const SUMMARY_H = 40 // px; tweak to match your th height
@@ -65,7 +65,7 @@ const AuditsTable: React.FC<Props> = ({
   accountantOptions = [],
   caOptions = []
 }) => {
-  type DateField = 'sentOn' | 'receivedOn' | 'dateOfUpload' | 'itrFiledOn'
+  type DateField = 'sentOn' | 'receivedOn' | 'dateOfUpload' | 'itrFiledOn' | 'dscExpiry'
 
   const [sortKey, setSortKey] = React.useState<'name' | DateField | null>(null)
   const [sortAsc, setSortAsc] = React.useState(true) // still used for Name only
@@ -153,7 +153,7 @@ const AuditsTable: React.FC<Props> = ({
   }, [])
 
   return (
-    <div className="audits-scroll" style={{ overflow: 'auto', width: '100%', maxHeight: '85vh' }}>
+    <div className="audits-scroll" style={{ overflow: 'auto', maxHeight: '85vh' }}>
       <datalist id={NAME_CA_DATALIST_ID}>
         {caOptions.map((n) => (
           <option key={n} value={n} />
@@ -169,14 +169,13 @@ const AuditsTable: React.FC<Props> = ({
       <table
         style={{
           borderCollapse: 'collapse',
-          width: '100%',
+          width: '135%',
           minWidth: '1350px',
           background: '#fff',
           tableLayout: 'fixed'
         }}
       >
         <colgroup>
-          <col style={{ width: COLUMN_WIDTHS.pan }} />
           <col style={{ width: COLUMN_WIDTHS.name }} />
           <col style={{ width: COLUMN_WIDTHS.sentToCA }} />
           <col style={{ width: COLUMN_WIDTHS.sentOn }} />
@@ -188,11 +187,11 @@ const AuditsTable: React.FC<Props> = ({
           <col style={{ width: COLUMN_WIDTHS.feeDate }} />
           <col style={{ width: COLUMN_WIDTHS.dscExpiry }} />
           <col style={{ width: COLUMN_WIDTHS.accountant }} />
+          <col style={{ width: COLUMN_WIDTHS.pan }} />
         </colgroup>
 
         <thead>
           <tr>
-            <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
             <th style={summaryThStyle}>Count: {stats.sentOn}</th>
@@ -204,9 +203,9 @@ const AuditsTable: React.FC<Props> = ({
             <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
             <th style={summaryThStyle}></th>
+            <th style={summaryThStyle}></th>
           </tr>
           <tr>
-            <th style={labelsThStyle}>PAN</th>
             <th
               style={{ ...labelsThStyle, cursor: 'pointer' }}
               onClick={() => {
@@ -254,8 +253,15 @@ const AuditsTable: React.FC<Props> = ({
             <th style={labelsThStyle}>Last Year Fee</th>
             <th style={labelsThStyle}>Fee</th>
             <th style={labelsThStyle}>Fee Date</th>
-            <th style={labelsThStyle}>DSC Expiry</th>
+            <th
+              style={{ ...labelsThStyle, cursor: 'pointer' }}
+              onClick={() => setSortKey((k) => (k === 'dscExpiry' ? null : 'dscExpiry'))}
+              title="Empty dates first, then newest → oldest"
+            >
+              DSC Expiry {sortKey === 'dscExpiry' ? '↓' : ''}
+            </th>
             <th style={labelsThStyle}>Accountant</th>
+            <th style={labelsThStyle}>PAN</th>
           </tr>
         </thead>
 
@@ -271,16 +277,6 @@ const AuditsTable: React.FC<Props> = ({
               const acc = r.accounts[year] || {}
               return (
                 <tr key={r.pan} className="hoverable-row">
-                  <td
-                    style={{
-                      ...tdStyle,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {r.pan}
-                  </td>
                   <td
                     className="name-col"
                     style={{
@@ -404,6 +400,16 @@ const AuditsTable: React.FC<Props> = ({
                       style={inputStyle}
                     />
                     <span className="print-value">{emptyValue(getDisplayAccountant(r, year))}</span>
+                  </td>
+                  <td
+                    style={{
+                      ...tdStyle,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {r.pan}
                   </td>
                 </tr>
               )
