@@ -119,6 +119,7 @@ export const StatementsTable: React.FC<Props> = ({
           (r) =>
             (r.name ?? '').toLowerCase().includes(lcQuery) ||
             (r.narration ?? '').toLowerCase().includes(lcQuery) ||
+            (r.chqNo ?? '').toLowerCase().includes(lcQuery) ||
             (r.withdrawal ?? '').toLowerCase().includes(lcQuery) ||
             (r.deposit ?? '').toLowerCase().includes(lcQuery) ||
             (r.closing ?? '').toLowerCase().includes(lcQuery) ||
