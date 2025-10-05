@@ -99,7 +99,7 @@ const StatementsSummary: React.FC = () => {
 
   useEffect(() => {
     ;(async () => {
-      const r = await window.electronAPI.loadStatements2()
+      const r = await window.electronAPI.loadStatements3()
       setRows(r ?? [])
     })()
   }, [])
