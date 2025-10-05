@@ -40,6 +40,37 @@ type SaveTimers = Map<string, number> // rowId -> timeout id
 const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
+  const rawSelected = localStorage.getItem('selectedYear')!
+
+  let startYear: number, endYear: number
+
+  if (rawSelected.includes('-')) {
+    const [a, b] = rawSelected.split('-').map((s) => s.trim())
+    startYear = Number(a.length === 2 ? `20${a}` : a)
+    endYear = Number(b.length === 2 ? `20${b}` : b)
+  } else {
+    // if only one year like "2026", assume FY starts that April → next March
+    const y = Number(rawSelected.length === 2 ? `20${rawSelected}` : rawSelected)
+    startYear = y
+    endYear = y + 1
+  }
+
+  // Financial year range
+  const startDate = new Date(`${startYear}-04-01`)
+  const endDate = new Date(`${endYear}-03-31`)
+
+  const filteredData = fileData.filter((row) => {
+    if (!row.date) return false
+
+    // date format is DD/MM/YY
+    const [day, month, year] = row.date.split('/').map((v) => v.trim())
+    const fullYear = year.length === 2 ? Number(`20${year}`) : Number(year)
+
+    // build valid Date (YYYY-MM-DD)
+    const date = new Date(`${fullYear}-${month}-${day}`)
+
+    return date >= startDate && date <= endDate
+  })
 
   // Temporary preview before Save
   const [previewData, setPreviewData] = useState<string[][]>([])
@@ -162,7 +193,7 @@ const Statements: React.FC = () => {
   }
 
   return (
-    <Layout title="🏦 Manage Bank Statements" hideAssessmentYear>
+    <Layout title="🏦 Manage Bank Statements">
       <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
@@ -433,7 +464,7 @@ const Statements: React.FC = () => {
         </div>
         {fileData.length > 0 && (
           <StatementsTable
-            rows={fileData}
+            rows={filteredData}
             onCellEdit={handleCellEdit}
             onRowDelete={handleDeleteRow}
             query={query}

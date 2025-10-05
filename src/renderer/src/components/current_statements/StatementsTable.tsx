@@ -62,7 +62,7 @@ const placeholderFor = (key: HeaderKeys): string => {
 }
 
 const COLUMN_WIDTHS: Partial<Record<keyof BankStatementRow, number | string>> = {
-  date: 100,
+  date: 120,
   narration: 360,
   chqNo: 180,
   valueDt: 120,
