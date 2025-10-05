@@ -18,9 +18,12 @@ const COLLAPSED_W = 56
 const PURPLE = '#4f46e5'
 const TDS_ACCENT = '#038260ff'
 const SAVING_STATEMENTS_ACCENT = '#d35f00ff'
+const PERSONAL_STATEMENTS_ACCENT = '#d30043ff'
 const getTaxesAccent = () => {
   if (localStorage.getItem('activeScreen') === 'excel2') {
     return SAVING_STATEMENTS_ACCENT
+  } else if (localStorage.getItem('activeScreen') === 'excel3') {
+    return PERSONAL_STATEMENTS_ACCENT
   } else if (localStorage.getItem('taxes.activeTab') === 'TDS') {
     return TDS_ACCENT
   } else {
@@ -245,6 +248,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       {renderButton('taxes', 'GST/TDS', '📝', false, false, taxesAccent)}
       {renderButton('excel', 'Current Statements', '🏦')}
       {renderButton('excel2', 'Savings Statements', '🏦', false, false, statementsAccent)}
+      {renderButton('excel3', 'Personal Statements', '🏦', false, false, statementsAccent)}
       {renderButton('audits', 'Audits', '📝')}
 
       <div style={{ marginTop: 'auto', width: '100%' }}>

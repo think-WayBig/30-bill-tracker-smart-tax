@@ -1183,6 +1183,96 @@ ipcMain.handle('delete-statement2', async (_event, id: string) => {
 })
 
 /** ==================
+ * For Personal Account
+ *  ==================
+ */
+
+const getStatements3Path = () => {
+  const dir = path.join(app.getPath('userData'), 'data')
+  const filePath = path.join(dir, 'personal_statements.json')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return filePath
+}
+
+// Create / Save Statement
+ipcMain.handle('save-statement3', async (_event, statement: Omit<BankStatementRow, 'id'>) => {
+  try {
+    const filePath = getStatements3Path()
+    const existing: BankStatementRow[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    const newStatement: BankStatementRow = { ...statement, id: uuidv4() }
+    existing.push(newStatement)
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    return { success: true, data: newStatement }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Read / Load all Statements
+ipcMain.handle('load-statements3', async () => {
+  try {
+    const filePath = getStatements3Path()
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Failed to load statements:', error)
+    return []
+  }
+})
+
+// Update Statement
+ipcMain.handle('update-statement3', async (_event, updated: BankStatementRow) => {
+  try {
+    const filePath = getStatements3Path()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Statements file not found.' }
+    }
+
+    const existing: BankStatementRow[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+
+    const index = existing.findIndex((s) => s.id === updated.id)
+    if (index === -1) {
+      return { success: false, error: 'Statement not found.' }
+    }
+
+    existing[index] = { ...existing[index], ...updated }
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
+
+    return { success: true, data: existing[index] }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+// Delete Statement
+ipcMain.handle('delete-statement3', async (_event, id: string) => {
+  try {
+    const filePath = getStatements3Path()
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Statements file not found.' }
+    }
+
+    const existing: BankStatementRow[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    const before = existing.length
+    const filtered = existing.filter((s) => s.id !== id)
+
+    if (filtered.length === before) {
+      return { success: false, error: 'Statement not found.' }
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(filtered, null, 2))
+    return { success: true, removed: before - filtered.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})
+
+/** ==================
  * Audits (Audit Case Entries)
  * ==================
  */

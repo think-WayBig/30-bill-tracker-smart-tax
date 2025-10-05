@@ -194,7 +194,7 @@ const Statements: React.FC = () => {
   }
 
   return (
-    <Layout title="🏦 Manage Bank Statements" hideAssessmentYear color="#d35f00ff">
+    <Layout title="🏦 Manage Bank Statements" financialYear color="#d35f00ff">
       <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }

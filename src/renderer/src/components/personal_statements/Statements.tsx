@@ -40,6 +40,7 @@ type SaveTimers = Map<string, number> // rowId -> timeout id
 const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
+
   const rawSelected = localStorage.getItem('selectedYear')!
 
   let startYear: number, endYear: number
@@ -85,7 +86,7 @@ const Statements: React.FC = () => {
 
   useEffect(() => {
     ;(async () => {
-      const rows = await window.electronAPI.loadStatements()
+      const rows = await window.electronAPI.loadStatements3()
       setFileData(rows ?? [])
     })()
   }, [])
@@ -121,7 +122,7 @@ const Statements: React.FC = () => {
       // save each row
       const rows = toRows(updated)
       for (const row of rows) {
-        await window.electronAPI.saveStatement({
+        await window.electronAPI.saveStatement3({
           date: row.date,
           narration: row.narration,
           chqNo: row.chqNo,
@@ -134,7 +135,7 @@ const Statements: React.FC = () => {
         })
       }
 
-      const saved = await window.electronAPI.loadStatements()
+      const saved = await window.electronAPI.loadStatements3()
       setFileData(saved ?? [])
 
       setPreviewData([])
@@ -155,7 +156,7 @@ const Statements: React.FC = () => {
 
     const t = window.setTimeout(async () => {
       try {
-        await window.electronAPI.updateStatement(row)
+        await window.electronAPI.updateStatement3(row)
       } catch (e: any) {
         console.error(e)
         alert(`❌ Failed to save change for row ${id}: ${e?.message || e}`)
@@ -181,7 +182,7 @@ const Statements: React.FC = () => {
 
   const handleDeleteRow = async (rowId: string) => {
     try {
-      const res = await window.electronAPI.deleteStatement(rowId)
+      const res = await window.electronAPI.deleteStatement3(rowId)
       if (!res?.success) {
         alert(`❌ Failed to delete: ${res?.error || 'Unknown error'}`)
         return
@@ -193,7 +194,7 @@ const Statements: React.FC = () => {
   }
 
   return (
-    <Layout title="🏦 Manage Bank Statements" financialYear>
+    <Layout title="🏦 Manage Bank Statements" financialYear color="#d30043ff">
       <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
@@ -290,7 +291,7 @@ const Statements: React.FC = () => {
         @media print {
           /* Accent color */
           :root {
-            --accent-color: #4f46e5; /* indigo, can swap with your brand */
+            --accent-color: #90002eff;
           }
 
           /* Header with accent background */
@@ -303,7 +304,7 @@ const Statements: React.FC = () => {
 
           /* Footer with lighter accent */
           #printable tfoot td {
-            background: #eef2ff !important;
+            background: #fff7f1ff !important;
             zoom: 0.9;
           }
 
@@ -347,8 +348,9 @@ const Statements: React.FC = () => {
         }
       `}</style>
       <SectionHeader
-        title="Current Statements"
+        title="Personal Statements"
         description="Import and manage your bank statements by uploading an Excel file."
+        color="#90002eff"
       />
 
       {/* Toolbar */}
@@ -370,8 +372,8 @@ const Statements: React.FC = () => {
           style={{
             ...importBtnStyle,
             background: '#ffff',
-            color: '#6366f1',
-            border: '1px solid #6366f1'
+            color: '#d30043ff',
+            border: '1px solid #d30043ff'
           }}
         >
           {editMode ? '🔒 Lock' : '✏️ Edit'}
@@ -381,8 +383,8 @@ const Statements: React.FC = () => {
           type="button"
           onClick={() => setShowUnnamed((prev) => !prev)}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d30043ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#90002eff')}
         >
           {showUnnamed ? 'Show All' : 'Show Unnamed'}
         </button>
@@ -390,14 +392,14 @@ const Statements: React.FC = () => {
         <button
           type="button"
           onClick={() => {
-            const screen = 'current-statements-summary' // matches MainView
+            const screen = 'savings-statements-summary' // matches MainView
             localStorage.setItem('activeScreen', screen)
             window.dispatchEvent(new Event('statements:page-change')) // if you use it for accent refresh
             window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
           }}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d30043ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#90002eff')}
           aria-label="Open statements summary"
           title="Open statements summary"
         >
@@ -413,8 +415,8 @@ const Statements: React.FC = () => {
             setTimeout(() => window.print(), 50)
           }}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d30043ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#90002eff')}
           className="screen-only"
           aria-label="Print visible rows"
           title="Print visible rows"
@@ -435,8 +437,8 @@ const Statements: React.FC = () => {
           type="button"
           onClick={() => inputRef.current?.click()}
           style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d30043ff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#90002eff')}
         >
           📄 Import
         </button>

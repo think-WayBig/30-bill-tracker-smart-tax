@@ -210,6 +210,21 @@ declare global {
         id: string
       ) => Promise<{ success: boolean; removed?: number; error?: string }>
 
+      // Personal Statements-related APIs
+      saveStatement3: (
+        statement: Omit<BankStatementRow, 'id'>
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      loadStatements3: () => Promise<BankStatementRow[]>
+
+      updateStatement3: (
+        statement: BankStatementRow
+      ) => Promise<{ success: boolean; data?: BankStatementRow; error?: string }>
+
+      deleteStatement3: (
+        id: string
+      ) => Promise<{ success: boolean; removed?: number; error?: string }>
+
       // Audits-related APIs
       saveAudit: (
         entry: AuditEntry

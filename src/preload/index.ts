@@ -222,6 +222,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   findPdfNameByCpin2: (cpin: string, directory: string) =>
     ipcRenderer.invoke('find-pdf-name-by-cpin2', cpin, directory),
 
+  /** Personal Statements Code */
+  saveStatement3: (statement: Omit<BankStatementRow, 'id'>) =>
+    ipcRenderer.invoke('save-statement3', statement),
+
+  loadStatements3: () => ipcRenderer.invoke('load-statements3'),
+
+  updateStatement3: (statement: BankStatementRow) =>
+    ipcRenderer.invoke('update-statement3', statement),
+
+  deleteStatement3: (id: string) => ipcRenderer.invoke('delete-statement3', id),
+
+  findPdfNameByCpin3: (cpin: string, directory: string) =>
+    ipcRenderer.invoke('find-pdf-name-by-cpin3', cpin, directory),
+
   saveAudit: (entry: AuditEntry) => ipcRenderer.invoke('save-audit', entry),
   loadAudits: () => ipcRenderer.invoke('load-audits'),
   updateAudit: (entry: AuditEntry) => ipcRenderer.invoke('update-audit', entry),
