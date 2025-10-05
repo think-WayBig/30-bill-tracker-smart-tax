@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   // deleteBtnStyle,
   tableContainerStyle,
@@ -62,7 +62,7 @@ const placeholderFor = (key: HeaderKeys): string => {
 }
 
 const COLUMN_WIDTHS: Partial<Record<keyof BankStatementRow, number | string>> = {
-  date: 100,
+  date: 120,
   narration: 360,
   chqNo: 180,
   valueDt: 120,
@@ -111,6 +111,21 @@ export const StatementsTable: React.FC<Props> = ({
   setEditingNameRowId,
   query = ''
 }) => {
+  const [dateSortDir, setDateSortDir] = useState<'asc' | 'desc'>('asc') // default asc
+
+  const parseDMY = (s?: string): number => {
+    if (!s) return NaN
+    // eslint-disable-next-line no-useless-escape
+    const parts = s.split(/[\/.-]/).map((t) => t.trim())
+    if (parts.length < 3) return NaN
+    const d = Number(parts[0])
+    const m = Number(parts[1])
+    const yy = parts[2]
+    const y = yy.length === 2 ? Number(`20${yy}`) : Number(yy)
+    const dt = new Date(y, m - 1, d)
+    return isNaN(dt.getTime()) ? NaN : dt.getTime()
+  }
+
   const lcQuery = query.trim().toLowerCase()
 
   const filtered = useMemo(() => {
@@ -135,8 +150,18 @@ export const StatementsTable: React.FC<Props> = ({
       })
     }
 
-    return res
-  }, [rows, lcQuery, showUnnamed, editingNameRowId])
+    const sorted = [...res].sort((a, b) => {
+      const ta = parseDMY(a.date)
+      const tb = parseDMY(b.date)
+      // push invalid to bottom
+      if (isNaN(ta) && isNaN(tb)) return 0
+      if (isNaN(ta)) return 1
+      if (isNaN(tb)) return -1
+      return dateSortDir === 'asc' ? ta - tb : tb - ta
+    })
+
+    return sorted
+  }, [rows, lcQuery, showUnnamed, editingNameRowId, dateSortDir])
 
   // Unique names, computed once per rows change
   const nameOptions = useMemo(() => {
@@ -221,8 +246,31 @@ export const StatementsTable: React.FC<Props> = ({
         <thead>
           <tr style={{ background: '#e06100ff', color: '#fff' }}>
             {HEADERS.map((h) => (
-              <th key={h} style={tableHeaderStyle}>
+              <th
+                key={h}
+                style={{
+                  ...tableHeaderStyle,
+                  cursor: h === 'date' ? 'pointer' : 'default',
+                  userSelect: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={
+                  h === 'date'
+                    ? () => setDateSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+                    : undefined
+                }
+                title={
+                  h === 'date'
+                    ? `Sort ${dateSortDir === 'asc' ? 'descending' : 'ascending'}`
+                    : undefined
+                }
+              >
                 {label(h)}
+                {h === 'date' && (
+                  <span style={{ marginLeft: 6, fontSize: 12 }}>
+                    {dateSortDir === 'asc' ? '🔼' : '🔽'}
+                  </span>
+                )}
               </th>
             ))}
             {/* <th style={tableHeaderStyle}>Actions</th> */}
