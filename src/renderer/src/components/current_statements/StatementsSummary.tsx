@@ -97,6 +97,46 @@ const StatementsSummary: React.FC = () => {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const printBtnRef = useRef<HTMLButtonElement>(null)
 
+  const selected = localStorage.getItem('selectedYear')!
+  const toFull = (y: string) => (y.length === 2 ? Number(`20${y}`) : Number(y))
+
+  let startYear: number, endYear: number
+  if (selected.includes('-')) {
+    const [a, b] = selected.split('-').map((s) => s.trim())
+    startYear = toFull(a)
+    endYear = toFull(b)
+  } else {
+    const y = selected ? toFull(selected) : new Date().getFullYear()
+    startYear = y
+    endYear = y + 1
+  }
+
+  const startTs = new Date(startYear, 3, 1).getTime() // 01-Apr startYear
+  const endTs = new Date(endYear, 2, 31, 23, 59, 59, 999).getTime() // 31-Mar endYear
+
+  // strict DD/MM/YY | DD/MM/YYYY -> timestamp, reject rollovers like 31/04/25
+  const parseDMYStrict = (s?: string): number => {
+    if (!s) return NaN
+    // eslint-disable-next-line no-useless-escape
+    const m = s.trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/)
+    if (!m) return NaN
+    const d = Number(m[1]),
+      mo = Number(m[2])
+    const y = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3])
+    const dt = new Date(y, mo - 1, d)
+    return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d
+      ? dt.getTime()
+      : NaN
+  }
+
+  // rows limited to selected FY
+  const rowsFY = React.useMemo(() => {
+    return rows.filter((r) => {
+      const ts = parseDMYStrict(r.date)
+      return !Number.isNaN(ts) && ts >= startTs && ts <= endTs
+    })
+  }, [rows, startTs, endTs])
+
   useEffect(() => {
     ;(async () => {
       const r = await window.electronAPI.loadStatements()
@@ -106,7 +146,9 @@ const StatementsSummary: React.FC = () => {
 
   const data: SummaryRow[] = useMemo(() => {
     const map = new Map<string, SummaryRow>()
-    for (const r of rows) {
+    // for (const r of rows) {   // ❌ old
+    for (const r of rowsFY) {
+      // ✅ only rows in selected FY
       const key = (r.name?.trim() || '(Unnamed)').toString()
       const dep = parseAmount(r.deposit)
       const wit = parseAmount(r.withdrawal)
@@ -131,21 +173,21 @@ const StatementsSummary: React.FC = () => {
 
     let list = Array.from(map.values())
 
-    // filter
+    // filter by search
     const q = query.trim().toLowerCase()
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q))
 
     // sort
     list.sort((a, b) => {
-      const A = a[sortKey]
-      const B = b[sortKey]
+      const A = a[sortKey] as any,
+        B = b[sortKey] as any
       if (A < B) return sortDir === 'asc' ? -1 : 1
       if (A > B) return sortDir === 'asc' ? 1 : -1
       return 0
     })
 
     return list
-  }, [rows, query, sortKey, sortDir])
+  }, [rowsFY, query, sortKey, sortDir])
 
   const toggleSort = (key: keyof SummaryRow) => {
     if (key === sortKey) {
@@ -157,7 +199,7 @@ const StatementsSummary: React.FC = () => {
   }
 
   return (
-    <Layout title="📊 Statements Summary" hideAssessmentYear color="#6366f1">
+    <Layout title="📊 Statements Summary" color="#6366f1">
       <style>{`
         :root {
           --accent: #6366f1;
@@ -291,7 +333,7 @@ const StatementsSummary: React.FC = () => {
 
       <SectionHeader
         title="Summary by Name"
-        description="Counts and totals aggregated across all statements."
+        description={`Financial Year: 01/04/${startYear} - 31/03/${endYear}`}
         color="#6366f1"
       />
 

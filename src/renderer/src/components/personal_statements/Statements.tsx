@@ -392,7 +392,7 @@ const Statements: React.FC = () => {
         <button
           type="button"
           onClick={() => {
-            const screen = 'savings-statements-summary' // matches MainView
+            const screen = 'personal-statements-summary' // matches MainView
             localStorage.setItem('activeScreen', screen)
             window.dispatchEvent(new Event('statements:page-change')) // if you use it for accent refresh
             window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))

@@ -67,7 +67,7 @@ const sumColor = (val: number): React.CSSProperties => ({
 
 const toolbarBtn: React.CSSProperties = {
   appearance: 'none',
-  background: '#ff7403ff',
+  background: '#d30043ff',
   color: '#fff',
   border: 0,
   borderRadius: 8,
@@ -104,9 +104,51 @@ const StatementsSummary: React.FC = () => {
     })()
   }, [])
 
+  const selected = localStorage.getItem('selectedYear')!
+  const toFull = (y: string) => (y.length === 2 ? Number(`20${y}`) : Number(y))
+
+  let startYear: number, endYear: number
+  if (selected.includes('-')) {
+    const [a, b] = selected.split('-').map((s) => s.trim())
+    startYear = toFull(a)
+    endYear = toFull(b)
+  } else {
+    const y = selected ? toFull(selected) : new Date().getFullYear()
+    startYear = y
+    endYear = y + 1
+  }
+
+  const startTs = new Date(startYear, 3, 1).getTime() // 01-Apr startYear
+  const endTs = new Date(endYear, 2, 31, 23, 59, 59, 999).getTime() // 31-Mar endYear
+
+  // strict DD/MM/YY | DD/MM/YYYY -> timestamp, reject rollovers like 31/04/25
+  const parseDMYStrict = (s?: string): number => {
+    if (!s) return NaN
+    // eslint-disable-next-line no-useless-escape
+    const m = s.trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/)
+    if (!m) return NaN
+    const d = Number(m[1]),
+      mo = Number(m[2])
+    const y = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3])
+    const dt = new Date(y, mo - 1, d)
+    return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d
+      ? dt.getTime()
+      : NaN
+  }
+
+  // rows limited to selected FY
+  const rowsFY = React.useMemo(() => {
+    return rows.filter((r) => {
+      const ts = parseDMYStrict(r.date)
+      return !Number.isNaN(ts) && ts >= startTs && ts <= endTs
+    })
+  }, [rows, startTs, endTs])
+
   const data: SummaryRow[] = useMemo(() => {
     const map = new Map<string, SummaryRow>()
-    for (const r of rows) {
+    // for (const r of rows) {   // ❌ old
+    for (const r of rowsFY) {
+      // ✅ only rows in selected FY
       const key = (r.name?.trim() || '(Unnamed)').toString()
       const dep = parseAmount(r.deposit)
       const wit = parseAmount(r.withdrawal)
@@ -131,21 +173,21 @@ const StatementsSummary: React.FC = () => {
 
     let list = Array.from(map.values())
 
-    // filter
+    // filter by search
     const q = query.trim().toLowerCase()
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q))
 
     // sort
     list.sort((a, b) => {
-      const A = a[sortKey]
-      const B = b[sortKey]
+      const A = a[sortKey] as any,
+        B = b[sortKey] as any
       if (A < B) return sortDir === 'asc' ? -1 : 1
       if (A > B) return sortDir === 'asc' ? 1 : -1
       return 0
     })
 
     return list
-  }, [rows, query, sortKey, sortDir])
+  }, [rowsFY, query, sortKey, sortDir])
 
   const toggleSort = (key: keyof SummaryRow) => {
     if (key === sortKey) {
@@ -157,14 +199,14 @@ const StatementsSummary: React.FC = () => {
   }
 
   return (
-    <Layout title="📊 Statements Summary" hideAssessmentYear color="#ff7403ff">
+    <Layout title="📊 Statements Summary" color="#d30043ff">
       <style>{`
         :root {
-          --accent: #ff7403ff;
-          --border: #e5e7eb;
-          --bg: #fff7f1;           /* soft header bg on screen */
-          --bg-hover: #fff2e6;     /* row hover */
-          --zebra: #f9fafb;        /* zebra stripe */
+          --accent: #d30043ff;
+          --border: #ebe5e6ff;
+          --bg: #fff1f2ff;           /* soft header bg on screen */
+          --bg-hover: #ffe6e9ff;     /* row hover */
+          --zebra: #fbf9f9ff;        /* zebra stripe */
           --text: #111;
         }
 
@@ -241,7 +283,7 @@ const StatementsSummary: React.FC = () => {
           cursor: pointer;
           transition: background .15s ease, transform .05s ease;
         }
-        .screen-only .btn:hover { background: #d35f00ff; }
+        .screen-only .btn:hover { background: #90002eff; }
         .screen-only .btn:active { transform: translateY(1px); }
         .screen-only .btn:focus-visible {
           outline: 2px solid #111; outline-offset: 2px;
@@ -291,8 +333,8 @@ const StatementsSummary: React.FC = () => {
 
       <SectionHeader
         title="Summary by Name"
-        description="Counts and totals aggregated across all statements."
-        color="#ff7403ff"
+        description={`Financial Year: 01/04/${startYear} - 31/03/${endYear}`}
+        color="#d30043ff"
       />
 
       {/* Toolbar */}
@@ -316,8 +358,8 @@ const StatementsSummary: React.FC = () => {
         <button
           type="button"
           style={toolbarBtn}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#90002eff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#d30043ff')}
           onClick={() => window.print()}
           ref={printBtnRef}
           title="Print summary"
@@ -327,8 +369,8 @@ const StatementsSummary: React.FC = () => {
         <button
           type="button"
           style={toolbarBtn}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#d35f00ff')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#ff7403ff')}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#90002eff')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#d30043ff')}
           onClick={() => exportCSV(data)}
           title="Export CSV"
         >
