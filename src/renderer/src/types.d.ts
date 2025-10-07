@@ -82,7 +82,9 @@ declare global {
     closing: string
     name: string
     txnType: string
+    deleted?: boolean
   }
+
   interface YearlyAuditData {
     lastYearFee?: number
     sentToCA?: string

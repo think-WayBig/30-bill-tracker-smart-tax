@@ -29,6 +29,7 @@ const toRows = (data: any[][]): BankStatementRow[] => {
     BANK_HEADERS.forEach((key, idx) => {
       obj[key] = row[idx] != null ? String(row[idx]) : ''
     })
+    obj.deleted = false
     return obj as BankStatementRow
   })
 }
@@ -40,6 +41,8 @@ type SaveTimers = Map<string, number> // rowId -> timeout id
 const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   const rawSelected = localStorage.getItem('selectedYear')!
 
   let startYear: number, endYear: number
@@ -58,19 +61,6 @@ const Statements: React.FC = () => {
   // Financial year range
   const startDate = new Date(`${startYear}-04-01`)
   const endDate = new Date(`${endYear}-03-31`)
-
-  const filteredData = fileData.filter((row) => {
-    if (!row.date) return false
-
-    // date format is DD/MM/YY
-    const [day, month, year] = row.date.split('/').map((v) => v.trim())
-    const fullYear = year.length === 2 ? Number(`20${year}`) : Number(year)
-
-    // build valid Date (YYYY-MM-DD)
-    const date = new Date(`${fullYear}-${month}-${day}`)
-
-    return date >= startDate && date <= endDate
-  })
 
   // Temporary preview before Save
   const [previewData, setPreviewData] = useState<string[][]>([])
@@ -92,6 +82,45 @@ const Statements: React.FC = () => {
 
   const [showUnnamed, setShowUnnamed] = useState(false)
   const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
+
+  const visibleData = fileData
+    .filter((r) => !r.deleted)
+    .filter((row) => {
+      if (!row.date) return false
+      const [day, month, year] = row.date.split('/').map((v) => v.trim())
+      const fullYear = year.length === 2 ? Number(`20${year}`) : Number(year)
+      const date = new Date(`${fullYear}-${month}-${day}`)
+      return date >= startDate && date <= endDate
+    })
+
+  const onToggleRow = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      checked ? next.add(id) : next.delete(id)
+      return next
+    })
+  }
+
+  // When filter changes, drop selections that aren't visible
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const visible = new Set(visibleData.map((r) => r.id))
+      const next = new Set<string>()
+      prev.forEach((id) => {
+        if (visible.has(id)) next.add(id)
+      })
+      return next
+    })
+  }, [])
+
+  const onToggleAll = (checked: boolean, visibleIds: string[]) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (checked) visibleIds.forEach((id) => next.add(id))
+      else visibleIds.forEach((id) => next.delete(id))
+      return next
+    })
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -361,9 +390,7 @@ const Statements: React.FC = () => {
           aria-label="Search bills"
           style={searchBarStyle}
         />
-
         <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
-
         <button
           type="button"
           onClick={() => setEditMode((prev) => !prev)}
@@ -376,7 +403,6 @@ const Statements: React.FC = () => {
         >
           {editMode ? '🔒 Lock' : '✏️ Edit'}
         </button>
-
         <button
           type="button"
           onClick={() => setShowUnnamed((prev) => !prev)}
@@ -386,7 +412,6 @@ const Statements: React.FC = () => {
         >
           {showUnnamed ? 'Show All' : 'Show Unnamed'}
         </button>
-
         <button
           type="button"
           onClick={() => {
@@ -403,7 +428,6 @@ const Statements: React.FC = () => {
         >
           📊 Summary
         </button>
-
         <button
           type="button"
           onClick={() => {
@@ -421,7 +445,6 @@ const Statements: React.FC = () => {
         >
           🖨️ Print
         </button>
-
         <input
           ref={inputRef}
           type="file"
@@ -430,7 +453,6 @@ const Statements: React.FC = () => {
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
-
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -439,6 +461,63 @@ const Statements: React.FC = () => {
           onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
         >
           📄 Import
+        </button>
+        &nbsp; | &nbsp;
+        <button
+          type="button"
+          disabled={selectedIds.size === 0}
+          onClick={async () => {
+            if (selectedIds.size === 0) return
+            const ok = window.confirm(
+              `Move ${selectedIds.size} selected row(s) to Deleted? You can restore them later.`
+            )
+            if (!ok) return
+            const ids = Array.from(selectedIds)
+            try {
+              // Persist soft delete
+              for (const id of ids) {
+                const row = fileData.find((r) => r.id === id)
+                if (!row) continue
+                await window.electronAPI.updateStatement({ ...row, deleted: true })
+              }
+              // Reflect in UI
+              setFileData((prev) =>
+                prev.map((r) => (ids.includes(r.id) ? { ...r, deleted: true } : r))
+              )
+              setSelectedIds(new Set())
+            } catch (e: any) {
+              alert(`❌ Failed to delete selected rows: ${e?.message || e}`)
+            }
+          }}
+          style={{
+            ...importBtnStyle,
+            background: selectedIds.size ? '#ef4444' : '#f3f4f6',
+            color: selectedIds.size ? '#fff' : '#9ca3af',
+            border: '1px solid #ef4444'
+          }}
+          onMouseOver={(e) => {
+            if (selectedIds.size) e.currentTarget.style.background = '#dc2626'
+          }}
+          onMouseOut={(e) => {
+            if (selectedIds.size) e.currentTarget.style.background = '#ef4444'
+          }}
+          title={selectedIds.size ? 'Move selected to Deleted' : 'Select rows to delete'}
+        >
+          🗑️ Delete
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const screen = 'current-statements-deleted'
+            localStorage.setItem('activeScreen', screen)
+            window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
+          }}
+          style={importBtnStyle}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          title="Open Deleted Statements"
+        >
+          🗂️ Deleted
         </button>
       </div>
 
@@ -464,7 +543,7 @@ const Statements: React.FC = () => {
         </div>
         {fileData.length > 0 && (
           <StatementsTable
-            rows={filteredData}
+            rows={visibleData}
             onCellEdit={handleCellEdit}
             onRowDelete={handleDeleteRow}
             query={query}
@@ -472,6 +551,9 @@ const Statements: React.FC = () => {
             showUnnamed={showUnnamed}
             editingNameRowId={editingNameRowId}
             setEditingNameRowId={setEditingNameRowId}
+            selectedIds={selectedIds}
+            onToggleRow={onToggleRow}
+            onToggleAll={onToggleAll}
           />
         )}
 

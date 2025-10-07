@@ -14,6 +14,9 @@ import Audits from './audits/Audits'
 import CurrentStatementsSummary from './current_statements/StatementsSummary'
 import SavingsStatementsSummary from './savings_statements/StatementsSummary'
 import PersonalStatementsSummary from './personal_statements/StatementsSummary'
+import CurrentStatementsDeleted from './current_statements/DeletedStatements'
+import SavingsStatementsDeleted from './savings_statements/DeletedStatements'
+import PersonalStatementsDeleted from './personal_statements/DeletedStatements'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -62,8 +65,11 @@ const MainView = () => {
         {activeScreen === 'excel3' && <PersonalStatements />}
         {activeScreen === 'audits' && <Audits />}
         {activeScreen === 'current-statements-summary' && <CurrentStatementsSummary />}
+        {activeScreen === 'current-statements-deleted' && <CurrentStatementsDeleted />}
         {activeScreen === 'savings-statements-summary' && <SavingsStatementsSummary />}
+        {activeScreen === 'savings-statements-deleted' && <SavingsStatementsDeleted />}
         {activeScreen === 'personal-statements-summary' && <PersonalStatementsSummary />}
+        {activeScreen === 'personal-statements-deleted' && <PersonalStatementsDeleted />}
       </div>
     </div>
   )

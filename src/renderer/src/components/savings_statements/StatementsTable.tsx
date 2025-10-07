@@ -100,6 +100,9 @@ type Props = {
   showUnnamed: boolean
   editingNameRowId: string | null
   setEditingNameRowId: (id: string | null) => void
+  selectedIds: Set<string>
+  onToggleRow: (id: string, checked: boolean) => void
+  onToggleAll: (checked: boolean, visibleIds: string[]) => void
 }
 
 export const StatementsTable: React.FC<Props> = ({
@@ -109,7 +112,10 @@ export const StatementsTable: React.FC<Props> = ({
   showUnnamed,
   editingNameRowId,
   setEditingNameRowId,
-  query = ''
+  query = '',
+  selectedIds,
+  onToggleRow,
+  onToggleAll
 }) => {
   const [dateSortDir, setDateSortDir] = useState<'asc' | 'desc'>('asc') // default asc
 
@@ -200,7 +206,7 @@ export const StatementsTable: React.FC<Props> = ({
   }
 
   const sumColumn = (key: keyof BankStatementRow) =>
-    filtered.reduce((acc, r) => acc + (parseFloat(r[key] || '0') || 0), 0)
+    filtered.reduce((acc, r) => acc + (parseFloat(String(r[key]) || '0') || 0), 0)
 
   const totalWithdrawal = sumColumn('withdrawal')
   const totalDeposit = sumColumn('deposit')
@@ -237,6 +243,7 @@ export const StatementsTable: React.FC<Props> = ({
     `}</style>
       <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', width: '100%' }}>
         <colgroup>
+          <col style={{ width: 36 }} />
           {HEADERS.map((key) => (
             <col key={key} style={{ width: toCss(COLUMN_WIDTHS[key]) }} />
           ))}
@@ -245,6 +252,27 @@ export const StatementsTable: React.FC<Props> = ({
 
         <thead>
           <tr style={{ background: '#e06100ff', color: '#fff' }}>
+            <th style={{ ...tableHeaderStyle, width: 36, textAlign: 'center' }}>
+              <input
+                type="checkbox"
+                aria-label="Select all visible"
+                checked={filtered.length > 0 && filtered.every((r) => selectedIds.has(r.id!))}
+                ref={(el) => {
+                  if (!el) return
+                  const some =
+                    filtered.some((r) => selectedIds.has(r.id!)) &&
+                    !filtered.every((r) => selectedIds.has(r.id!))
+                  el.indeterminate = some
+                }}
+                onChange={(e) =>
+                  onToggleAll(
+                    e.currentTarget.checked,
+                    filtered.map((r) => r.id!)
+                  )
+                }
+              />
+            </th>
+
             {HEADERS.map((h) => (
               <th
                 key={h}
@@ -286,6 +314,14 @@ export const StatementsTable: React.FC<Props> = ({
                 ...tableRowStyle(rowIndex)
               }}
             >
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(row.id!)}
+                  onChange={(e) => onToggleRow(row.id!, e.currentTarget.checked)}
+                  aria-label={`Select row ${rowIndex + 1}`}
+                />
+              </td>
               {HEADERS.map((key) => {
                 const isLocked =
                   !editMode &&
@@ -358,6 +394,7 @@ export const StatementsTable: React.FC<Props> = ({
         </tbody>
 
         <tfoot>
+          <td />
           <tr style={{ background: '#f3f4f6' }}>
             {HEADERS.map((key) => {
               if (key === 'narration') {
