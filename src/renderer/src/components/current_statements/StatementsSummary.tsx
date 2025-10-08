@@ -199,7 +199,7 @@ const StatementsSummary: React.FC = () => {
   }
 
   return (
-    <Layout title="📊 Statements Summary" color="#6366f1">
+    <Layout title="📊 Statements Summary" financialYear color="#6366f1">
       <style>{`
         :root {
           --accent: #6366f1;
