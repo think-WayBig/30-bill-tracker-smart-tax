@@ -133,6 +133,7 @@ const StatementsSummary: React.FC = () => {
   const rowsFY = React.useMemo(() => {
     return rows.filter((r) => {
       const ts = parseDMYStrict(r.date)
+      if ((r as any).deleted) return false
       return !Number.isNaN(ts) && ts >= startTs && ts <= endTs
     })
   }, [rows, startTs, endTs])
