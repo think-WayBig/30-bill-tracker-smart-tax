@@ -88,6 +88,10 @@ const Statements: React.FC = () => {
     .filter((row) => {
       if (!row.date) return false
       const [day, month, year] = row.date.split('/').map((v) => v.trim())
+      if (!year) {
+        console.log('Invalid date in row:', row)
+        return false;
+      }
       const fullYear = year.length === 2 ? Number(`20${year}`) : Number(year)
       const date = new Date(`${fullYear}-${month}-${day}`)
       return date >= startDate && date <= endDate
