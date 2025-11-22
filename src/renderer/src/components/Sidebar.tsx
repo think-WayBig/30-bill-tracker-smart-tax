@@ -6,8 +6,8 @@ type SidebarProps = {
 
 const billingSubPages = ['billing-pending', 'billing-paid']
 const bookSubPages = [
-  'book-entries-docs-complete',
   'book-entries-docs-incomplete',
+  'book-entries-docs-complete',
   'book-entries-completed'
 ]
 
@@ -30,6 +30,21 @@ const getTaxesAccent = () => {
     return PURPLE
   }
 }
+
+const NAV_ITEMS: string[] = [
+  'add',
+  'manage',
+  ...bookSubPages,
+  'group',
+  'billing',
+  ...billingSubPages,
+  'notices',
+  'taxes',
+  'excel',
+  'excel2',
+  'excel3',
+  'audits'
+]
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
@@ -75,6 +90,32 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
     if (hovering || active === 'statements') setStatementsAccent(getTaxesAccent())
   }, [hovering, active])
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+
+      e.preventDefault();
+
+      const currentIndex = NAV_ITEMS.indexOf(active);
+      if (currentIndex === -1) return;
+
+      let nextIndex =
+        e.key === 'ArrowDown'
+          ? currentIndex + 1
+          : currentIndex - 1;
+
+      if (nextIndex < 0) nextIndex = NAV_ITEMS.length - 1;
+      if (nextIndex >= NAV_ITEMS.length) nextIndex = 0;
+
+      handleClick(NAV_ITEMS[nextIndex]);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [active]);
+
+
   const handleClick = (key: string) => {
     setActive(key)
     localStorage.setItem('activeScreen', key)
@@ -109,6 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
 
     return (
       <button
+        tabIndex={-1}
         key={key}
         onClick={() => handleClick(key)}
         onMouseEnter={() => setHoveredItem(key)}
@@ -185,6 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         {showBookOptions && (
           <div style={{ marginLeft: 20 }}>
             <button
+              tabIndex={-1}
               key="book-entries-docs-incomplete"
               onClick={() => handleClick('book-entries-docs-incomplete')}
               style={{
@@ -200,6 +243,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               📄 ITR
             </div>
             <button
+              tabIndex={-1}
               key="book-entries-docs-complete"
               onClick={() => handleClick('book-entries-docs-complete')}
               style={{
@@ -211,6 +255,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               Pending
             </button>
             <button
+              tabIndex={-1}
               key="book-entries-completed"
               onClick={() => handleClick('book-entries-completed')}
               style={{
@@ -233,6 +278,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               const screenKey = `billing-${status.toLowerCase()}`
               return (
                 <button
+                  tabIndex={-1}
                   key={screenKey}
                   onClick={() => handleClick(screenKey)}
                   style={{
