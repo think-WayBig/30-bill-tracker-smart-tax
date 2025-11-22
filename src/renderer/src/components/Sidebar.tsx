@@ -145,129 +145,140 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
         width: isExpanded ? EXPANDED_W : COLLAPSED_W,
         padding: isExpanded ? '10px' : '10px 8px',
         alignItems: isExpanded ? 'stretch' : 'center',
-        transition: 'width 340ms ease, padding 340ms ease'
+        transition: 'width 340ms ease, padding 340ms ease',
+        height: '100%',
+        overflowY: 'auto',
+        gap: 40
       }}
     >
       {/* Header / Title + pin toggle */}
-      <div style={{ ...titleRowStyle, justifyContent: isExpanded ? 'space-between' : 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span>📚</span>
-          {isExpanded && <span style={titleTextStyle}>Bill Tracker</span>}
-        </div>
-        <button
-          onClick={togglePinned}
-          aria-label={
-            collapsed
-              ? 'Pinned (expand on hover). Click to keep open'
-              : 'Unpinned (always open). Click to collapse on hover'
-          }
-          title={
-            collapsed
-              ? 'Expand on hover (pinned). Click to keep open'
-              : 'Always open. Click to make hover-expand'
-          }
-          style={{
-            ...collapseBtnStyle,
-            marginLeft: isExpanded ? 'auto' : 0
-          }}
-        >
-          {collapsed ? '📌' : '📍'}
-        </button>
-      </div>
-
-      {renderButton('add', 'Entry', '👤')}
-      {renderButton('manage', 'Book', '📚', true, showBookOptions)}
-
-      {showBookOptions && (
-        <div style={{ marginLeft: 20 }}>
-          <button
-            key="book-entries-docs-incomplete"
-            onClick={() => handleClick('book-entries-docs-incomplete')}
-            style={{
-              ...subButtonStyle,
-              backgroundColor:
-                active === 'book-entries-docs-incomplete' ? '#e0e7ff' : 'transparent',
-              fontWeight: active === 'book-entries-docs-incomplete' ? 600 : 'normal'
-            }}
-          >
-            Assessee List
-          </button>
-          <div style={{ fontSize: 13, marginTop: 8, marginBottom: 4, color: '#6b7280' }}>
-            📄 ITR
+      <div>
+        <div style={{ ...titleRowStyle, justifyContent: isExpanded ? 'space-between' : 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>📚</span>
+            {isExpanded && <span style={titleTextStyle}>Bill Tracker</span>}
           </div>
           <button
-            key="book-entries-docs-complete"
-            onClick={() => handleClick('book-entries-docs-complete')}
+            onClick={togglePinned}
+            aria-label={
+              collapsed
+                ? 'Pinned (expand on hover). Click to keep open'
+                : 'Unpinned (always open). Click to collapse on hover'
+            }
+            title={
+              collapsed
+                ? 'Expand on hover (pinned). Click to keep open'
+                : 'Always open. Click to make hover-expand'
+            }
             style={{
-              ...subButtonStyle,
-              backgroundColor: active === 'book-entries-docs-complete' ? '#e0e7ff' : 'transparent',
-              fontWeight: active === 'book-entries-docs-complete' ? 600 : 'normal'
+              ...collapseBtnStyle,
+              marginLeft: isExpanded ? 'auto' : 0
             }}
           >
-            Pending
-          </button>
-          <button
-            key="book-entries-completed"
-            onClick={() => handleClick('book-entries-completed')}
-            style={{
-              ...subButtonStyle,
-              backgroundColor: active === 'book-entries-completed' ? '#e0e7ff' : 'transparent',
-              fontWeight: active === 'book-entries-completed' ? 600 : 'normal'
-            }}
-          >
-            Filed
+            {collapsed ? '📌' : '📍'}
           </button>
         </div>
-      )}
 
-      {renderButton('group', 'Groups', '📂')}
-      {renderButton('billing', 'Billing', '💳', true, showBillingOptions)}
+        {renderButton('add', 'Entry', '👤')}
+        {renderButton('manage', 'Book', '📚', true, showBookOptions)}
 
-      {showBillingOptions && (
-        <div style={{ marginLeft: 20 }}>
-          {['Pending', 'Paid'].map((status) => {
-            const screenKey = `billing-${status.toLowerCase()}`
-            return (
-              <button
-                key={screenKey}
-                onClick={() => handleClick(screenKey)}
-                style={{
-                  ...subButtonStyle,
-                  backgroundColor: active === screenKey ? '#e0e7ff' : 'transparent',
-                  fontWeight: active === screenKey ? 600 : 'normal'
-                }}
-              >
-                {status}
-              </button>
-            )
-          })}
-        </div>
-      )}
+        {showBookOptions && (
+          <div style={{ marginLeft: 20 }}>
+            <button
+              key="book-entries-docs-incomplete"
+              onClick={() => handleClick('book-entries-docs-incomplete')}
+              style={{
+                ...subButtonStyle,
+                backgroundColor:
+                  active === 'book-entries-docs-incomplete' ? '#e0e7ff' : 'transparent',
+                fontWeight: active === 'book-entries-docs-incomplete' ? 600 : 'normal'
+              }}
+            >
+              Assessee List
+            </button>
+            <div style={{ fontSize: 13, marginTop: 8, marginBottom: 4, color: '#6b7280' }}>
+              📄 ITR
+            </div>
+            <button
+              key="book-entries-docs-complete"
+              onClick={() => handleClick('book-entries-docs-complete')}
+              style={{
+                ...subButtonStyle,
+                backgroundColor: active === 'book-entries-docs-complete' ? '#e0e7ff' : 'transparent',
+                fontWeight: active === 'book-entries-docs-complete' ? 600 : 'normal'
+              }}
+            >
+              Pending
+            </button>
+            <button
+              key="book-entries-completed"
+              onClick={() => handleClick('book-entries-completed')}
+              style={{
+                ...subButtonStyle,
+                backgroundColor: active === 'book-entries-completed' ? '#e0e7ff' : 'transparent',
+                fontWeight: active === 'book-entries-completed' ? 600 : 'normal'
+              }}
+            >
+              Filed
+            </button>
+          </div>
+        )}
 
-      {renderButton('notices', 'Notices', '📬')}
-      {renderButton('taxes', 'GST/TDS', '📝', false, false, taxesAccent)}
-      {renderButton('excel', 'Current Statements', '🏦')}
-      {renderButton('excel2', 'Savings Statements', '🏦', false, false, statementsAccent)}
-      {renderButton('excel3', 'Personal Statements', '🏦', false, false, statementsAccent)}
-      {renderButton('audits', 'Audits', '📝')}
+        {renderButton('group', 'Groups', '📂')}
+        {renderButton('billing', 'Billing', '💳', true, showBillingOptions)}
 
-      <div style={{ marginTop: 'auto', width: '100%' }}>
-        {renderButton('settings', 'Settings', '⚙️')}
+        {showBillingOptions && (
+          <div style={{ marginLeft: 20 }}>
+            {['Pending', 'Paid'].map((status) => {
+              const screenKey = `billing-${status.toLowerCase()}`
+              return (
+                <button
+                  key={screenKey}
+                  onClick={() => handleClick(screenKey)}
+                  style={{
+                    ...subButtonStyle,
+                    backgroundColor: active === screenKey ? '#e0e7ff' : 'transparent',
+                    fontWeight: active === screenKey ? 600 : 'normal'
+                  }}
+                >
+                  {status}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {renderButton('notices', 'Notices', '📬')}
+        {renderButton('taxes', 'GST/TDS', '📝', false, false, taxesAccent)}
+        {renderButton('excel', 'Current Statements', '🏦')}
+        {renderButton('excel2', 'Savings Statements', '🏦', false, false, statementsAccent)}
+        {renderButton('excel3', 'Personal Statements', '🏦', false, false, statementsAccent)}
+        {renderButton('audits', 'Audits', '📝')}
       </div>
 
-      <button
-        onClick={() => window.close()}
-        title="Close"
-        style={{
-          ...closeButtonStyle,
-          backgroundColor: closeHover ? '#dc2626' : 'transparent',
-          color: closeHover ? 'white' : '#000'
-        }}
-        onMouseEnter={() => setCloseHover(true)}
-        onMouseLeave={() => setCloseHover(false)}
-      >
-        {isExpanded ? '❌ Close' : '❌'}
-      </button>
+      <div style={{ marginTop: 'auto' }}>
+        <div style={{ width: '100%' }}>
+          {renderButton('settings', 'Settings', '⚙️')}
+        </div>
+
+        <div style={{ width: '100%' }}>
+          <button
+            onClick={() => window.close()}
+            title="Close"
+            style={{
+              ...closeButtonStyle,
+              backgroundColor: closeHover ? '#dc2626' : 'transparent',
+              color: closeHover ? 'white' : '#000',
+              width: '100%',
+            }}
+            onMouseEnter={() => setCloseHover(true)}
+            onMouseLeave={() => setCloseHover(false)}
+          >
+            {isExpanded ? '❌ Close' : '❌'}
+          </button>
+        </div>
+
+      </div>
     </div>
   )
 }

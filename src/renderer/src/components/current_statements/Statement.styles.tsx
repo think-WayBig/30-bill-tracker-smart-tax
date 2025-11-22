@@ -15,7 +15,8 @@ export const searchBarContainerStyle: React.CSSProperties = {
   borderRadius: 8,
   boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
   border: '1px solid #e5e7eb',
-  marginBottom: 16
+  marginBottom: 16,
+  overflowX: 'auto'
 }
 
 export const searchBarStyle: React.CSSProperties = {
