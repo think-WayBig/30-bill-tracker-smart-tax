@@ -93,28 +93,24 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
 
-      e.preventDefault();
+      e.preventDefault()
 
-      const currentIndex = NAV_ITEMS.indexOf(active);
-      if (currentIndex === -1) return;
+      const currentIndex = NAV_ITEMS.indexOf(active)
+      if (currentIndex === -1) return
 
-      let nextIndex =
-        e.key === 'ArrowDown'
-          ? currentIndex + 1
-          : currentIndex - 1;
+      let nextIndex = e.key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1
 
-      if (nextIndex < 0) nextIndex = NAV_ITEMS.length - 1;
-      if (nextIndex >= NAV_ITEMS.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = NAV_ITEMS.length - 1
+      if (nextIndex >= NAV_ITEMS.length) nextIndex = 0
 
-      handleClick(NAV_ITEMS[nextIndex]);
-    };
+      handleClick(NAV_ITEMS[nextIndex])
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [active]);
-
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [active])
 
   const handleClick = (key: string) => {
     setActive(key)
@@ -248,7 +244,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               onClick={() => handleClick('book-entries-docs-complete')}
               style={{
                 ...subButtonStyle,
-                backgroundColor: active === 'book-entries-docs-complete' ? '#e0e7ff' : 'transparent',
+                backgroundColor:
+                  active === 'book-entries-docs-complete' ? '#e0e7ff' : 'transparent',
                 fontWeight: active === 'book-entries-docs-complete' ? 600 : 'normal'
               }}
             >
@@ -303,9 +300,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
       </div>
 
       <div style={{ marginTop: 'auto' }}>
-        <div style={{ width: '100%' }}>
-          {renderButton('settings', 'Settings', '⚙️')}
-        </div>
+        <div style={{ width: '100%' }}>{renderButton('settings', 'Settings', '⚙️')}</div>
 
         <div style={{ width: '100%' }}>
           <button
@@ -315,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
               ...closeButtonStyle,
               backgroundColor: closeHover ? '#dc2626' : 'transparent',
               color: closeHover ? 'white' : '#000',
-              width: '100%',
+              width: '100%'
             }}
             onMouseEnter={() => setCloseHover(true)}
             onMouseLeave={() => setCloseHover(false)}
@@ -323,7 +318,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveScreen }) => {
             {isExpanded ? '❌ Close' : '❌'}
           </button>
         </div>
-
       </div>
     </div>
   )
