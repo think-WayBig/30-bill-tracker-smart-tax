@@ -69,6 +69,7 @@ const Statements: React.FC = () => {
 
   const [showDialog, setShowDialog] = useState(false)
   const [query, setQuery] = useState('')
+  const [deepQuery, setDeepQuery] = useState('')
 
   const inputRef = useRef<HTMLInputElement>(null)
   const saveTimersRef = useRef<SaveTimers>(new Map())
@@ -95,6 +96,18 @@ const Statements: React.FC = () => {
       const fullYear = year.length === 2 ? Number(`20${year}`) : Number(year)
       const date = new Date(`${fullYear}-${month}-${day}`)
       return date >= startDate && date <= endDate
+    })
+    // 1st-level search
+    .filter((row) => {
+      const q = query.trim().toLowerCase()
+      if (!q) return true
+      return Object.values(row).some((v) => String(v).toLowerCase().includes(q))
+    })
+    // 2nd-level search (search within search)
+    .filter((row) => {
+      const dq = deepQuery.trim().toLowerCase()
+      if (!dq) return true
+      return Object.values(row).some((v) => String(v).toLowerCase().includes(dq))
     })
 
   const onToggleRow = (id: string, checked: boolean) => {
@@ -395,6 +408,19 @@ const Statements: React.FC = () => {
           aria-label="Search bills"
           style={searchBarStyle}
         />
+        {query.trim() !== '' && (
+          <input
+            type="text"
+            value={deepQuery}
+            onChange={(e) => setDeepQuery(e.target.value)}
+            placeholder="Search within results..."
+            style={{
+              ...searchBarStyle,
+              width: 240,
+              background: '#eef2ff'
+            }}
+          />
+        )}
         <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
         <button
           type="button"
