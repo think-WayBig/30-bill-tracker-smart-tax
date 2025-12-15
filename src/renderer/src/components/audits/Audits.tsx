@@ -242,6 +242,11 @@ const Audits: React.FC = () => {
       setRows(Array.isArray(fresh) ? fresh : [])
       console.error('Update failed:', res?.error)
     }
+
+    if (!res?.success && res?.error === 'Audit entry not found.') {
+      // Entry doesn't exist in audits.json, save it as new
+      await window.electronAPI.saveAudit(updatedRow)
+    }
   }
 
   const handleDialogSubmit = async (data: AuditEntry) => {
