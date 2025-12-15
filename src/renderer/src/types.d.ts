@@ -15,6 +15,7 @@ declare global {
     group?: string
     remarks?: { remark: string; year: string }[]
     docsComplete?: { value: boolean; year: string }[]
+    auditCase?: { value: boolean; year: string }[]
   }
 
   interface Notice {

@@ -274,7 +274,7 @@ const AuditsTable: React.FC<Props> = ({
             </tr>
           ) : (
             sortedRows.map((r) => {
-              const acc = r.accounts[year] || {}
+              const acc = r.accounts?.[year] || {}
               return (
                 <tr key={r.pan} className="hoverable-row">
                   <td

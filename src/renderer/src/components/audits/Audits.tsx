@@ -90,13 +90,34 @@ const Audits: React.FC = () => {
 
   useEffect(() => {
     let mounted = true
-    window.electronAPI
-      .loadAudits()
-      .then((data) => {
+
+    const loadAll = async () => {
+      try {
+        const [audits, entries] = await Promise.all([
+          window.electronAPI.loadAudits(),
+          window.electronAPI.loadEntries()
+        ])
+
         if (!mounted) return
-        setRows(Array.isArray(data) ? data : [])
-      })
-      .catch((err) => console.error('load-audits failed:', err))
+
+        const auditRows = Array.isArray(audits) ? audits : []
+
+        console.log('Extracted audits:', extractAuditCases(entries, currentYear, auditRows))
+
+        // extract audit entries from entries.json
+        const entryAuditRows = extractAuditCases(entries, currentYear, auditRows)
+
+        // merge both
+        const combined = [...auditRows, ...entryAuditRows]
+        console.log('Final combined audits:', combined)
+
+        setRows(combined)
+      } catch (err) {
+        console.error('load-all failed:', err)
+      }
+    }
+
+    loadAll()
     return () => {
       mounted = false
     }
@@ -116,6 +137,38 @@ const Audits: React.FC = () => {
       }
     })()
   }, [rows, currentYear]) // re-check when rows load or assessment year changes
+
+  const extractAuditCases = (
+    entries: any,
+    year: number,
+    existingAudits: AuditEntry[]
+  ): AuditEntry[] => {
+    if (!entries) return []
+
+    // Create a Set of existing PANs for fast lookup
+    const existingPANs = new Set(existingAudits.map((audit) => audit.pan.toUpperCase()))
+
+    return entries
+      .filter((e: Entry) => {
+        if (!e.auditCase || !Array.isArray(e.auditCase)) return false
+
+        // Check if PAN already exists in audit cases
+        if (existingPANs.has(e.pan.toUpperCase())) return false
+
+        return e.auditCase.some(
+          (audit: { year: string; value: boolean }) =>
+            Number(audit.year) === year && audit.value === true
+        )
+      })
+      .map((e: Entry) => ({
+        pan: e.pan,
+        name: e.name,
+        accounts: {
+          [year]: {}, // Ensure current year exists
+          [year + 1]: {} // Ensure next year exists
+        }
+      }))
+  }
 
   const caOptions = useMemo(() => {
     const set = new Set<string>()
