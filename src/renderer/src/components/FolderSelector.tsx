@@ -8,6 +8,7 @@ const FolderSelector = () => {
 
     if (selected) {
       localStorage.setItem('selectedFolder', selected)
+      localStorage.setItem('selectedYear', new Date().getFullYear().toString())
       setShowButton(false)
     } else {
       setShowButton(true)
