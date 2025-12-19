@@ -80,7 +80,7 @@ export const tableRowStyle: (rowIndex: number) => React.CSSProperties = (rowInde
 
 export const textAreaStyle: React.CSSProperties = {
   width: '100%',
-  minHeight: 48,
+  minHeight: 64,
   fontSize: 13,
   padding: '8px 10px',
   border: '1px solid #e5e7eb',

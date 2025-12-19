@@ -365,7 +365,18 @@ export const StatementsTable: React.FC<Props> = ({
                         className={`editable-textarea ${isLocked ? 'disabled' : ''}`}
                         style={{
                           ...textAreaStyle,
-                          backgroundColor: isLocked ? '#f9fafb' : '#fff'
+                          backgroundColor:
+                            key === 'narration'
+                              ? row.narration.includes('50100394646904')
+                                ? '#fed7aa'
+                                : row.narration.includes('50200054036440')
+                                  ? '#b4e4ffff'
+                                  : isLocked
+                                    ? ''
+                                    : '#fff'
+                              : isLocked
+                                ? '#f9fafb'
+                                : '#fff'
                         }}
                         readOnly={isLocked}
                         placeholder={placeholderFor(key)}
