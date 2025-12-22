@@ -9,6 +9,17 @@ import pdfParse from 'pdf-parse'
 import fs from 'fs'
 import path from 'path'
 
+// ============================================
+// CONSTANTS & UTILITIES
+// ============================================
+
+const DATA_DIR = path.join('../../../smart-tax-dont-touch')
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true })
+}
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -123,10 +134,8 @@ ipcMain.handle('select-folder', async () => {
 
 ipcMain.handle('save-entry', async (_event, entry) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
     const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
 
     // Check if PAN already exists (case-insensitive match)
@@ -162,8 +171,7 @@ ipcMain.handle('save-entry', async (_event, entry) => {
 
 ipcMain.handle('update-end-year', async (_event, fileCode, endYear) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) {
       return { success: false, error: 'Entries file not found.' }
@@ -201,8 +209,7 @@ ipcMain.handle('update-end-year', async (_event, fileCode, endYear) => {
 
 ipcMain.handle('update-name', async (_event, fileCode, newName) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) {
       return { success: false, error: 'Entries file not found.' }
@@ -231,8 +238,7 @@ ipcMain.handle('update-name', async (_event, fileCode, newName) => {
 
 ipcMain.handle('load-entries', async () => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) return []
 
@@ -247,10 +253,8 @@ ipcMain.handle('load-entries', async () => {
 // Save or create a group
 ipcMain.handle('save-group', async (_event, group) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'groups.json')
+    const filePath = path.join(DATA_DIR, 'groups.json')
 
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
     const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
 
     // Check if group already exists (case-insensitive)
@@ -270,9 +274,8 @@ ipcMain.handle('save-group', async (_event, group) => {
 
 ipcMain.handle('delete-group', async (_event, groupName: string) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const groupsPath = path.join(dir, 'groups.json')
-    const entriesPath = path.join(dir, 'entries.json')
+    const groupsPath = path.join(DATA_DIR, 'groups.json')
+    const entriesPath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(groupsPath)) throw new Error('Groups file not found')
     const groups = JSON.parse(fs.readFileSync(groupsPath, 'utf-8')).filter((g) => g !== groupName)
@@ -294,8 +297,7 @@ ipcMain.handle('delete-group', async (_event, groupName: string) => {
 // Load all groups
 ipcMain.handle('load-groups', async () => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'groups.json')
+    const filePath = path.join(DATA_DIR, 'groups.json')
 
     if (!fs.existsSync(filePath)) return []
 
@@ -310,8 +312,7 @@ ipcMain.handle('load-groups', async () => {
 // Update user's group assignment
 ipcMain.handle('assign-user-to-group', async (_event, pan: string, group: string) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
 
@@ -331,8 +332,7 @@ ipcMain.handle('assign-user-to-group', async (_event, pan: string, group: string
 
 ipcMain.handle('update-docs-complete', async (_event, pan: string, docsComplete) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
 
@@ -354,8 +354,7 @@ ipcMain.handle('update-docs-complete', async (_event, pan: string, docsComplete)
 
 ipcMain.handle('update-audit-case', async (_event, pan: string, auditCase) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) {
       return { success: false, error: 'Entries file not found' }
@@ -381,10 +380,8 @@ ipcMain.handle('update-audit-case', async (_event, pan: string, auditCase) => {
 
 ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
     const existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : []
 
     const updated = existing.map((entry: any) => {
@@ -402,8 +399,7 @@ ipcMain.handle('save-multiple-entries', async (_event, newEntries) => {
 
 ipcMain.handle('update-remarks', async (_event, pan, remarks) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) throw new Error('Entries file does not exist')
 
@@ -423,8 +419,7 @@ ipcMain.handle('update-remarks', async (_event, pan, remarks) => {
 
 ipcMain.handle('update-billing-status', async (_event, pan, newStatus, year: string) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
     if (!fs.existsSync(filePath)) throw new Error('Entries file does not exist')
 
     const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
@@ -459,8 +454,7 @@ ipcMain.handle('update-billing-status', async (_event, pan, newStatus, year: str
 
 ipcMain.handle('delete-entry', async (_event, fileCode) => {
   try {
-    const dir = path.join('../../smart-tax-dont-touch')
-    const filePath = path.join(dir, 'entries.json')
+    const filePath = path.join(DATA_DIR, 'entries.json')
 
     if (!fs.existsSync(filePath)) return { success: false, error: 'Entries file not found' }
 
@@ -505,7 +499,7 @@ ipcMain.handle(
   'get-ackno-from-file',
   async (_event, pan: string, directory: string, year: string) => {
     try {
-      const entriesPath = path.join('../../smart-tax-dont-touch', 'entries.json')
+      const entriesPath = path.join('DATA_DIR', 'entries.json')
 
       if (!fs.existsSync(entriesPath)) {
         return { success: false, error: 'Entries data not found' }
@@ -567,7 +561,7 @@ ipcMain.handle(
   'update-entry-ack-date',
   async (_event, pan: string, ackDate: { date: string; year: string }[]) => {
     try {
-      const entriesPath = path.join('../../smart-tax-dont-touch', 'entries.json')
+      const entriesPath = path.join('DATA_DIR', 'entries.json')
 
       if (!fs.existsSync(entriesPath)) {
         return { success: false, error: 'Entries data not found' }
@@ -594,7 +588,7 @@ ipcMain.handle(
 
 ipcMain.handle('update-entry-ackno', async (_, pan: string, ackno: string, filePath: string) => {
   try {
-    const entriesPath = path.join('../../smart-tax-dont-touch', 'entries.json')
+    const entriesPath = path.join('DATA_DIR', 'entries.json')
 
     if (!fs.existsSync(entriesPath)) {
       return { success: false, error: 'Entries file not found.' }
@@ -634,9 +628,7 @@ ipcMain.handle('open-containing-folder', async (_event, filePath: string) => {
 
 /** Notices Code */
 const getNoticesPath = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'notices.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'notices.json')
   return filePath
 }
 
@@ -751,9 +743,7 @@ ipcMain.handle('deleteNotice', async (_event, notice) => {
 })
 
 const getBillsPath = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'bills.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'bills.json')
   return filePath
 }
 
@@ -919,9 +909,7 @@ ipcMain.handle('delete-bill', async (_event, payload: DeleteBillPayload) => {
 })
 
 const getStatementsPath = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'statements.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'statements.json')
   return filePath
 }
 
@@ -1098,9 +1086,7 @@ ipcMain.handle('find-pdf-name-by-cpin', async (_evt, cpin: string, directory: st
  */
 
 const getStatements2Path = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'savings_statements.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'savings_statements.json')
   return filePath
 }
 
@@ -1188,9 +1174,7 @@ ipcMain.handle('delete-statement2', async (_event, id: string) => {
  */
 
 const getStatements3Path = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'personal_statements.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'personal_statements.json')
   return filePath
 }
 
@@ -1296,9 +1280,7 @@ interface AuditEntry {
 }
 
 const getAuditsPath = () => {
-  const dir = path.join('../../smart-tax-dont-touch')
-  const filePath = path.join(dir, 'audits.json')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(DATA_DIR, 'audits.json')
   return filePath
 }
 
