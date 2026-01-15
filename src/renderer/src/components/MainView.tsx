@@ -17,6 +17,7 @@ import PersonalStatementsSummary from './personal_statements/StatementsSummary'
 import CurrentStatementsDeleted from './current_statements/DeletedStatements'
 import SavingsStatementsDeleted from './savings_statements/DeletedStatements'
 import PersonalStatementsDeleted from './personal_statements/DeletedStatements'
+import FeeManagement from './current_statements/FeeManagement'
 
 const MainView = () => {
   const [activeScreen, setActiveScreen] = useState(() => {
@@ -70,6 +71,7 @@ const MainView = () => {
         {activeScreen === 'savings-statements-deleted' && <SavingsStatementsDeleted />}
         {activeScreen === 'personal-statements-summary' && <PersonalStatementsSummary />}
         {activeScreen === 'personal-statements-deleted' && <PersonalStatementsDeleted />}
+        {activeScreen === 'fee-management' && <FeeManagement />}
       </div>
     </div>
   )

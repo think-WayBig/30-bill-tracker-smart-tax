@@ -120,6 +120,16 @@ interface AuditEntry {
   }
 }
 
+type CurrentFeeEntry = {
+  name: string
+  gstFee: string
+  itFee: string
+  tdsFee: string
+  auditFee: string
+}
+
+type FeeMap = Record<string, CurrentFeeEntry> // nameKey -> entry
+
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')
 }
@@ -239,7 +249,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveAudit: (entry: AuditEntry) => ipcRenderer.invoke('save-audit', entry),
   loadAudits: () => ipcRenderer.invoke('load-audits'),
   updateAudit: (entry: AuditEntry) => ipcRenderer.invoke('update-audit', entry),
-  deleteAudit: (id: string) => ipcRenderer.invoke('delete-audit', id)
+  deleteAudit: (id: string) => ipcRenderer.invoke('delete-audit', id),
+  loadCurrentFeeEntries: () => ipcRenderer.invoke('load-current-fee-entries'),
+  upsertCurrentFeeEntry: (entry: { name: string; gstFee: string }) =>
+    ipcRenderer.invoke('upsert-current-fee-entry', entry)
 })
 
 if (process.contextIsolated) {

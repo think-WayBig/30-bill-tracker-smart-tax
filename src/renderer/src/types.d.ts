@@ -1,4 +1,4 @@
-export {}
+export { }
 
 declare global {
   interface Entry {
@@ -106,6 +106,17 @@ declare global {
       [year: number]: YearlyAuditData
     }
   }
+
+  type CurrentFeeEntry = {
+    name: string
+    gstFee: string
+    itFee: string
+    tdsFee: string
+    auditFee: string
+  }
+
+  type FeeMap = Record<string, CurrentFeeEntry> // nameKey -> entry
+
 
   interface Window {
     electronAPI: {
@@ -240,6 +251,13 @@ declare global {
       ) => Promise<{ success: boolean; data: AuditEntry; error?: string }>
 
       deleteAudit: (pan: string) => Promise<{ success: boolean; removed?: number; error?: string }>
+
+      // Current Fee Entries-related APIs
+      loadCurrentFeeEntries: () => Promise<CurrentFeeEntry[]>
+
+      upsertCurrentFeeEntry: (
+        entry: CurrentFeeEntry
+      ) => Promise<{ success: boolean; error?: string }>
     }
 
     api: {

@@ -1367,3 +1367,62 @@ ipcMain.handle('delete-audit', async (_event, pan: string) => {
     return { success: false, error: error.message }
   }
 })
+
+export interface CurrentFeeEntry {
+  name: string
+  gstFee: string
+  itFee: string
+  tdsFee: string
+  auditFee: string
+  paidByFY?: Record<string, boolean>
+}
+
+const getCurrentFeeEntriesPath = () => path.join(DATA_DIR, 'current_fee_entries.json')
+
+const normalizeNameKey = (name: string) => (name || '').trim().replace(/\s+/g, ' ').toUpperCase()
+
+ipcMain.handle('load-current-fee-entries', async () => {
+  try {
+    const filePath = getCurrentFeeEntriesPath()
+    if (!fs.existsSync(filePath)) return []
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as CurrentFeeEntry[]
+  } catch (e) {
+    console.error('Failed to load current fee entries:', e)
+    return []
+  }
+})
+
+ipcMain.handle('upsert-current-fee-entry', async (_event, entry: CurrentFeeEntry) => {
+  try {
+    const filePath = getCurrentFeeEntriesPath()
+    const existing: CurrentFeeEntry[] = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      : []
+
+    const key = normalizeNameKey(entry.name)
+    if (!key) return { success: false, error: 'Name is required.' }
+
+    const normalizedEntry: CurrentFeeEntry = {
+      name: entry.name.trim(),
+      gstFee: String(entry.gstFee ?? ''),
+      itFee: String(entry.itFee ?? ''),
+      tdsFee: String(entry.tdsFee ?? ''),
+      auditFee: String(entry.auditFee ?? ''),
+      paidByFY:
+        entry.paidByFY && typeof entry.paidByFY === 'object' && !Array.isArray(entry.paidByFY)
+          ? Object.fromEntries(
+            Object.entries(entry.paidByFY).map(([fy, v]) => [String(fy), Boolean(v)])
+          )
+          : {}
+    }
+
+    const idx = existing.findIndex((e) => normalizeNameKey(e.name) === key)
+    if (idx >= 0) existing[idx] = { ...existing[idx], ...normalizedEntry }
+    else existing.push(normalizedEntry)
+
+    fs.writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf-8')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+})

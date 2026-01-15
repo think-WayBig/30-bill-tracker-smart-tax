@@ -435,6 +435,23 @@ const Statements: React.FC = () => {
         </button>
         <button
           type="button"
+          onClick={() => {
+            const screen = 'fee-management'
+            localStorage.setItem('activeScreen', screen)
+            window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
+          }}
+          style={{
+            ...importBtnStyle,
+            background: '#ffff',
+            color: '#6366f1',
+            border: '1px solid #6366f1'
+          }}
+          title="Manage GST fees by party name"
+        >
+          💰 Fee Management
+        </button>
+        <button
+          type="button"
           onClick={() => setShowUnnamed((prev) => !prev)}
           style={importBtnStyle}
           onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
