@@ -120,16 +120,6 @@ interface AuditEntry {
   }
 }
 
-type CurrentFeeEntry = {
-  name: string
-  gstFee: string
-  itFee: string
-  tdsFee: string
-  auditFee: string
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type FeeMap = Record<string, CurrentFeeEntry> // nameKey -> entry
 
 const api = {
   selectFolder: () => ipcRenderer.invoke('select-folder')

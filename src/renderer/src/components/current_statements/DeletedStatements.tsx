@@ -132,6 +132,9 @@ const DeletedStatements: React.FC = () => {
           selectedIds={selectedIds}
           onToggleRow={onToggleRow}
           onToggleAll={onToggleAll}
+          onSearchName={function (): void {
+            throw new Error('Function not implemented.')
+          }}
         />
       ) : (
         <div style={{ padding: 24, color: '#6b7280' }}>No deleted statements for this year.</div>

@@ -176,7 +176,11 @@ const Statements: React.FC = () => {
           deposit: row.deposit,
           closing: row.closing,
           name: row.name,
-          txnType: row.txnType
+          txnType: row.txnType,
+          gstFee: '',
+          itFee: '',
+          tdsFee: '',
+          auditFee: ''
         })
       }
 

@@ -84,6 +84,11 @@ declare global {
     name: string
     txnType: string
     deleted?: boolean
+
+    gstFee: string
+    itFee: string
+    tdsFee: string
+    auditFee: string
   }
 
   interface YearlyAuditData {

@@ -94,9 +94,6 @@ const receivedForName = (rows: BankStatementRow[], nameKey: string) =>
     .filter((r) => normalizeNameKey((r as any).name) === nameKey)
     .reduce((sum, r: any) => sum + (toNum(r.deposit) - toNum(r.withdrawal)), 0)
 
-const isPaidForFY = (e: CurrentFeeEntry | undefined, fy: number) =>
-  Boolean(e?.paidByFY?.[String(fy)])
-
 // update helper (keeps other years intact)
 const patchPaidForFY = (e: CurrentFeeEntry, fy: number, paid: boolean): CurrentFeeEntry => ({
   ...e,

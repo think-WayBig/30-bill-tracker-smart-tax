@@ -101,11 +101,6 @@ const Statements: React.FC = () => {
   const [showUnnamed, setShowUnnamed] = useState(false)
   const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
 
-  const setSearchToName = (name: string) => {
-    setQuery(name)
-    setDeepQuery('')
-  }
-
   const visibleData = fileData
     .filter((r) => !r.deleted)
     .filter((row) => {
@@ -217,7 +212,11 @@ const Statements: React.FC = () => {
           deposit: row.deposit,
           closing: row.closing,
           name: row.name,
-          txnType: row.txnType
+          txnType: row.txnType,
+          gstFee: '',
+          itFee: '',
+          tdsFee: '',
+          auditFee: ''
         })
       }
 
