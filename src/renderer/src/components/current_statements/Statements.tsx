@@ -38,6 +38,23 @@ const SAVE_DEBOUNCE_MS = 500
 
 type SaveTimers = Map<string, number> // rowId -> timeout id
 
+// helpers (same as before)
+const toNum = (v?: string) => {
+  const n = Number(
+    String(v ?? '')
+      .replace(/,/g, '')
+      .trim()
+  )
+  return Number.isFinite(n) ? n : 0
+}
+const totalFee = (f: { gstFee?: string; itFee?: string; tdsFee?: string; auditFee?: string }) =>
+  toNum(f.gstFee) + toNum(f.itFee) + toNum(f.tdsFee) + toNum(f.auditFee)
+
+const receivedForName = (rows: BankStatementRow[], name: string) =>
+  rows
+    .filter((r) => (r.name ?? '').trim() === name)
+    .reduce((sum, r) => sum + (toNum(r.deposit) - toNum(r.withdrawal)), 0)
+
 const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
@@ -84,6 +101,11 @@ const Statements: React.FC = () => {
   const [showUnnamed, setShowUnnamed] = useState(false)
   const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
 
+  const setSearchToName = (name: string) => {
+    setQuery(name)
+    setDeepQuery('')
+  }
+
   const visibleData = fileData
     .filter((r) => !r.deleted)
     .filter((row) => {
@@ -109,6 +131,25 @@ const Statements: React.FC = () => {
       if (!dq) return true
       return Object.values(row).some((v) => String(v).toLowerCase().includes(dq))
     })
+
+  const getSingleName = (rows: BankStatementRow[]) => {
+    const names = Array.from(new Set(rows.map((r) => (r.name ?? '').trim()).filter(Boolean)))
+    return names.length === 1 ? names[0] : null
+  }
+
+  const activeName = getSingleName(visibleData)
+  const activeRow = activeName ? fileData.find((r) => (r.name ?? '').trim() === activeName) : null
+
+  const feeState = {
+    gstFee: String((activeRow as any)?.gstFee ?? ''),
+    itFee: String((activeRow as any)?.itFee ?? ''),
+    tdsFee: String((activeRow as any)?.tdsFee ?? ''),
+    auditFee: String((activeRow as any)?.auditFee ?? '')
+  }
+
+  const total = totalFee(feeState)
+  const received = activeName ? receivedForName(visibleData, activeName) : 0
+  const remaining = total - received
 
   const onToggleRow = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -236,6 +277,22 @@ const Statements: React.FC = () => {
     } catch (e: any) {
       alert(`❌ Failed to delete: ${e?.message || e}`)
     }
+  }
+
+  const updateFeeForName = (
+    name: string,
+    patch: Partial<Pick<BankStatementRow, 'gstFee' | 'itFee' | 'tdsFee' | 'auditFee'>>
+  ) => {
+    setFileData((prev) => {
+      const next = prev.map((r) =>
+        (r.name ?? '').trim() === name ? ({ ...r, ...patch } as any) : r
+      )
+
+      // persist all rows for this name (debounced per row)
+      next.filter((r) => (r.name ?? '').trim() === name).forEach((r) => scheduleSaveRow(r))
+
+      return next
+    })
   }
 
   return (
@@ -391,34 +448,138 @@ const Statements: React.FC = () => {
             font-weight: 700 !important;
           }
         }
+
+        .search-wrap { position: relative; display: inline-flex; align-items: center; width: 100%; }
+        .search-clear {
+          display: none;
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 22px;
+          height: 22px;
+          border-radius: 999px;
+          border: 1px solid #e5e7eb;
+          background: #fff;
+          color: #111;
+          cursor: pointer;
+          line-height: 20px;
+          font-size: 16px;
+          padding: 0;
+        }
+        .search-wrap:hover .search-clear { display: inline-flex; align-items: center; justify-content: center; }
+
+        .deep-action {
+          display: none;
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          padding: 4px 10px;
+          border-radius: 999px;
+          border: 1px solid #6366f1;
+          background: #fff;
+          color: #6366f1;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .search-wrap:hover .deep-action { display: inline-flex; align-items: center; }
+
+        .deep-clear {
+          display: none;
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 22px;
+          height: 22px;
+          border-radius: 999px;
+          border: 1px solid #e5e7eb;
+          background: #fff;
+          color: #111;
+          cursor: pointer;
+          line-height: 20px;
+          font-size: 16px;
+          padding: 0;
+        }
+
+        .search-wrap:hover .deep-clear {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* move savings left so × fits on the far right */
+        .deep-action {
+          right: 40px;
+        }
       `}</style>
       <SectionHeader
         title="Current Statements"
         description="Import and manage your bank statements by uploading an Excel file."
       />
-
       {/* Toolbar */}
       <div style={searchBarContainerStyle}>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search bills..."
-          aria-label="Search bills"
-          style={searchBarStyle}
-        />
-        {query.trim() !== '' && (
+        <div className="search-wrap">
           <input
             type="text"
-            value={deepQuery}
-            onChange={(e) => setDeepQuery(e.target.value)}
-            placeholder="Search within results..."
-            style={{
-              ...searchBarStyle,
-              width: 240,
-              background: '#eef2ff'
-            }}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search bills..."
+            aria-label="Search bills"
+            style={{ ...searchBarStyle, paddingRight: 36 }}
           />
+          {query.trim() !== '' && (
+            <button
+              type="button"
+              className="search-clear"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setQuery('')
+                setDeepQuery('')
+              }}
+              aria-label="Clear search"
+              title="Clear"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {query.trim() !== '' && (
+          <div className="search-wrap">
+            <input
+              type="text"
+              value={deepQuery}
+              onChange={(e) => setDeepQuery(e.target.value)}
+              placeholder="Search within results..."
+              style={{ ...searchBarStyle, width: 240, background: '#eef2ff', paddingRight: 130 }}
+            />
+
+            <button
+              type="button"
+              className="deep-action"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setDeepQuery('646904')}
+              title='Set filter to "savings"'
+            >
+              646904
+            </button>
+
+            {deepQuery.trim() !== '' && (
+              <button
+                type="button"
+                className="deep-clear"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setDeepQuery('')}
+                aria-label="Clear deep search"
+                title="Clear"
+              >
+                ×
+              </button>
+            )}
+          </div>
         )}
         <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
         <button
@@ -433,7 +594,7 @@ const Statements: React.FC = () => {
         >
           {editMode ? '🔒 Lock' : '✏️ Edit'}
         </button>
-        <button
+        {/* <button
           type="button"
           onClick={() => {
             const screen = 'fee-management'
@@ -449,7 +610,7 @@ const Statements: React.FC = () => {
           title="Manage GST fees by party name"
         >
           💰 Fee Management
-        </button>
+        </button> */}
         <button
           type="button"
           onClick={() => setShowUnnamed((prev) => !prev)}
@@ -567,7 +728,6 @@ const Statements: React.FC = () => {
           🗂️ Deleted
         </button>
       </div>
-
       {/* Dialog */}
       <StatementsEditorDialog
         open={showDialog}
@@ -578,7 +738,58 @@ const Statements: React.FC = () => {
         }}
         onSave={handleSave}
       />
+      {activeName && (
+        <div
+          style={{
+            marginTop: 10,
+            display: 'flex',
+            gap: 10,
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}
+        >
+          <div style={{ fontWeight: 700 }}>{activeName}</div>
+          <input
+            value={feeState.gstFee}
+            placeholder="GST Fee"
+            style={{ ...searchBarStyle, width: 140 }}
+            onChange={(e) => updateFeeForName(activeName, { gstFee: e.target.value })}
+          />
+          <input
+            value={feeState.itFee}
+            placeholder="IT Fee"
+            style={{ ...searchBarStyle, width: 140 }}
+            onChange={(e) => updateFeeForName(activeName, { itFee: e.target.value })}
+          />
+          <input
+            value={feeState.tdsFee}
+            placeholder="TDS Fee"
+            style={{ ...searchBarStyle, width: 140 }}
+            onChange={(e) => updateFeeForName(activeName, { tdsFee: e.target.value })}
+          />
+          <input
+            value={feeState.auditFee}
+            placeholder="Audit Fee"
+            style={{ ...searchBarStyle, width: 140 }}
+            onChange={(e) => updateFeeForName(activeName, { auditFee: e.target.value })}
+          />
 
+          <div style={{ fontWeight: 800, marginLeft: 6 }}>
+            Total: {total ? total.toFixed(2) : ''}
+          </div>
+          <div
+            style={{ fontWeight: 800, marginLeft: 6, color: received < 0 ? '#dc2626' : '#16a34a' }}
+          >
+            Received: {received ? received.toFixed(2) : ''}
+          </div>
+
+          <div
+            style={{ fontWeight: 800, marginLeft: 6, color: remaining < 0 ? '#dc2626' : undefined }}
+          >
+            Remaining: {remaining ? remaining.toFixed(2) : ''}
+          </div>
+        </div>
+      )}
       <div id="printable">
         {/* Print header (only shows on print) */}
         <div className="print-only" style={{ marginBottom: 12 }}>
@@ -601,6 +812,10 @@ const Statements: React.FC = () => {
             selectedIds={selectedIds}
             onToggleRow={onToggleRow}
             onToggleAll={onToggleAll}
+            onSearchName={(name) => {
+              setQuery(name)
+              setDeepQuery('')
+            }}
           />
         )}
 

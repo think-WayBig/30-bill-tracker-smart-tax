@@ -924,6 +924,11 @@ interface BankStatementRow {
   closing: string
   name: string
   txnType: string
+
+  gstFee?: string
+  itFee?: string
+  tdsFee?: string
+  auditFee?: string
 }
 
 // Create / Save Statement
@@ -934,15 +939,23 @@ ipcMain.handle('save-statement', async (_event, statement: Omit<BankStatementRow
       ? JSON.parse(fs.readFileSync(filePath, 'utf-8'))
       : []
 
-    const newStatement: BankStatementRow = { ...statement, id: uuidv4() }
+    const newStatement: BankStatementRow = {
+      ...statement,
+      gstFee: String((statement as any).gstFee ?? ''),
+      itFee: String((statement as any).itFee ?? ''),
+      tdsFee: String((statement as any).tdsFee ?? ''),
+      auditFee: String((statement as any).auditFee ?? ''),
+      id: uuidv4()
+    }
+
     existing.push(newStatement)
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
-
     return { success: true, data: newStatement }
   } catch (error: any) {
     return { success: false, error: error.message }
   }
 })
+
 
 // Read / Load all Statements
 ipcMain.handle('load-statements', async () => {
@@ -961,25 +974,27 @@ ipcMain.handle('load-statements', async () => {
 ipcMain.handle('update-statement', async (_event, updated: BankStatementRow) => {
   try {
     const filePath = getStatementsPath()
-    if (!fs.existsSync(filePath)) {
-      return { success: false, error: 'Statements file not found.' }
-    }
+    if (!fs.existsSync(filePath)) return { success: false, error: 'Statements file not found.' }
 
     const existing: BankStatementRow[] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-
     const index = existing.findIndex((s) => s.id === updated.id)
-    if (index === -1) {
-      return { success: false, error: 'Statement not found.' }
+    if (index === -1) return { success: false, error: 'Statement not found.' }
+
+    existing[index] = {
+      ...existing[index],
+      ...updated,
+      gstFee: String((updated as any).gstFee ?? ''),
+      itFee: String((updated as any).itFee ?? ''),
+      tdsFee: String((updated as any).tdsFee ?? ''),
+      auditFee: String((updated as any).auditFee ?? '')
     }
-
-    existing[index] = { ...existing[index], ...updated }
     fs.writeFileSync(filePath, JSON.stringify(existing, null, 2))
-
     return { success: true, data: existing[index] }
   } catch (error: any) {
     return { success: false, error: error.message }
   }
 })
+
 
 // Delete Statement
 ipcMain.handle('delete-statement', async (_event, id: string) => {

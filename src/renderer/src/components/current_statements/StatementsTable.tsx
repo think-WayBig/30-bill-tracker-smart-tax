@@ -103,6 +103,7 @@ type Props = {
   selectedIds: Set<string>
   onToggleRow: (id: string, checked: boolean) => void
   onToggleAll: (checked: boolean, visibleIds: string[]) => void
+  onSearchName: (name: string) => void
 }
 
 export const StatementsTable: React.FC<Props> = ({
@@ -115,7 +116,8 @@ export const StatementsTable: React.FC<Props> = ({
   query = '',
   selectedIds,
   onToggleRow,
-  onToggleAll
+  onToggleAll,
+  onSearchName
 }) => {
   const [dateSortDir, setDateSortDir] = useState<'asc' | 'desc'>('asc') // default asc
 
@@ -240,6 +242,24 @@ export const StatementsTable: React.FC<Props> = ({
       .editable-textarea.disabled {
         resize: none !important;
       }
+
+      .name-cell { position: relative; }
+      .name-search-btn {
+        display: none;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #111;
+        cursor: pointer;
+        font-size: 12px;
+        z-index: 5;
+      }
+      .name-cell:hover .name-search-btn { display: inline-flex; }
     `}</style>
       <table style={{ borderCollapse: 'collapse', tableLayout: 'fixed', width: '100%' }}>
         <colgroup>
@@ -341,21 +361,36 @@ export const StatementsTable: React.FC<Props> = ({
                     className="editable-cell"
                   >
                     {key === 'name' ? (
-                      <input
-                        type="text"
-                        list={NAME_DATALIST_ID}
-                        value={row.name ?? ''}
-                        onFocus={() => setEditingNameRowId(row.id!)}
-                        onBlur={() => setEditingNameRowId(null)}
-                        onChange={(e) => !isLocked && onCellEdit(row.id!, 'name', e.target.value)}
-                        style={{
-                          ...textAreaStyle,
-                          backgroundColor: isLocked ? '#f9fafb' : '#fff',
-                          pointerEvents: isLocked ? 'none' : 'auto'
-                        }}
-                        readOnly={isLocked}
-                        placeholder="Name"
-                      />
+                      <div className="name-cell">
+                        <input
+                          type="text"
+                          list={NAME_DATALIST_ID}
+                          value={row.name ?? ''}
+                          onFocus={() => setEditingNameRowId(row.id!)}
+                          onBlur={() => setEditingNameRowId(null)}
+                          onChange={(e) => !isLocked && onCellEdit(row.id!, 'name', e.target.value)}
+                          style={{
+                            ...textAreaStyle,
+                            backgroundColor: isLocked ? '#f9fafb' : '#fff',
+                            pointerEvents: isLocked ? 'none' : 'auto',
+                            paddingRight: 72 // ✅ space for button
+                          }}
+                          readOnly={isLocked}
+                          placeholder="Name"
+                        />
+
+                        {!!row.name?.trim() && (
+                          <button
+                            type="button"
+                            className="name-search-btn"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => onSearchName(row.name.trim())}
+                            title={`Search "${row.name.trim()}"`}
+                          >
+                            Search
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <textarea
                         rows={2}
