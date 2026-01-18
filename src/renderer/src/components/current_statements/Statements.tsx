@@ -5,10 +5,21 @@ import { SectionHeader } from '../helpers/SectionHeader'
 import { StatementsEditorDialog } from './StatementsEditorDialog'
 import { StatementsTable, OnCellEdit } from './StatementsTable'
 import {
+  chip,
+  chipLabel,
+  chipValue,
+  chipValueNeg,
   emptyStatementStyle,
+  fieldLabel,
+  fieldsStyle,
+  fieldWrap,
   importBtnStyle,
+  inputStyle,
+  nameStyle,
+  rowStyle,
   searchBarContainerStyle,
-  searchBarStyle
+  searchBarStyle,
+  totalsStyle
 } from './Statement.styles'
 
 const BANK_HEADERS = [
@@ -47,12 +58,24 @@ const toNum = (v?: string) => {
   )
   return Number.isFinite(n) ? n : 0
 }
-const totalFee = (f: { gstFee?: string; itFee?: string; tdsFee?: string; auditFee?: string }) =>
-  toNum(f.gstFee) + toNum(f.itFee) + toNum(f.tdsFee) + toNum(f.auditFee)
+const totalFee = (f: {
+  gstFee?: string
+  itFee?: string
+  tdsFee?: string
+  auditFee?: string
+  otherFee?: string
+}) => toNum(f.gstFee) + toNum(f.itFee) + toNum(f.tdsFee) + toNum(f.auditFee) + toNum(f.otherFee)
+
+const RECEIVED_NARRATION_KEY = '646904'
 
 const receivedForName = (rows: BankStatementRow[], name: string) =>
   rows
     .filter((r) => (r.name ?? '').trim() === name)
+    .filter((r) =>
+      String(r.narration ?? '')
+        .toLowerCase()
+        .includes(RECEIVED_NARRATION_KEY)
+    )
     .reduce((sum, r) => sum + (toNum(r.deposit) - toNum(r.withdrawal)), 0)
 
 const Statements: React.FC = () => {
@@ -139,7 +162,8 @@ const Statements: React.FC = () => {
     gstFee: String((activeRow as any)?.gstFee ?? ''),
     itFee: String((activeRow as any)?.itFee ?? ''),
     tdsFee: String((activeRow as any)?.tdsFee ?? ''),
-    auditFee: String((activeRow as any)?.auditFee ?? '')
+    auditFee: String((activeRow as any)?.auditFee ?? ''),
+    otherFee: String((activeRow as any)?.otherFee ?? '')
   }
 
   const total = totalFee(feeState)
@@ -216,7 +240,8 @@ const Statements: React.FC = () => {
           gstFee: '',
           itFee: '',
           tdsFee: '',
-          auditFee: ''
+          auditFee: '',
+          otherFee: ''
         })
       }
 
@@ -280,7 +305,7 @@ const Statements: React.FC = () => {
 
   const updateFeeForName = (
     name: string,
-    patch: Partial<Pick<BankStatementRow, 'gstFee' | 'itFee' | 'tdsFee' | 'auditFee'>>
+    patch: Partial<Pick<BankStatementRow, 'gstFee' | 'itFee' | 'tdsFee' | 'auditFee' | 'otherFee'>>
   ) => {
     setFileData((prev) => {
       const next = prev.map((r) =>
@@ -738,54 +763,71 @@ const Statements: React.FC = () => {
         onSave={handleSave}
       />
       {activeName && (
-        <div
-          style={{
-            marginTop: 10,
-            display: 'flex',
-            gap: 10,
-            alignItems: 'center',
-            flexWrap: 'wrap'
-          }}
-        >
-          <div style={{ fontWeight: 700 }}>{activeName}</div>
-          <input
-            value={feeState.gstFee}
-            placeholder="GST Fee"
-            style={{ ...searchBarStyle, width: 140 }}
-            onChange={(e) => updateFeeForName(activeName, { gstFee: e.target.value })}
-          />
-          <input
-            value={feeState.itFee}
-            placeholder="IT Fee"
-            style={{ ...searchBarStyle, width: 140 }}
-            onChange={(e) => updateFeeForName(activeName, { itFee: e.target.value })}
-          />
-          <input
-            value={feeState.tdsFee}
-            placeholder="TDS Fee"
-            style={{ ...searchBarStyle, width: 140 }}
-            onChange={(e) => updateFeeForName(activeName, { tdsFee: e.target.value })}
-          />
-          <input
-            value={feeState.auditFee}
-            placeholder="Audit Fee"
-            style={{ ...searchBarStyle, width: 140 }}
-            onChange={(e) => updateFeeForName(activeName, { auditFee: e.target.value })}
-          />
+        <div style={rowStyle}>
+          <div style={nameStyle}>{activeName}</div>
 
-          <div style={{ fontWeight: 800, marginLeft: 6 }}>
-            Total: {total ? total.toFixed(2) : ''}
-          </div>
-          <div
-            style={{ fontWeight: 800, marginLeft: 6, color: received < 0 ? '#dc2626' : '#16a34a' }}
-          >
-            Received: {received ? received.toFixed(2) : ''}
+          <div style={fieldsStyle}>
+            <div style={fieldWrap}>
+              <div style={fieldLabel}>GST Fee</div>
+              <input
+                value={feeState.gstFee}
+                style={{ ...inputStyle }}
+                onChange={(e) => updateFeeForName(activeName, { gstFee: e.target.value })}
+              />
+            </div>
+
+            <div style={fieldWrap}>
+              <div style={fieldLabel}>IT Fee</div>
+              <input
+                value={feeState.itFee}
+                style={{ ...inputStyle }}
+                onChange={(e) => updateFeeForName(activeName, { itFee: e.target.value })}
+              />
+            </div>
+
+            <div style={fieldWrap}>
+              <div style={fieldLabel}>TDS Fee</div>
+              <input
+                value={feeState.tdsFee}
+                style={{ ...inputStyle }}
+                onChange={(e) => updateFeeForName(activeName, { tdsFee: e.target.value })}
+              />
+            </div>
+
+            <div style={fieldWrap}>
+              <div style={fieldLabel}>Audit Fee</div>
+              <input
+                value={feeState.auditFee}
+                style={{ ...inputStyle }}
+                onChange={(e) => updateFeeForName(activeName, { auditFee: e.target.value })}
+              />
+            </div>
+
+            <div style={fieldWrap}>
+              <div style={fieldLabel}>Other Fee</div>
+              <input
+                value={feeState.otherFee}
+                style={{ ...inputStyle }}
+                onChange={(e) => updateFeeForName(activeName, { otherFee: e.target.value })}
+              />
+            </div>
           </div>
 
-          <div
-            style={{ fontWeight: 800, marginLeft: 6, color: remaining < 0 ? '#dc2626' : undefined }}
-          >
-            Remaining: {remaining ? remaining.toFixed(2) : ''}
+          <div style={totalsStyle}>
+            <div style={chip}>
+              <div style={chipLabel}>Total</div>
+              <div style={chipValue}>{total.toFixed(2)}</div>
+            </div>
+
+            <div style={chip}>
+              <div style={chipLabel}>Received</div>
+              <div style={received < 0 ? chipValueNeg : chipValue}>{received.toFixed(2)}</div>
+            </div>
+
+            <div style={chip}>
+              <div style={chipLabel}>Remaining</div>
+              <div style={chipValue}>{remaining.toFixed(2)}</div>
+            </div>
           </div>
         </div>
       )}

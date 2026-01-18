@@ -105,3 +105,88 @@ export const deleteBtnStyle: React.CSSProperties = {
   background: '#fff',
   cursor: 'pointer'
 }
+
+export const fieldWrap: React.CSSProperties = {
+  display: 'inline-flex',
+  flexDirection: 'column',
+  gap: 4
+}
+
+export const fieldLabel: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  opacity: 0.8,
+  lineHeight: 1
+}
+
+export const rowStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '220px 1fr auto',
+  alignItems: 'end',
+  gap: 20,
+  padding: '12px 16px',
+  borderRadius: 14,
+  background: '#fff',
+  boxShadow: '0 6px 18px rgba(0,0,0,0.06)'
+}
+
+export const nameStyle: React.CSSProperties = {
+  fontWeight: 700,
+  fontSize: 18,
+  lineHeight: 1.1,
+  alignSelf: 'center',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis'
+}
+
+export const fieldsStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, minmax(140px, 180px))',
+  gap: 14,
+  alignItems: 'end'
+}
+
+export const inputStyle: React.CSSProperties = {
+  height: 36,
+  borderRadius: 10,
+  border: '1px solid rgba(0,0,0,0.12)',
+  padding: '0 12px',
+  outline: 'none',
+  fontSize: 14,
+  background: 'rgba(0,0,0,0.02)'
+}
+
+export const totalsStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 10,
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  justifyContent: 'flex-end'
+}
+
+export const chip: React.CSSProperties = {
+  display: 'flex',
+  gap: 8,
+  alignItems: 'baseline',
+  padding: '8px 12px',
+  borderRadius: 999,
+  background: 'rgba(0,0,0,0.04)'
+}
+
+export const chipLabel: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 700,
+  color: 'rgba(0,0,0,0.65)'
+}
+
+export const chipValue: React.CSSProperties = {
+  fontSize: 16,
+  fontWeight: 800,
+  color: '#111'
+}
+
+export const chipValueNeg: React.CSSProperties = {
+  ...chipValue,
+  color: '#d32f2f'
+}

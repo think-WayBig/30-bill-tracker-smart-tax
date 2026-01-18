@@ -89,6 +89,7 @@ declare global {
     itFee: string
     tdsFee: string
     auditFee: string
+    otherFee: string
   }
 
   interface YearlyAuditData {
