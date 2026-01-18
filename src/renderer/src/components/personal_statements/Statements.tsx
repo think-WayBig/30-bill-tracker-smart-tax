@@ -180,7 +180,8 @@ const Statements: React.FC = () => {
           gstFee: '',
           itFee: '',
           tdsFee: '',
-          auditFee: ''
+          auditFee: '',
+          otherFee: '',
         })
       }
 
