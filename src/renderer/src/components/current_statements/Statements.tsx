@@ -82,6 +82,9 @@ const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  // const [showScrollBottom, setShowScrollBottom] = useState(false)
+
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const rawSelected = localStorage.getItem('selectedYear')!
 
@@ -120,6 +123,39 @@ const Statements: React.FC = () => {
       setFileData(rows ?? [])
     })()
   }, [])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    const onScroll = () => {
+      const max = el.scrollHeight - el.clientHeight
+      setShowScrollBottom(max - el.scrollTop > 120)
+    }
+
+    onScroll()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const scrollBtnStyle: React.CSSProperties = {
+    position: 'fixed',
+    right: 18,
+    bottom: 18,
+    width: 42,
+    height: 42,
+    borderRadius: 999,
+    border: '1px solid rgba(0,0,0,0.12)',
+    background: '#fff',
+    color: '#111',
+    cursor: 'pointer',
+    boxShadow: '0 10px 24px rgba(0,0,0,0.12)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 18,
+    zIndex: 999999999
+  }
 
   const [showUnnamed, setShowUnnamed] = useState(false)
   const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
@@ -168,7 +204,7 @@ const Statements: React.FC = () => {
 
   const total = totalFee(feeState)
   const received = activeName ? receivedForName(visibleData, activeName) : 0
-  const remaining = total - received
+  const remaining = total + received
 
   const onToggleRow = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -321,7 +357,8 @@ const Statements: React.FC = () => {
 
   return (
     <Layout title="🏦 Manage Bank Statements" financialYear>
-      <style>{`
+      <div ref={scrollRef} style={{ height: '100%', overflow: 'auto' }}>
+        <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
 
@@ -540,85 +577,85 @@ const Statements: React.FC = () => {
           right: 40px;
         }
       `}</style>
-      <SectionHeader
-        title="Current Statements"
-        description="Import and manage your bank statements by uploading an Excel file."
-      />
-      {/* Toolbar */}
-      <div style={searchBarContainerStyle}>
-        <div className="search-wrap">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search bills..."
-            aria-label="Search bills"
-            style={{ ...searchBarStyle, paddingRight: 36 }}
-          />
-          {query.trim() !== '' && (
-            <button
-              type="button"
-              className="search-clear"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                setQuery('')
-                setDeepQuery('')
-              }}
-              aria-label="Clear search"
-              title="Clear"
-            >
-              ×
-            </button>
-          )}
-        </div>
-        {query.trim() !== '' && (
+        <SectionHeader
+          title="Current Statements"
+          description="Import and manage your bank statements by uploading an Excel file."
+        />
+        {/* Toolbar */}
+        <div style={searchBarContainerStyle}>
           <div className="search-wrap">
             <input
               type="text"
-              value={deepQuery}
-              onChange={(e) => setDeepQuery(e.target.value)}
-              placeholder="Search within results..."
-              style={{ ...searchBarStyle, width: 240, background: '#eef2ff', paddingRight: 130 }}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search bills..."
+              aria-label="Search bills"
+              style={{ ...searchBarStyle, paddingRight: 36 }}
             />
-
-            <button
-              type="button"
-              className="deep-action"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setDeepQuery('646904')}
-              title='Set filter to "savings"'
-            >
-              646904
-            </button>
-
-            {deepQuery.trim() !== '' && (
+            {query.trim() !== '' && (
               <button
                 type="button"
-                className="deep-clear"
+                className="search-clear"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => setDeepQuery('')}
-                aria-label="Clear deep search"
+                onClick={() => {
+                  setQuery('')
+                  setDeepQuery('')
+                }}
+                aria-label="Clear search"
                 title="Clear"
               >
                 ×
               </button>
             )}
           </div>
-        )}
-        <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
-        <button
-          type="button"
-          onClick={() => setEditMode((prev) => !prev)}
-          style={{
-            ...importBtnStyle,
-            background: '#ffff',
-            color: '#6366f1',
-            border: '1px solid #6366f1'
-          }}
-        >
-          {editMode ? '🔒 Lock' : '✏️ Edit'}
-        </button>
-        {/* <button
+          {query.trim() !== '' && (
+            <div className="search-wrap">
+              <input
+                type="text"
+                value={deepQuery}
+                onChange={(e) => setDeepQuery(e.target.value)}
+                placeholder="Search within results..."
+                style={{ ...searchBarStyle, width: 240, background: '#eef2ff', paddingRight: 130 }}
+              />
+
+              <button
+                type="button"
+                className="deep-action"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setDeepQuery('646904')}
+                title='Set filter to "savings"'
+              >
+                646904
+              </button>
+
+              {deepQuery.trim() !== '' && (
+                <button
+                  type="button"
+                  className="deep-clear"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setDeepQuery('')}
+                  aria-label="Clear deep search"
+                  title="Clear"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )}
+          <div style={{ width: 1, alignSelf: 'stretch', background: '#e5e7eb' }} />
+          <button
+            type="button"
+            onClick={() => setEditMode((prev) => !prev)}
+            style={{
+              ...importBtnStyle,
+              background: '#ffff',
+              color: '#6366f1',
+              border: '1px solid #6366f1'
+            }}
+          >
+            {editMode ? '🔒 Lock' : '✏️ Edit'}
+          </button>
+          {/* <button
           type="button"
           onClick={() => {
             const screen = 'fee-management'
@@ -635,239 +672,259 @@ const Statements: React.FC = () => {
         >
           💰 Fee Management
         </button> */}
-        <button
-          type="button"
-          onClick={() => setShowUnnamed((prev) => !prev)}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-        >
-          {showUnnamed ? 'Show All' : 'Show Unnamed'}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const screen = 'current-statements-summary' // matches MainView
-            localStorage.setItem('activeScreen', screen)
-            window.dispatchEvent(new Event('statements:page-change')) // if you use it for accent refresh
-            window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
-          }}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-          aria-label="Open statements summary"
-          title="Open statements summary"
-        >
-          📊 Summary
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            // optional: lock edits for cleaner print
-            if (editMode) setEditMode(false)
-            // wait a tick if you just toggled edit mode
-            setTimeout(() => window.print(), 50)
-          }}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-          className="screen-only"
-          aria-label="Print visible rows"
-          title="Print visible rows"
-        >
-          🖨️ Print
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".xlsx,.xls"
-          id="excel-upload"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-        >
-          📄 Import
-        </button>
-        &nbsp; | &nbsp;
-        <button
-          type="button"
-          disabled={selectedIds.size === 0}
-          onClick={async () => {
-            if (selectedIds.size === 0) return
-            const ok = window.confirm(
-              `Move ${selectedIds.size} selected row(s) to Deleted? You can restore them later.`
-            )
-            if (!ok) return
-            const ids = Array.from(selectedIds)
-            try {
-              // Persist soft delete
-              for (const id of ids) {
-                const row = fileData.find((r) => r.id === id)
-                if (!row) continue
-                await window.electronAPI.updateStatement({ ...row, deleted: true })
-              }
-              // Reflect in UI
-              setFileData((prev) =>
-                prev.map((r) => (ids.includes(r.id) ? { ...r, deleted: true } : r))
-              )
-              setSelectedIds(new Set())
-            } catch (e: any) {
-              alert(`❌ Failed to delete selected rows: ${e?.message || e}`)
-            }
-          }}
-          style={{
-            ...importBtnStyle,
-            background: selectedIds.size ? '#ef4444' : '#f3f4f6',
-            color: selectedIds.size ? '#fff' : '#9ca3af',
-            border: '1px solid #ef4444'
-          }}
-          onMouseOver={(e) => {
-            if (selectedIds.size) e.currentTarget.style.background = '#dc2626'
-          }}
-          onMouseOut={(e) => {
-            if (selectedIds.size) e.currentTarget.style.background = '#ef4444'
-          }}
-          title={selectedIds.size ? 'Move selected to Deleted' : 'Select rows to delete'}
-        >
-          🗑️ Delete
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const screen = 'current-statements-deleted'
-            localStorage.setItem('activeScreen', screen)
-            window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
-          }}
-          style={importBtnStyle}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
-          title="Open Deleted Statements"
-        >
-          🗂️ Deleted
-        </button>
-      </div>
-      {/* Dialog */}
-      <StatementsEditorDialog
-        open={showDialog}
-        data={previewData}
-        onClose={() => {
-          setPreviewData([])
-          setShowDialog(false)
-        }}
-        onSave={handleSave}
-      />
-      {activeName && (
-        <div style={rowStyle}>
-          <div style={nameStyle}>{activeName}</div>
-
-          <div style={fieldsStyle}>
-            <div style={fieldWrap}>
-              <div style={fieldLabel}>GST Fee</div>
-              <input
-                value={feeState.gstFee}
-                style={{ ...inputStyle }}
-                onChange={(e) => updateFeeForName(activeName, { gstFee: e.target.value })}
-              />
-            </div>
-
-            <div style={fieldWrap}>
-              <div style={fieldLabel}>IT Fee</div>
-              <input
-                value={feeState.itFee}
-                style={{ ...inputStyle }}
-                onChange={(e) => updateFeeForName(activeName, { itFee: e.target.value })}
-              />
-            </div>
-
-            <div style={fieldWrap}>
-              <div style={fieldLabel}>TDS Fee</div>
-              <input
-                value={feeState.tdsFee}
-                style={{ ...inputStyle }}
-                onChange={(e) => updateFeeForName(activeName, { tdsFee: e.target.value })}
-              />
-            </div>
-
-            <div style={fieldWrap}>
-              <div style={fieldLabel}>Audit Fee</div>
-              <input
-                value={feeState.auditFee}
-                style={{ ...inputStyle }}
-                onChange={(e) => updateFeeForName(activeName, { auditFee: e.target.value })}
-              />
-            </div>
-
-            <div style={fieldWrap}>
-              <div style={fieldLabel}>Other Fee</div>
-              <input
-                value={feeState.otherFee}
-                style={{ ...inputStyle }}
-                onChange={(e) => updateFeeForName(activeName, { otherFee: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div style={totalsStyle}>
-            <div style={chip}>
-              <div style={chipLabel}>Total</div>
-              <div style={chipValue}>{total.toFixed(2)}</div>
-            </div>
-
-            <div style={chip}>
-              <div style={chipLabel}>Received</div>
-              <div style={received < 0 ? chipValueNeg : chipValue}>{received.toFixed(2)}</div>
-            </div>
-
-            <div style={chip}>
-              <div style={chipLabel}>Remaining</div>
-              <div style={chipValue}>{remaining.toFixed(2)}</div>
-            </div>
-          </div>
-        </div>
-      )}
-      <div id="printable">
-        {/* Print header (only shows on print) */}
-        <div className="print-only" style={{ marginBottom: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 16 }}>Bank Statements</div>
-          <div style={{ fontSize: 12 }}>
-            Printed: {new Date().toLocaleString()}
-            {query?.trim() ? `  •  Filter: "${query.trim()}"` : ''}
-          </div>
-        </div>
-        {fileData.length > 0 && (
-          <StatementsTable
-            rows={visibleData}
-            onCellEdit={handleCellEdit}
-            onRowDelete={handleDeleteRow}
-            query={query}
-            editMode={editMode}
-            showUnnamed={showUnnamed}
-            editingNameRowId={editingNameRowId}
-            setEditingNameRowId={setEditingNameRowId}
-            selectedIds={selectedIds}
-            onToggleRow={onToggleRow}
-            onToggleAll={onToggleAll}
-            onSearchName={(name) => {
-              setQuery(name)
-              setDeepQuery('')
+          <button
+            type="button"
+            onClick={() => setShowUnnamed((prev) => !prev)}
+            style={importBtnStyle}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          >
+            {showUnnamed ? 'Show All' : 'Show Unnamed'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const screen = 'current-statements-summary' // matches MainView
+              localStorage.setItem('activeScreen', screen)
+              window.dispatchEvent(new Event('statements:page-change')) // if you use it for accent refresh
+              window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
             }}
+            style={importBtnStyle}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+            aria-label="Open statements summary"
+            title="Open statements summary"
+          >
+            📊 Summary
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              // optional: lock edits for cleaner print
+              if (editMode) setEditMode(false)
+              // wait a tick if you just toggled edit mode
+              setTimeout(() => window.print(), 50)
+            }}
+            style={importBtnStyle}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+            className="screen-only"
+            aria-label="Print visible rows"
+            title="Print visible rows"
+          >
+            🖨️ Print
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            id="excel-upload"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
           />
-        )}
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            style={importBtnStyle}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+          >
+            📄 Import
+          </button>
+          &nbsp; | &nbsp;
+          <button
+            type="button"
+            disabled={selectedIds.size === 0}
+            onClick={async () => {
+              if (selectedIds.size === 0) return
+              const ok = window.confirm(
+                `Move ${selectedIds.size} selected row(s) to Deleted? You can restore them later.`
+              )
+              if (!ok) return
+              const ids = Array.from(selectedIds)
+              try {
+                // Persist soft delete
+                for (const id of ids) {
+                  const row = fileData.find((r) => r.id === id)
+                  if (!row) continue
+                  await window.electronAPI.updateStatement({ ...row, deleted: true })
+                }
+                // Reflect in UI
+                setFileData((prev) =>
+                  prev.map((r) => (ids.includes(r.id) ? { ...r, deleted: true } : r))
+                )
+                setSelectedIds(new Set())
+              } catch (e: any) {
+                alert(`❌ Failed to delete selected rows: ${e?.message || e}`)
+              }
+            }}
+            style={{
+              ...importBtnStyle,
+              background: selectedIds.size ? '#ef4444' : '#f3f4f6',
+              color: selectedIds.size ? '#fff' : '#9ca3af',
+              border: '1px solid #ef4444'
+            }}
+            onMouseOver={(e) => {
+              if (selectedIds.size) e.currentTarget.style.background = '#dc2626'
+            }}
+            onMouseOut={(e) => {
+              if (selectedIds.size) e.currentTarget.style.background = '#ef4444'
+            }}
+            title={selectedIds.size ? 'Move selected to Deleted' : 'Select rows to delete'}
+          >
+            🗑️ Delete
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const screen = 'current-statements-deleted'
+              localStorage.setItem('activeScreen', screen)
+              window.dispatchEvent(new CustomEvent('app:navigate', { detail: { screen } }))
+            }}
+            style={importBtnStyle}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#6366f1')}
+            title="Open Deleted Statements"
+          >
+            🗂️ Deleted
+          </button>
+        </div>
+        {/* Dialog */}
+        <StatementsEditorDialog
+          open={showDialog}
+          data={previewData}
+          onClose={() => {
+            setPreviewData([])
+            setShowDialog(false)
+          }}
+          onSave={handleSave}
+        />
+        {activeName && (
+          <div style={rowStyle}>
+            <div style={nameStyle}>{activeName}</div>
 
-        {fileData.length === 0 && (
-          <div style={emptyStatementStyle}>
-            No statements yet. Import an Excel file to get started.
+            <div style={fieldsStyle}>
+              <div style={fieldWrap}>
+                <div style={fieldLabel}>GST Fee</div>
+                <input
+                  value={feeState.gstFee}
+                  style={{ ...inputStyle }}
+                  onChange={(e) => updateFeeForName(activeName, { gstFee: e.target.value })}
+                />
+              </div>
+
+              <div style={fieldWrap}>
+                <div style={fieldLabel}>IT Fee</div>
+                <input
+                  value={feeState.itFee}
+                  style={{ ...inputStyle }}
+                  onChange={(e) => updateFeeForName(activeName, { itFee: e.target.value })}
+                />
+              </div>
+
+              <div style={fieldWrap}>
+                <div style={fieldLabel}>TDS Fee</div>
+                <input
+                  value={feeState.tdsFee}
+                  style={{ ...inputStyle }}
+                  onChange={(e) => updateFeeForName(activeName, { tdsFee: e.target.value })}
+                />
+              </div>
+
+              <div style={fieldWrap}>
+                <div style={fieldLabel}>Audit Fee</div>
+                <input
+                  value={feeState.auditFee}
+                  style={{ ...inputStyle }}
+                  onChange={(e) => updateFeeForName(activeName, { auditFee: e.target.value })}
+                />
+              </div>
+
+              <div style={fieldWrap}>
+                <div style={fieldLabel}>Other Fee</div>
+                <input
+                  value={feeState.otherFee}
+                  style={{ ...inputStyle }}
+                  onChange={(e) => updateFeeForName(activeName, { otherFee: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div style={totalsStyle}>
+              <div style={chip}>
+                <div style={chipLabel}>Total</div>
+                <div style={chipValue}>{total.toFixed(2)}</div>
+              </div>
+
+              <div style={chip}>
+                <div style={chipLabel}>Received</div>
+                <div style={received < 0 ? chipValueNeg : chipValue}>{received.toFixed(2)}</div>
+              </div>
+
+              <div style={chip}>
+                <div style={chipLabel}>Remaining</div>
+                <div style={chipValue}>{remaining.toFixed(2)}</div>
+              </div>
+            </div>
           </div>
         )}
+        <div id="printable">
+          {/* Print header (only shows on print) */}
+          <div className="print-only" style={{ marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>Bank Statements</div>
+            <div style={{ fontSize: 12 }}>
+              Printed: {new Date().toLocaleString()}
+              {query?.trim() ? `  •  Filter: "${query.trim()}"` : ''}
+            </div>
+          </div>
+          {fileData.length > 0 && (
+            <StatementsTable
+              rows={visibleData}
+              onCellEdit={handleCellEdit}
+              onRowDelete={handleDeleteRow}
+              query={query}
+              editMode={editMode}
+              showUnnamed={showUnnamed}
+              editingNameRowId={editingNameRowId}
+              setEditingNameRowId={setEditingNameRowId}
+              selectedIds={selectedIds}
+              onToggleRow={onToggleRow}
+              onToggleAll={onToggleAll}
+              onSearchName={(name) => {
+                setQuery(name)
+                setDeepQuery('')
+              }}
+            />
+          )}
+
+          {fileData.length === 0 && (
+            <div style={emptyStatementStyle}>
+              No statements yet. Import an Excel file to get started.
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          style={scrollBtnStyle}
+          onClick={() => {
+            const el = document.getElementById('statements-scroll')
+            if (!el) return
+
+            el.scrollTo({
+              top: el.scrollHeight,
+              behavior: 'smooth'
+            })
+          }}
+        >
+          ↓
+        </button>
       </div>
     </Layout>
   )
 }
 
 export default Statements
+function setShowScrollBottom(arg: boolean) {
+  throw new Error('Function not implemented.')
+}

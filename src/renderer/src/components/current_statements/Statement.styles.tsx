@@ -142,7 +142,7 @@ export const nameStyle: React.CSSProperties = {
 
 export const fieldsStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(4, minmax(140px, 180px))',
+  gridTemplateColumns: 'repeat(5, minmax(100px, 100px))',
   gap: 14,
   alignItems: 'end'
 }
@@ -154,7 +154,8 @@ export const inputStyle: React.CSSProperties = {
   padding: '0 12px',
   outline: 'none',
   fontSize: 14,
-  background: 'rgba(0,0,0,0.02)'
+  background: 'rgba(0,0,0,0.02)',
+  width: '90px'
 }
 
 export const totalsStyle: React.CSSProperties = {

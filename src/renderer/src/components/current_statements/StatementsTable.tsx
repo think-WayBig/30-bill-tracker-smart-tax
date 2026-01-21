@@ -218,7 +218,7 @@ export const StatementsTable: React.FC<Props> = ({
   const countDebits = filtered.filter((r) => parseFloat(r.withdrawal || '0') > 0).length
 
   return (
-    <div style={tableContainerStyle}>
+    <div id="statements-scroll" style={tableContainerStyle}>
       <datalist id={NAME_DATALIST_ID}>
         {nameOptions.map((n) => (
           <option key={n} value={n} />
