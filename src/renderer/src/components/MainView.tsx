@@ -53,7 +53,7 @@ const MainView = () => {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <Sidebar setActiveScreen={setActiveScreen} />
-      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f5f7ff' }}>
+      <div id="main-scroll-container" style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f5f7ff' }}>
         {activeScreen === 'add' && <Entry />}
         {isBookScreen && <Book activeScreen={activeScreen} />}
         {activeScreen === 'group' && <Group />}

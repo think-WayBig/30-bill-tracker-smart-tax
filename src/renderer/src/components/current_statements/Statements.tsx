@@ -82,9 +82,7 @@ const Statements: React.FC = () => {
   // Final saved rows
   const [fileData, setFileData] = useState<BankStatementRow[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  // const [showScrollBottom, setShowScrollBottom] = useState(false)
-
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [showScrollBottom, setShowScrollBottom] = useState(false)
 
   const rawSelected = localStorage.getItem('selectedYear')!
 
@@ -125,12 +123,11 @@ const Statements: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    const el = scrollRef.current
+    const el = document.getElementById('main-scroll-container')
     if (!el) return
 
     const onScroll = () => {
-      const max = el.scrollHeight - el.clientHeight
-      setShowScrollBottom(max - el.scrollTop > 120)
+      setShowScrollBottom(el.scrollTop > 120)
     }
 
     onScroll()
@@ -357,7 +354,7 @@ const Statements: React.FC = () => {
 
   return (
     <Layout title="🏦 Manage Bank Statements" financialYear>
-      <div ref={scrollRef} style={{ height: '100%', overflow: 'auto' }}>
+      <div style={{ height: '100%', overflow: 'auto' }}>
         <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
@@ -903,28 +900,22 @@ const Statements: React.FC = () => {
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          style={scrollBtnStyle}
-          onClick={() => {
-            const el = document.getElementById('statements-scroll')
-            if (!el) return
-
-            el.scrollTo({
-              top: el.scrollHeight,
-              behavior: 'smooth'
-            })
-          }}
-        >
-          ↓
-        </button>
+        {showScrollBottom && (
+          <button
+            type="button"
+            style={scrollBtnStyle}
+            onClick={() => {
+              document
+                .getElementById('main-scroll-container')
+                ?.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+          >
+            ↑
+          </button>
+        )}
       </div>
     </Layout>
   )
 }
 
 export default Statements
-function setShowScrollBottom(arg: boolean) {
-  throw new Error('Function not implemented.')
-}
