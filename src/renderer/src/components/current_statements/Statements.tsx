@@ -354,7 +354,6 @@ const Statements: React.FC = () => {
 
   return (
     <Layout title="🏦 Manage Bank Statements" financialYear>
-      <div style={{ height: '100%', overflow: 'auto' }}>
         <style>{`
         @media print {
           @page { size: A4 landscape; margin: 8mm; }
@@ -913,7 +912,6 @@ const Statements: React.FC = () => {
             ↑
           </button>
         )}
-      </div>
     </Layout>
   )
 }
