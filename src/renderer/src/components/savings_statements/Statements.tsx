@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
 import Layout from '../helpers/Layout'
 import { SectionHeader } from '../helpers/SectionHeader'
@@ -83,6 +83,16 @@ const Statements: React.FC = () => {
 
   const [showUnnamed, setShowUnnamed] = useState(false)
   const [editingNameRowId, setEditingNameRowId] = useState<string | null>(null)
+
+  // All unique names across every year (for datalist suggestions)
+  const allNames = useMemo(() => {
+    const set = new Set<string>()
+    for (const r of fileData) {
+      const n = (r.name ?? '').trim()
+      if (n) set.add(n)
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [fileData])
 
   const visibleData = fileData
     .filter((r) => !r.deleted)
@@ -590,6 +600,7 @@ const Statements: React.FC = () => {
             selectedIds={selectedIds}
             onToggleRow={onToggleRow}
             onToggleAll={onToggleAll}
+            allNames={allNames}
           />
         )}
 
