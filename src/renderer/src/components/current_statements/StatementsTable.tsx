@@ -104,6 +104,7 @@ type Props = {
   onToggleRow: (id: string, checked: boolean) => void
   onToggleAll: (checked: boolean, visibleIds: string[]) => void
   onSearchName: (name: string) => void
+  allNames?: string[]
 }
 
 export const StatementsTable: React.FC<Props> = ({
@@ -117,7 +118,8 @@ export const StatementsTable: React.FC<Props> = ({
   selectedIds,
   onToggleRow,
   onToggleAll,
-  onSearchName
+  onSearchName,
+  allNames
 }) => {
   const [dateSortDir, setDateSortDir] = useState<'asc' | 'desc'>('asc') // default asc
 
@@ -171,18 +173,16 @@ export const StatementsTable: React.FC<Props> = ({
     return sorted
   }, [rows, lcQuery, showUnnamed, editingNameRowId, dateSortDir])
 
-  // Unique names, computed once per rows change
+  // Unique names — use allNames (all years) if provided, otherwise fall back to current rows
   const nameOptions = useMemo(() => {
+    if (allNames) return allNames
     const set = new Set<string>()
     for (const r of rows) {
       const n = (r.name ?? '').trim()
       if (n) set.add(n)
     }
-    // Sort and cap to avoid huge DOM lists
-    return Array.from(set)
-      .sort((a, b) => a.localeCompare(b))
-      .slice(0, 200)
-  }, [rows])
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [allNames, rows])
 
   const normalizeChq = (s?: string) => (s ?? '').toString().replace(/\s+/g, '').toUpperCase()
 
